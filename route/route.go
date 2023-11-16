@@ -15,6 +15,9 @@ func New() *echo.Echo {
 	// Trailing Slash for slashing in endpoint
 	e.Pre(middleware.RemoveTrailingSlash())
 
+	// Trailing Slash for slashing in endpoint
+	e.Pre(middleware.RemoveTrailingSlash())
+
 	//JWT Group
 	r := e.Group("")
 	r.Use(middleware.JWT([]byte(config.JWT_KEY)))
@@ -47,6 +50,9 @@ func New() *echo.Echo {
 	e.POST("/patients", controller.CreatePatientController)
 	e.PUT("/patients/:id", controller.UpdatePatientController)
 	e.DELETE("/patients/:id", controller.DeletePatientController)
+
+	// doctor route
+	e.POST("/doctors/login", controller.DoctorLoginController)
 
 	// doctor route
 	e.POST("/doctors/login", controller.DoctorLoginController)
