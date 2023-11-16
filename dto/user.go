@@ -2,6 +2,8 @@ package dto
 
 import (
 	"capstone-project/model"
+
+	"github.com/google/uuid"
 )
 
 type UserRequest struct {
@@ -10,20 +12,21 @@ type UserRequest struct {
 }
 
 type UserResponse struct {
-	ID 		 uint `json:"id"`
-	Email    string `json:"email"`
+	ID    uuid.UUID `json:"id"`
+	Email string    `json:"email"`
 }
 
 func ConvertToUserModel(user UserRequest) model.User {
 	return model.User{
-		Email:       user.Email,
-		Password:    user.Password,
+		ID:       uuid.New(),
+		Email:    user.Email,
+		Password: user.Password,
 	}
 }
 
 func ConvertToUserResponse(user model.User) UserResponse {
 	return UserResponse{
-		ID:          user.ID,
-		Email:       user.Email,
+		ID:    user.ID,
+		Email: user.Email,
 	}
 }

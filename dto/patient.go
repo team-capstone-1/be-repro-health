@@ -2,6 +2,8 @@ package dto
 
 import (
 	"capstone-project/model"
+
+	"github.com/google/uuid"
 )
 
 type LoginRequest struct {
@@ -16,23 +18,23 @@ type PatientRequest struct {
 }
 
 type PatientResponse struct {
-	ID 		 uint `json:"id"`
-	Name    string `json:"name"`
-	Email    string `json:"email"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Email string    `json:"email"`
 }
 
 func ConvertToPatientModel(patient PatientRequest) model.Patient {
 	return model.Patient{
-		Name:        patient.Name,
-		Email:       patient.Email,
-		Password:    patient.Password,
+		Name:     patient.Name,
+		Email:    patient.Email,
+		Password: patient.Password,
 	}
 }
 
 func ConvertToPatientResponse(patient model.Patient) PatientResponse {
 	return PatientResponse{
-		ID:          patient.ID,
-		Name:        patient.Name,
-		Email:       patient.Email,
+		ID:    patient.ID,
+		Name:  patient.Name,
+		Email: patient.Email,
 	}
 }
