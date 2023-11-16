@@ -12,7 +12,7 @@ import (
 
 func CheckUser(email string, password string) (model.User, string, error) {
 	var data model.User
-	
+
 	tx := database.DB.Where("email = ?", email).First(&data)
 	if tx.Error != nil {
 		return model.User{}, "", errors.New("Invalid Email or Password")
@@ -26,7 +26,7 @@ func CheckUser(email string, password string) (model.User, string, error) {
 	var token string
 	if tx.RowsAffected > 0 {
 		var errToken error
-		token, errToken = middleware.CreateToken(int(data.ID), "user")
+		token, errToken = middleware.CreateToken(data.ID, "user")
 		if errToken != nil {
 			return model.User{}, "", errToken
 		}
@@ -35,7 +35,7 @@ func CheckUser(email string, password string) (model.User, string, error) {
 }
 
 func CreateUser(data model.User) (model.User, error) {
-	hashPassword,err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return model.User{}, err
 	}
@@ -49,7 +49,7 @@ func CreateUser(data model.User) (model.User, error) {
 }
 
 func UpdateUserPassword(data model.User) (model.User, error) {
-	hashPassword,err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return model.User{}, err
 	}
@@ -61,9 +61,9 @@ func UpdateUserPassword(data model.User) (model.User, error) {
 	return data, nil
 }
 
-func CheckUserEmail(email string) (bool) {
+func CheckUserEmail(email string) bool {
 	var data model.User
-	
+
 	tx := database.DB.Where("email = ?", email).First(&data)
 	if tx.Error != nil {
 		return false
