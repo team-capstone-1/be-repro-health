@@ -24,6 +24,10 @@ func New() *echo.Echo {
 	e.POST("/users/signup", controller.SignUpUserController)
 	e.POST("/users/login", controller.LoginUserController)
 	e.POST("/users/change-password", controller.ChangeUserPasswordController)
+	
+	// appointment route
+	e.GET("/specialists", controller.GetSpecialistsController)
+
 
 	// user forum
 	e.GET("/forums", controller.GetForumsController)
