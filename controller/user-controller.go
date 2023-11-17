@@ -47,7 +47,7 @@ func SignUpUserController(c echo.Context) error {
 	}
 
 	emailExist := repository.CheckUserEmail(payloads.Email)
-	if emailExist{
+	if emailExist {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "fail sign up",
 			"response": "email already exist",
@@ -77,13 +77,13 @@ func ChangeUserPasswordController(c echo.Context) error {
 	errBind := c.Bind(&updatePassword)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
+			"message":  "error bind data",
 			"response": errBind.Error(),
 		})
 	}
 
 	emailExist := repository.CheckUserEmail(updatePassword.Email)
-	if !emailExist{
+	if !emailExist {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "fail sign up",
 			"response": "email doesn't exist",
@@ -95,13 +95,13 @@ func ChangeUserPasswordController(c echo.Context) error {
 	responseData, err := repository.UpdateUserPassword(userData)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
-			"message": "failed change User",
-			"response":   err.Error(),
+			"message":  "failed change User",
+			"response": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success change password",
-		"response": "success change password for "+ responseData.Email,
+		"message":  "success change password",
+		"response": "success change password for " + responseData.Email,
 	})
 }
