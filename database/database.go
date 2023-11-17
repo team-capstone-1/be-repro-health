@@ -60,6 +60,7 @@ func InitialMigration() {
 	DB.AutoMigrate(&model.User{}, &model.Doctor{})
 	DB.AutoMigrate(&model.Patient{})
 	DB.AutoMigrate(&model.Specialist{})
+	DB.AutoMigrate(&model.Consultation{})
 	DB.AutoMigrate(&model.Forum{})
 	DB.AutoMigrate(&model.Specialist{})
 	DB.AutoMigrate(&model.Forum{})
