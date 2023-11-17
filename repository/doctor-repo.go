@@ -25,7 +25,7 @@ func CheckDoctor(email string, password string) (model.Doctor, string, error) {
 	var token string
 	if tx.RowsAffected > 0 {
 		var errToken error
-		token, errToken = middleware.CreateTokenDoctor(data.ID, "user")
+		token, errToken = middleware.CreateTokenDoctor(data.ID, "doctor")
 		if errToken != nil {
 			return model.Doctor{}, "", errToken
 		}
