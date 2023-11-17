@@ -98,84 +98,32 @@ func AdminSeeders() {
 	}
 }
 
-func ClinicSeeders() {
-	clinic := []model.Clinic{
+func AdminSeeders() {
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte("Admin@123"), bcrypt.DefaultCost)
+
+	if err != nil {
+		return
+	}
+	admin := []model.User{
 		{
 			ID:       uuid.New(),
-			Name:     "Klinik Inter Medika",
-			City:     "Jakarta Pusat",
-			Location: "Jl. K.S. Tubun No.21, Petamburan, Kota Jakarta Pusat ",
-			Profile:  "Selamat datang di Klinik Inter Medika, tempat di mana kesehatan dan kenyamanan pasien menjadi prioritas utama. Klinik kami berkomitmen untuk memberikan pelayanan medis berkualitas tinggi.",
+			Email:    "admin1@gmail.com",
+			Password: string(passwordHash),
 		},
-	}
-
-	for _, v := range clinic {
-		var exist model.Clinic
-
-		errCheck := DB.Where("name = ?", v.Name).First(&exist).Error
-
-		if errCheck != nil {
-			DB.Create(&v)
-		}
-	}
-}
-
-func SpecialistSeeders() {
-	specialist := []model.Specialist{
 		{
-			ID:    uuid.New(),
-			Name:  "Kandungan",
-			Image: "",
+			ID:       uuid.New(),
+			Email:    "admin2@gmail.com",
+			Password: string(passwordHash),
 		},
-	}
-
-	for _, v := range specialist {
-		var exist model.Specialist
-
-		errCheck := DB.Where("name = ?", v.Name).First(&exist).Error
-
-		if errCheck != nil {
-			DB.Create(&v)
-		}
-	}
-}
-
-func DoctorSeeders() {
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte("Doctor@123"), bcrypt.DefaultCost)
-
-	if err != nil {
-		return
-	}
-
-	specialistID, err := uuid.Parse("9d33c1eb-e918-4df2-bc41-b54e2fc4002c")
-	if err != nil {
-		// Handle error
-		return
-	}
-
-	// Objek Clinic sudah ada atau dibuat
-	clinicID, err := uuid.Parse("fff50db6-ca43-46fb-8d64-fa0c46f429a7")
-	if err != nil {
-		// Handle error
-		return
-	}
-
-	doctor := []model.Doctor{
 		{
-			ID:           uuid.New(),
-			Name:         "Dr. Andi Cahaya, Sp.OG",
-			Email:        "andicahyo@gmail.com",
-			Password:     string(passwordHash),
-			Price:        150000,
-			Address:      "Klinik Nasional. Jl. Bedrek No.47e, Sanggrahan, Condongcatur, Kec. Depok, Kabupaten Sleman, DIY",
-			Phone:        "+62 812345865",
-			SpecialistID: specialistID,
-			ClinicID:     clinicID,
+			ID:       uuid.New(),
+			Email:    "admin3@gmail.com",
+			Password: string(passwordHash),
 		},
 	}
 
-	for _, v := range doctor {
-		var exist model.Doctor
+	for _, v := range admin {
+		var exist model.User
 
 		errCheck := DB.Where("email = ?", v.Email).First(&exist).Error
 
