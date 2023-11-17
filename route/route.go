@@ -25,6 +25,12 @@ func New() *echo.Echo {
 	e.POST("/users/login", controller.LoginUserController)
 	e.POST("/users/change-password", controller.ChangeUserPasswordController)
 
+	// admin route
+	e.POST("/admins/login", controller.AdminLoginController)
+	adm := e.Group("/admins")
+	adm.Use(middleware.JWT([]byte(config.JWT_KEY)))
+	adm.POST("/doctors/signup", controller.SignUpDoctorController)
+
 	// need authentication
 	// user route
 	e.GET("/patients", controller.GetPatientsController)
@@ -35,6 +41,7 @@ func New() *echo.Echo {
 
 	// doctor route
 	e.POST("/doctors/login", controller.DoctorLoginController)
+	// e.POST("/admins/logins", controller.AdminLoginController)
 
 	return e
 }

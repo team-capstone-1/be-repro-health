@@ -2,6 +2,7 @@ package controller
 
 import (
 	"capstone-project/dto"
+	"capstone-project/middleware"
 	"capstone-project/repository"
 	"net/http"
 
@@ -32,6 +33,48 @@ func DoctorLoginController(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success login doctor account",
+		"response": response,
+	})
+}
+
+func SignUpDoctorController(c echo.Context) error {
+	if _, err := middleware.ExtractTokenAdmin(c); err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message": "this route is only for admin",
+		})
+	}
+
+	var payloads = dto.DoctorSignUpRequest{}
+	errBind := c.Bind(&payloads)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	emailExist := repository.CheckDoctorEmail(payloads.Email)
+	if emailExist {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "fail sign up",
+			"response": "email already exist",
+		})
+	}
+
+	signUpData := dto.ConvertToDoctorModel(payloads)
+
+	data, err := repository.CreateDoctor(signUpData)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "fail sign up",
+			"response": err.Error(),
+		})
+	}
+
+	response := dto.ConvertToDoctorSignUpResponse(data)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success receive user data",
 		"response": response,
 	})
 }
