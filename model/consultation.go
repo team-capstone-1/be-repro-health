@@ -1,5 +1,6 @@
 package model
 
+
 import (
 	"time"
 
@@ -10,8 +11,8 @@ import (
 type Consultation struct {
 	gorm.Model
 	ID          uuid.UUID   `json:"id" form:"id"`
-	DoctorID    uuid.UUID   `gorm:"index" json:"doctor_id"`
-	PatientID   uuid.UUID   `gorm:"index" json:"patient_id"`
+	// DoctorID    uuid.UUID   `gorm:"index" json:"doctor_id"`
+	// PatientID   uuid.UUID   `gorm:"index" json:"patient_id"`
 	ClinicID    uuid.UUID   `gorm:"index" json:"clinic_id"`
 	Date        time.Time   `gorm:"type:date"`
 	Session     string      `gorm:"type:enum('pagi', 'siang', 'malam')"`

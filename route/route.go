@@ -31,6 +31,7 @@ func New() *echo.Echo {
 	// user appointment route
 	e.GET("/specialists", controller.GetSpecialistsController)
 	e.GET("/clinics", controller.GetClinicsController)
+	e.POST("/consultations", controller.CreateConsultationController)
 
 
 	// user forum
