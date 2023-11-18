@@ -25,6 +25,11 @@ func New() *echo.Echo {
 	e.POST("/users/login", controller.LoginUserController)
 	e.POST("/users/change-password", controller.ChangeUserPasswordController)
 
+	// user forum
+	e.GET("/forums", controller.GetForumsController)
+	e.POST("/forums", controller.CreateForumController)
+	e.DELETE("/forums/:id", controller.DeleteForumController)
+
 	// admin route
 	e.POST("/admins/login", controller.AdminLoginController)
 	adm := e.Group("/admins")
