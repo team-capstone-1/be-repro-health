@@ -58,6 +58,7 @@ func InitDB() {
 func InitialMigration() {
 	DB.AutoMigrate(&model.User{}, &model.Doctor{})
 	DB.AutoMigrate(&model.Patient{})
+	DB.AutoMigrate(&model.Forum{})
 }
 
 func AdminSeeders() {
