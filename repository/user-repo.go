@@ -13,6 +13,7 @@ import (
 func CheckUser(email string, password string) (model.User, string, error) {
 	var data model.User
 
+
 	tx := database.DB.Where("email = ?", email).First(&data)
 	if tx.Error != nil {
 		return model.User{}, "", errors.New("Invalid Email or Password")
