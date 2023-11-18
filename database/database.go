@@ -59,6 +59,7 @@ func InitialMigration() {
 	DB.AutoMigrate(&model.User{}, &model.Doctor{})
 	DB.AutoMigrate(&model.User{}, &model.Doctor{})
 	DB.AutoMigrate(&model.Patient{})
+	DB.AutoMigrate(&model.Forum{})
 	DB.AutoMigrate(&model.Specialist{})
 	DB.AutoMigrate(&model.Forum{})
 }
@@ -96,6 +97,7 @@ func AdminSeeders() {
 			DB.Create(&v)
 		}
 	}
+	DB.AutoMigrate(&model.Forum{})
 }
 
 func AdminSeeders() {
