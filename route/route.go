@@ -19,8 +19,8 @@ func New() *echo.Echo {
 	r := e.Group("")
 	r.Use(middleware.JWT([]byte(config.JWT_KEY)))
 
-	// Route / to handler function
-	// user route
+	// davin
+	// user auth route
 	e.POST("/users/signup", controller.SignUpUserController)
 	e.POST("/users/login", controller.LoginUserController)
 	e.POST("/users/change-password", controller.ChangeUserPasswordController)
@@ -34,11 +34,18 @@ func New() *echo.Echo {
 	e.GET("/doctors/:id", controller.GetDoctorController)
 	e.POST("/consultations", controller.CreateConsultationController)
 
+	// patient route
+	e.GET("/patients", controller.GetPatientsController)
+	e.GET("/patients/:id", controller.GetPatientController)
+	e.POST("/patients", controller.CreatePatientController)
+	e.PUT("/patients/:id", controller.UpdatePatientController)
+	e.DELETE("/patients/:id", controller.DeletePatientController)
 
 	// user forum
 	e.GET("/forums", controller.GetForumsController)
 	e.POST("/forums", controller.CreateForumController)
 	e.DELETE("/forums/:id", controller.DeleteForumController)
+	// davin
 
 	// admin route
 	e.POST("/admins/login", controller.AdminLoginController)
@@ -46,13 +53,6 @@ func New() *echo.Echo {
 	adm.Use(middleware.JWT([]byte(config.JWT_KEY)))
 	adm.POST("/doctors/signup", controller.SignUpDoctorController)
 
-	// need authentication
-	// user route
-	e.GET("/patients", controller.GetPatientsController)
-	e.GET("/patients/:id", controller.GetPatientController)
-	e.POST("/patients", controller.CreatePatientController)
-	e.PUT("/patients/:id", controller.UpdatePatientController)
-	e.DELETE("/patients/:id", controller.DeletePatientController)
 
 	// doctor route
 	e.POST("/doctors/login", controller.DoctorLoginController)

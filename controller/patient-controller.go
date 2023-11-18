@@ -2,12 +2,12 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 
 	"capstone-project/repository"
 	"capstone-project/dto"
 
 	"github.com/labstack/echo/v4"
+	"github.com/google/uuid"
 )
 
 func GetPatientsController(c echo.Context) error {
@@ -31,7 +31,7 @@ func GetPatientsController(c echo.Context) error {
 }
 
 func GetPatientController(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "error parse id",
@@ -39,7 +39,7 @@ func GetPatientController(c echo.Context) error {
 		})
 	}
 
-	responseData, err := repository.GetPatientByID(id)
+	responseData, err := repository.GetPatientByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
@@ -84,7 +84,7 @@ func CreatePatientController(c echo.Context) error {
 }
 
 func UpdatePatientController(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "error parse id",
@@ -103,7 +103,7 @@ func UpdatePatientController(c echo.Context) error {
 
 	patientData := dto.ConvertToPatientModel(updateData)
 
-	responseData, err := repository.UpdatePatientByID(id, patientData)
+	responseData, err := repository.UpdatePatientByID(uuid, patientData)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message": "failed update patient",
@@ -112,7 +112,7 @@ func UpdatePatientController(c echo.Context) error {
 	}
 
 	//recall the GetById repo because if I return it from update, it only fill the updated field and leaves everything else null or 0
-	responseData, err = repository.GetPatientByID(id)
+	responseData, err = repository.GetPatientByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
@@ -129,7 +129,7 @@ func UpdatePatientController(c echo.Context) error {
 }
 
 func DeletePatientController(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "error parse id",
@@ -137,7 +137,7 @@ func DeletePatientController(c echo.Context) error {
 		})
 	}
 
-	_, err = repository.GetPatientByID(id)
+	_, err = repository.GetPatientByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed delete patient",
@@ -145,7 +145,7 @@ func DeletePatientController(c echo.Context) error {
 		})
 	}
 
-	err = repository.DeletePatientByID(id)
+	err = repository.DeletePatientByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message": "failed delete patient",
@@ -155,6 +155,6 @@ func DeletePatientController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message": "success delete patient",
-		"response": "success delete patient with id " + strconv.Itoa(id),
+		"response": "success delete patient with id " + uuid.String(),
 	})
 }
