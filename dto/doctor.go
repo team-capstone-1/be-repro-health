@@ -36,6 +36,17 @@ type DoctorSignUpResponse struct {
 	ClinicID     uuid.UUID `json:"clinic_id"`
 }
 
+type DoctorResponse struct {
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	Price        float64   `json:"price"`
+	Address      string    `json:"address"`
+	Phone        string    `json:"phone"`
+	SpecialistID uuid.UUID `json:"specialist_id"`
+	ClinicID     uuid.UUID `json:"clinic_id"`
+}
+
 func ConvertToDoctorSignUpResponse(doctor model.Doctor) DoctorSignUpResponse {
 	return DoctorSignUpResponse{
 		ID:           doctor.ID,
@@ -64,5 +75,18 @@ func ConvertToDoctorModel(doctor DoctorSignUpRequest) model.Doctor {
 		Phone:        doctor.Phone,
 		SpecialistID: doctor.SpecialistID,
 		ClinicID:     doctor.ClinicID,
+	}
+}
+
+func ConvertToDoctorResponse(doctor model.Doctor) DoctorResponse {
+	return DoctorResponse{
+		ID           : doctor.ID,
+		Name         : doctor.Name,
+		Email        : doctor.Email,
+		Price        : doctor.Price,
+		Address      : doctor.Address,
+		Phone        : doctor.Phone,
+		SpecialistID : doctor.SpecialistID,
+		ClinicID     : doctor.ClinicID,
 	}
 }

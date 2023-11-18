@@ -7,6 +7,7 @@ import (
 	"errors"
 
 	"golang.org/x/crypto/bcrypt"
+	"github.com/google/uuid"
 )
 
 func CheckDoctor(email string, password string) (model.Doctor, string, error) {
@@ -56,4 +57,66 @@ func CreateDoctor(data model.Doctor) (model.Doctor, error) {
 		return model.Doctor{}, tx.Error
 	}
 	return data, nil
+}
+
+func GetClinicByDoctorID(id uuid.UUID) (model.Clinic, error) {
+	var datadoctor model.Doctor
+	var dataclinic model.Clinic
+
+	tx := database.DB.First(&datadoctor, id)
+	if tx.Error != nil {
+		return model.Clinic{}, tx.Error
+	}
+
+	tx = database.DB.First(&dataclinic, datadoctor.ClinicID)
+	if tx.Error != nil {
+		return model.Clinic{}, tx.Error
+	}
+	return dataclinic, nil
+}
+
+func GetAllDoctors(name string) ([]model.Doctor, error) {
+	var datadoctors []model.Doctor
+
+	tx := database.DB
+	
+	if name != "" {
+        tx = tx.Where("name LIKE ?", "%"+name+"%")
+    }
+
+	tx.Find(&datadoctors)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return datadoctors, nil
+}
+
+func GetDoctorByID(id uuid.UUID) (model.Doctor, error) {
+	var datadoctor model.Doctor
+
+	tx := database.DB.First(&datadoctor, id)
+	if tx.Error != nil {
+		return model.Doctor{}, tx.Error
+	}
+	return datadoctor, nil
+}
+
+func GetDoctorsBySpecialist(id uuid.UUID) ([]model.Doctor, error) {
+	var datadoctors []model.Doctor
+
+	tx := database.DB.Where("specialist_id = ?", id).Find(&datadoctors)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return datadoctors, nil
+}
+
+func GetDoctorsByClinic(id uuid.UUID) ([]model.Doctor, error) {
+	var datadoctors []model.Doctor
+
+	tx := database.DB.Where("clinic_id = ?", id).Find(&datadoctors)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return datadoctors, nil
 }

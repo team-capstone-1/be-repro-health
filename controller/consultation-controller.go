@@ -21,6 +21,16 @@ func CreateConsultationController(c echo.Context) error {
 
 	consultationData := dto.ConvertToConsultationModel(consultation)
 	
+	clinicData, err := repository.GetClinicByDoctorID(consultationData.DoctorID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get clinic",
+			"response":  err.Error(),
+		})
+	}
+
+	consultationData.ClinicID = clinicData.ID
+
 	responseData, err := repository.InsertConsultation(consultationData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{

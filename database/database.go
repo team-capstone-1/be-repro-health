@@ -38,7 +38,6 @@ func InitDB() {
 		DB_Host:     config.DB_HOST,
 		DB_Name:     config.DB_NAME,
 	}
-	fmt.Println("database:", database)
 
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
 		database.DB_Username,
