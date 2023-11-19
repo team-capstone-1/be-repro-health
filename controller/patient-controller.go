@@ -102,6 +102,7 @@ func UpdatePatientController(c echo.Context) error {
 	}
 
 	patientData := dto.ConvertToPatientModel(updateData)
+	patientData.ID = uuid
 
 	responseData, err := repository.UpdatePatientByID(uuid, patientData)
 	if err != nil {

@@ -6,6 +6,8 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+
+	m "capstone-project/middleware"
 )
 
 func New() *echo.Echo {
@@ -35,11 +37,11 @@ func New() *echo.Echo {
 	e.POST("/consultations", controller.CreateConsultationController)
 
 	// patient route
-	e.GET("/patients", controller.GetPatientsController)
-	e.GET("/patients/:id", controller.GetPatientController)
-	e.POST("/patients", controller.CreatePatientController)
-	e.PUT("/patients/:id", controller.UpdatePatientController)
-	e.DELETE("/patients/:id", controller.DeletePatientController)
+	r.GET("/patients", controller.GetPatientsController, m.CheckRole("user"))
+	r.GET("/patients/:id", controller.GetPatientController, m.CheckRole("user"))
+	r.POST("/patients", controller.CreatePatientController, m.CheckRole("user"))
+	r.PUT("/patients/:id", controller.UpdatePatientController, m.CheckRole("user"))
+	r.DELETE("/patients/:id", controller.DeletePatientController, m.CheckRole("user"))
 
 	// user forum
 	e.GET("/forums", controller.GetForumsController)
@@ -51,7 +53,7 @@ func New() *echo.Echo {
 	e.POST("/admins/login", controller.AdminLoginController)
 	adm := e.Group("/admins")
 	adm.Use(middleware.JWT([]byte(config.JWT_KEY)))
-	adm.POST("/doctors/signup", controller.SignUpDoctorController)
+	adm.POST("/doctors/signup", controller.SignUpDoctorController, m.CheckRole("admin"))
 
 
 	// doctor route
