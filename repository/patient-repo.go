@@ -1,19 +1,21 @@
 package repository
 
 import (
+
 	"capstone-project/database"
 	"capstone-project/model"
 
 	"github.com/google/uuid"
 )
 
-func GetAllPatients() ([]model.Patient, error) {
+func GetAllPatients(user uuid.UUID) ([]model.Patient, error) {
 	var datapatients []model.Patient
 
-	tx := database.DB.Find(&datapatients)
+	tx := database.DB.Where("user_id = ?", user).Find(&datapatients)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
+	
 	return datapatients, nil
 }
 

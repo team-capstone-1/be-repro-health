@@ -8,7 +8,7 @@ import (
 
 type ConsultationRequest struct {
 	DoctorID    uuid.UUID `json:"doctor_id" form:"doctor_id"`
-	// PatientID   uuid.UUID `json:"consultation_id" form:"consultation_id"`
+	PatientID   uuid.UUID `json:"patient_id" form:"patient_id"`
 	Date        time.Time `json:"date" form:"date"`
 	Session     string    `json:"session" form:"session"`
 }
@@ -16,7 +16,7 @@ type ConsultationRequest struct {
 type ConsultationResponse struct {
 	ID          uuid.UUID `json:"id"`
 	DoctorID    uuid.UUID `json:"doctor_id"`
-	// PatientID   uuid.UUID `json:"consultation_id"`
+	PatientID   uuid.UUID `json:"patient_id"`
 	ClinicID    uuid.UUID `json:"clinic_id"`
 	Date        time.Time `json:"date"`
 	Session     string    `json:"session"`
@@ -26,7 +26,7 @@ func ConvertToConsultationModel(consultation ConsultationRequest) model.Consulta
 	return model.Consultation{
 		ID: uuid.New(),
 		DoctorID: consultation.DoctorID,
-		// PatientID: consultation.PatientID,
+		PatientID: consultation.PatientID,
 		Date: consultation.Date,
 		Session: consultation.Session,
 	}
@@ -36,7 +36,7 @@ func ConvertToConsultationResponse(consultation model.Consultation) Consultation
 	return ConsultationResponse{
 		ID:    consultation.ID,
 		DoctorID: consultation.DoctorID,
-		// PatientID: consultation.PatientID,
+		PatientID: consultation.PatientID,
 		ClinicID: consultation.ClinicID,
 		Date: consultation.Date,
 		Session: consultation.Session,

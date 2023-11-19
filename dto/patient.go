@@ -23,6 +23,7 @@ type PatientRequest struct {
 
 type PatientResponse struct {
 	ID    			   uuid.UUID `json:"id"`
+	UserID 			   uuid.UUID `json:"user_id"`
 	Name  			   string    `json:"name"`
 	ProfileImage       string    `json:"profile_image"`
 	DateOfBirth 	   time.Time `json:"date_of_birth"`
@@ -54,6 +55,7 @@ func ConvertToPatientModel(patient PatientRequest) model.Patient {
 func ConvertToPatientResponse(patient model.Patient) PatientResponse {
 	return PatientResponse{
 		ID:    patient.ID,
+		UserID:    patient.UserID,
 		Name:  patient.Name,
 		ProfileImage:       patient.ProfileImage,
 		DateOfBirth: 	    patient.DateOfBirth,

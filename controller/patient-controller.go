@@ -5,13 +5,22 @@ import (
 
 	"capstone-project/repository"
 	"capstone-project/dto"
+	m "capstone-project/middleware"
 
 	"github.com/labstack/echo/v4"
 	"github.com/google/uuid"
 )
 
 func GetPatientsController(c echo.Context) error {
-	responseData, err := repository.GetAllPatients()
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+	
+	responseData, err := repository.GetAllPatients(user)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patients",
@@ -31,6 +40,14 @@ func GetPatientsController(c echo.Context) error {
 }
 
 func GetPatientController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -44,6 +61,13 @@ func GetPatientController(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
 			"reponse":   err.Error(),
+		})
+	}
+
+	if responseData.UserID != user{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
 		})
 	}
 
@@ -65,7 +89,16 @@ func CreatePatientController(c echo.Context) error {
 		})
 	}
 
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
 	patientData := dto.ConvertToPatientModel(patient)
+	patientData.UserID = user
 	
 	responseData, err := repository.InsertPatient(patientData)
 	if err != nil {
@@ -84,11 +117,33 @@ func CreatePatientController(c echo.Context) error {
 }
 
 func UpdatePatientController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "error parse id",
 			"response":   err.Error(),
+		})
+	}
+
+	checkPatient, err := repository.GetPatientByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get patient",
+			"reponse":   err.Error(),
+		})
+	}
+	if checkPatient.UserID != user{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
 		})
 	}
 
@@ -130,6 +185,14 @@ func UpdatePatientController(c echo.Context) error {
 }
 
 func DeletePatientController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+	
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -138,11 +201,17 @@ func DeletePatientController(c echo.Context) error {
 		})
 	}
 
-	_, err = repository.GetPatientByID(uuid)
+	checkPatient, err := repository.GetPatientByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed delete patient",
 			"reponse":   err.Error(),
+		})
+	}
+	if checkPatient.UserID != user{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
 		})
 	}
 

@@ -5,17 +5,41 @@ import (
 
 	"capstone-project/repository"
 	"capstone-project/dto"
+	m "capstone-project/middleware"
 
 	"github.com/labstack/echo/v4"
+	"github.com/google/uuid"
 )
 
 func CreateConsultationController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
 	consultation := dto.ConsultationRequest{}
 	errBind := c.Bind(&consultation)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "error bind data",
 			"response": errBind.Error(),
+		})
+	}
+
+	checkPatient, err := repository.GetPatientByID(consultation.PatientID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed delete forum",
+			"reponse":   err.Error(),
+		})
+	}
+	if checkPatient.UserID != user{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
 		})
 	}
 

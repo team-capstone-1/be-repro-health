@@ -34,7 +34,7 @@ func New() *echo.Echo {
 	e.GET("/clinics/:id/doctors", controller.GetDoctorsByClinicController)
 	e.GET("/doctors", controller.GetDoctorsController)
 	e.GET("/doctors/:id", controller.GetDoctorController)
-	e.POST("/consultations", controller.CreateConsultationController)
+	r.POST("/consultations", controller.CreateConsultationController)
 
 	// patient route
 	r.GET("/patients", controller.GetPatientsController, m.CheckRole("user"))
@@ -45,8 +45,8 @@ func New() *echo.Echo {
 
 	// user forum
 	e.GET("/forums", controller.GetForumsController)
-	e.POST("/forums", controller.CreateForumController)
-	e.DELETE("/forums/:id", controller.DeleteForumController)
+	r.POST("/forums", controller.CreateForumController)
+	r.DELETE("/forums/:id", controller.DeleteForumController)
 	// davin
 
 	// admin route
