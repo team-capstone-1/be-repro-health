@@ -3,6 +3,8 @@ package dto
 import (
 	"capstone-project/model"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type DoctorArticleRequest struct {
@@ -13,15 +15,15 @@ type DoctorArticleRequest struct {
 }
 
 type DoctorArticleResponse struct {
-	ID       uint      `json:"id"`
-	DoctorID uint      `json:"doctor_id"`
+	ID       uuid.UUID `json:"id"`
+	DoctorID uuid.UUID `json:"doctor_id"`
 	Title    string    `json:"title"`
 	Content  string    `json:"content"`
 	Date     time.Time `json:"date"`
 	Image    string    `json:"image"`
 }
 
-func ConvertToDoctorArticleModel(doctor *DoctorArticleRequest, doctorID uint) *model.Article {
+func ConvertToDoctorArticleModel(doctor *DoctorArticleRequest, doctorID uuid.UUID) *model.Article {
 	return &model.Article{
 		DoctorID: doctorID,
 		Title:    doctor.Title,

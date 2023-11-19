@@ -1,9 +1,13 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type Clinic struct {
 	gorm.Model
+	ID           uuid.UUID      `json:"id" form:"id"`
 	Name         string         `gorm:"size:255"`
 	City         string         `gorm:"size:255"`
 	Location     string         `gorm:"size:255"`

@@ -1,6 +1,9 @@
 package model
 
-import "gorm.io/gorm"
+import (
+	"github.com/google/uuid"
+	"gorm.io/gorm"
+)
 
 type TransactionStatus string
 
@@ -12,7 +15,8 @@ const (
 
 type Transaction struct {
 	gorm.Model
-	ConsultationID uint              `gorm:"index" json:"consultation_id"`
+	ID             uuid.UUID         `json:"id" form:"id"`
+	ConsultationID uuid.UUID         `gorm:"index" json:"consultation_id"`
 	Invoice        string            `gorm:"size:255"`
 	Price          float64           `gorm:"type:decimal(15,2)"`
 	AdminPrice     float64           `gorm:"type:decimal(15,2)"`

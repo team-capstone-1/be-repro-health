@@ -3,12 +3,14 @@ package model
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Article struct {
 	gorm.Model
-	DoctorID uint      `gorm:"index" json:"doctor_id"`
+	ID       uuid.UUID `json:"id" form:"id"`
+	DoctorID uuid.UUID `gorm:"index" json:"doctor_id"`
 	Title    string    `gorm:"size:255"`
 	Content  string    `gorm:"size:255"`
 	Date     time.Time `gorm:"type:datetime"`
