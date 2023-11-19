@@ -62,6 +62,7 @@ func New() *echo.Echo {
 	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole("doctor"))
 	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistoriesController, m.CheckRole("doctor"))
 	doctor.GET("/profile/educations", controller.GetDoctorEducationController, m.CheckRole("doctor"))
+	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole("doctor"))
 
 	return e
 }

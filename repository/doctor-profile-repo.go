@@ -32,13 +32,25 @@ func GetDoctorWorkHistory(id uuid.UUID) ([]model.DoctorWorkHistory, error) {
 }
 
 func GetDoctorEducation(id uuid.UUID) ([]model.DoctorEducation, error) {
-	var doctorEducation []model.DoctorEducation
+	var education []model.DoctorEducation
 
-	tx := database.DB.Where("doctor_profile_id = ?", id).Find(&doctorEducation)
+	tx := database.DB.Where("doctor_profile_id = ?", id).Find(&education)
 
 	if tx.Error != nil {
-		return doctorEducation, tx.Error
+		return education, tx.Error
 	}
 
-	return doctorEducation, nil
+	return education, nil
+}
+
+func GetDoctorCertification(id uuid.UUID) ([]model.DoctorCertification, error) {
+	var certification []model.DoctorCertification
+
+	tx := database.DB.Where("doctor_profile_id = ?", id).Find(&certification)
+
+	if tx.Error != nil {
+		return certification, tx.Error
+	}
+
+	return certification, nil
 }

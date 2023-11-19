@@ -51,6 +51,17 @@ type DoctorEducationResponse struct {
 	University       string    `json:"university"`
 }
 
+type DoctorCertificationResponse struct {
+	ID              uuid.UUID `json:"id"`
+	DoctorProfileID uuid.UUID `json:"doctor_profile_id"`
+	StartingDate    time.Time `json:"start_date"`
+	EndingDate      time.Time `json:"end_date"`
+	Description     string    `json:"description"`
+	CertificateType string    `json:"certificate_type"`
+	FileSize        string    `json:"file_size"`
+	Details         string    `json:"details"`
+}
+
 func ConvertToDoctorProfileResponse(doctor model.Doctor) DoctorProfileResponse {
 	return DoctorProfileResponse{
 		ID:           doctor.ID,
@@ -86,5 +97,18 @@ func ConvertToDoctorEducationResponse(doctorEducation model.DoctorEducation) Doc
 		EndingDate:       doctorEducation.EndingDate,
 		EducationProgram: doctorEducation.EducationProgram,
 		University:       doctorEducation.University,
+	}
+}
+
+func ConvertToDoctorCertificationResponse(certification model.DoctorCertification) DoctorCertificationResponse {
+	return DoctorCertificationResponse{
+		ID:              certification.ID,
+		DoctorProfileID: certification.DoctorProfileID,
+		StartingDate:    certification.StartingDate,
+		EndingDate:      certification.EndingDate,
+		Description:     certification.Description,
+		CertificateType: certification.CertificateType,
+		FileSize:        certification.FileSize,
+		Details:         certification.Details,
 	}
 }
