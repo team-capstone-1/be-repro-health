@@ -8,10 +8,10 @@ import (
 )
 
 type DoctorArticleRequest struct {
-	Title   string    `json:"title"`
-	Content string    `json:"content"`
-	Date    time.Time `json:"date"`
-	Image   string    `json:"image"`
+	DoctorID uuid.UUID `json:"doctor_id"`
+	Title    string    `json:"title"`
+	Content  string    `json:"content"`
+	Image    string    `json:"image"`
 }
 
 type DoctorArticleResponse struct {
@@ -23,17 +23,19 @@ type DoctorArticleResponse struct {
 	Image    string    `json:"image"`
 }
 
-func ConvertToDoctorArticleModel(doctor *DoctorArticleRequest, doctorID uuid.UUID) *model.Article {
-	return &model.Article{
-		DoctorID: doctorID,
+func ConvertToDoctorArticleModel(doctor DoctorArticleRequest) model.Article {
+	return model.Article{
+		ID:       uuid.New(),
+		DoctorID: doctor.DoctorID,
 		Title:    doctor.Title,
 		Content:  doctor.Content,
 		Date:     time.Now(),
+		Image:    doctor.Image,
 	}
 }
 
-func ConvertToDoctorArticleResponse(article *model.Article) *DoctorArticleResponse {
-	return &DoctorArticleResponse{
+func ConvertToDoctorArticleResponse(article model.Article) DoctorArticleResponse {
+	return DoctorArticleResponse{
 		ID:       article.ID,
 		DoctorID: article.DoctorID,
 		Title:    article.Title,
@@ -42,12 +44,3 @@ func ConvertToDoctorArticleResponse(article *model.Article) *DoctorArticleRespon
 		Image:    article.Image,
 	}
 }
-
-// func ConvertToDoctorArticleResponseList(articles []*model.Article) []*DoctorArticleResponse {
-// 	var responseList []*DoctorArticleResponse
-// 	for _, article := range articles {
-// 		response := ConvertToDoctorArticleResponse(article)
-// 		responseList = append(responseList, response)
-// 	}
-// 	return responseList
-// }

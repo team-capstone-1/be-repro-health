@@ -25,6 +25,9 @@ func DoctorLoginController(c echo.Context) error {
 			"response": err.Error(),
 		})
 	}
+
+	c.Set("doctor_id", data.ID)
+
 	response := map[string]any{
 		"doctor_id": data.ID,
 		"email":     data.Email,

@@ -58,7 +58,11 @@ func InitDB() {
 }
 
 func InitialMigration() {
-	DB.AutoMigrate(&model.User{}, &model.Doctor{})
+	DB.AutoMigrate(&model.User{})
+	DB.AutoMigrate(&model.Doctor{})
+	DB.AutoMigrate(&model.Article{})
+	DB.AutoMigrate(&model.Clinic{})
+	DB.AutoMigrate(&model.Specialist{})
 	DB.AutoMigrate(&model.Patient{})
 }
 
@@ -105,20 +109,20 @@ func SpecialistSeeders() {
 }
 
 func DoctorSeeders() {
-	passwordHash, err := bcrypt.GenerateFromPassword([]byte("Doctor@123"), bcrypt.DefaultCost)
+	passwordHash, err := bcrypt.GenerateFromPassword([]byte("Andi@123"), bcrypt.DefaultCost)
 
 	if err != nil {
 		return
 	}
 
-	specialistID, err := uuid.Parse("9d33c1eb-e918-4df2-bc41-b54e2fc4002c")
+	specialistID, err := uuid.Parse("f8286c0b-a33b-43fa-b27e-0f87008b5349")
 	if err != nil {
 		// Handle error
 		return
 	}
 
 	// Objek Clinic sudah ada atau dibuat
-	clinicID, err := uuid.Parse("fff50db6-ca43-46fb-8d64-fa0c46f429a7")
+	clinicID, err := uuid.Parse("75d53030-0fe7-466a-8dce-0d481c4c1fab")
 	if err != nil {
 		// Handle error
 		return

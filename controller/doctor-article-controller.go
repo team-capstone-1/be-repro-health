@@ -2,119 +2,136 @@ package controller
 
 import (
 	"capstone-project/dto"
-	"capstone-project/model"
 	"capstone-project/repository"
 	"net/http"
-	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
 )
 
-type DoctorArticleController struct {
-	Repo *repository.DoctorArticleRepository
+func GetAllArticleDotorsController(c echo.Context) error {
+	responseData, err := repository.GetAllDoctorsArticles()
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get doctor articles",
+			"response": err.Error(),
+		})
+	}
+
+	var doctorArticleResponse []dto.DoctorArticleResponse
+	for _, article := range responseData {
+		doctorArticleResponse = append(doctorArticleResponse, dto.ConvertToDoctorArticleResponse(article))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get articles",
+		"response": doctorArticleResponse,
+	})
 }
 
-func NewDoctorArticleController(db *gorm.DB) *DoctorArticleController {
-	return &DoctorArticleController{
-		Repo: repository.NewDoctorArticleRepository(db),
+func CreateDoctorArticleController(c echo.Context) error {
+	article := dto.DoctorArticleRequest{}
+	errBind := c.Bind(&article)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
 	}
+
+	articleData := dto.ConvertToDoctorArticleModel(article)
+
+	responseData, err := repository.InsertDoctorArticle(articleData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed create article",
+			"response": err.Error(),
+		})
+	}
+
+	articleResponse := dto.ConvertToDoctorArticleResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success create new article",
+		"response": articleResponse,
+	})
 }
 
-type ErrorResponse struct {
-	Message string `json:"message"`
+func UpdateDoctorArticleController(c echo.Context) error {
+	idParam := c.Param("id")
+
+	id, err := uuid.Parse(idParam)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	updateArticleData := dto.DoctorArticleRequest{} // Ganti dengan tipe DTO yang sesuai untuk entitas dokter
+	errBind := c.Bind(&updateArticleData)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	doctorData := dto.ConvertToDoctorArticleModel(updateArticleData)
+
+	responseData, err := repository.UpdateDoctorArticleByID(id, doctorData)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "failed update doctor",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err = repository.GetDoctorArticleByID(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get doctor",
+			"reponse": err.Error(),
+		})
+	}
+
+	doctorResponse := dto.ConvertToDoctorArticleResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success update doctor",
+		"response": doctorResponse,
+	})
 }
 
-func (c *DoctorArticleController) GetListAllArticlesDoctor(ctx echo.Context) error {
-	articles, err := c.Repo.GetAllArticles()
+func DeleteDoctorArticleController(c echo.Context) error {
+	idParam := c.Param("id")
+
+	id, err := uuid.Parse(idParam)
 	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{"Internal Server Error"})
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
 	}
 
-	responseList := make([]*dto.DoctorArticleResponse, len(articles))
-	for i, article := range articles {
-		responseList[i] = dto.ConvertToDoctorArticleResponse(&article)
-	}
-
-	return ctx.JSON(http.StatusOK, responseList)
-}
-
-func (c *DoctorArticleController) GetArticleByIDDoctor(ctx echo.Context) error {
-	id, err := strconv.Atoi(ctx.Param("id"))
+	_, err = repository.GetDoctorArticleByID(id) // Ganti dengan repository yang sesuai
 	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, ErrorResponse{"Invalid ID"})
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed delete doctor",
+			"reponse": err.Error(),
+		})
 	}
 
-	article, err := c.Repo.GetArticleByID(uint(id))
+	err = repository.DeleteDoctorArticleByID(id) // Ganti dengan repository yang sesuai
 	if err != nil {
-		return ctx.JSON(http.StatusNotFound, ErrorResponse{"Article not found"})
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message": "failed delete doctor",
+			"reponse": err.Error(),
+		})
 	}
 
-	return ctx.JSON(http.StatusOK, article)
-}
-
-func (c *DoctorArticleController) CreateNewArticleDoctor(ctx echo.Context) error {
-	var request dto.DoctorArticleRequest
-	if err := ctx.Bind(&request); err != nil {
-		return ctx.JSON(http.StatusBadRequest, ErrorResponse{"Invalid request payload"})
-	}
-
-	doctorID := uuid.New() // Placeholder, replace with actual authentication logic
-
-	articleModel := &model.Article{
-		DoctorID: doctorID,
-		Title:    request.Title,
-		Content:  request.Content,
-		Image:    request.Image,
-	}
-
-	err := c.Repo.CreateArticle(articleModel)
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{"Internal Server Error"})
-	}
-
-	return ctx.JSON(http.StatusCreated, articleModel)
-}
-
-func (c *DoctorArticleController) UpdateArticleByIdDoctor(ctx echo.Context) error {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, ErrorResponse{"Invalid ID"})
-	}
-
-	article, err := c.Repo.GetArticleByID(uint(id))
-	if err != nil {
-		return ctx.JSON(http.StatusNotFound, ErrorResponse{"Article not found"})
-	}
-
-	var request dto.DoctorArticleRequest
-	if err := ctx.Bind(&request); err != nil {
-		return ctx.JSON(http.StatusBadRequest, ErrorResponse{"Invalid request payload"})
-	}
-
-	article.Title = request.Title
-	article.Content = request.Content
-	article.Image = request.Image
-
-	err = c.Repo.UpdateArticle(article)
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{"Internal Server Error"})
-	}
-
-	return ctx.JSON(http.StatusOK, article)
-}
-
-func (c *DoctorArticleController) DeleteArticleByIdDoctor(ctx echo.Context) error {
-	id, err := strconv.Atoi(ctx.Param("id"))
-	if err != nil {
-		return ctx.JSON(http.StatusBadRequest, ErrorResponse{"Invalid ID"})
-	}
-
-	err = c.Repo.DeleteArticle(uint(id))
-	if err != nil {
-		return ctx.JSON(http.StatusInternalServerError, ErrorResponse{"Internal Server Error"})
-	}
-
-	return ctx.NoContent(http.StatusNoContent)
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success delete doctor",
+		"response": "success delete doctor with id " + id.String(),
+	})
 }
