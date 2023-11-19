@@ -2,7 +2,7 @@ package controller
 
 import (
 	"capstone-project/dto"
-	"capstone-project/middleware"
+	// "capstone-project/middleware"
 	"capstone-project/repository"
 	"net/http"
 
@@ -39,11 +39,6 @@ func DoctorLoginController(c echo.Context) error {
 }
 
 func SignUpDoctorController(c echo.Context) error {
-	if _, err := middleware.ExtractTokenAdmin(c); err != nil {
-		return c.JSON(http.StatusUnauthorized, map[string]any{
-			"message": "this route is only for admin",
-		})
-	}
 
 	var payloads = dto.DoctorSignUpRequest{}
 	errBind := c.Bind(&payloads)

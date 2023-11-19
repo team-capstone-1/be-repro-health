@@ -2,23 +2,24 @@ package controller
 
 import (
 	"capstone-project/dto"
-	"capstone-project/middleware"
+	m "capstone-project/middleware"
 	"capstone-project/repository"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 func GetDoctorProfileController(c echo.Context) error {
-	id, err := middleware.ExtractTokenDoctor(c)
-	if err != nil {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
-			"message":  "this route is only for doctor",
-			"response": err,
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
 		})
 	}
 
-	responseData, err := repository.GetDoctorProfile(id)
+	responseData, err := repository.GetDoctorProfile(user)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get doctor profile",

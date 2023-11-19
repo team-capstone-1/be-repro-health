@@ -5,6 +5,7 @@ import (
 
 	"capstone-project/repository"
 	"capstone-project/dto"
+	m "capstone-project/middleware"
 
 	"github.com/labstack/echo/v4"
 	"github.com/google/uuid"
@@ -12,8 +13,9 @@ import (
 
 func GetForumsController(c echo.Context) error {
 	title := c.FormValue("title")
+	patient_id := c.FormValue("patient_id")
 
-	responseData, err := repository.GetAllForums(title)
+	responseData, err := repository.GetAllForums(title, patient_id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get forums",
@@ -33,12 +35,34 @@ func GetForumsController(c echo.Context) error {
 }
 
 func CreateForumController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
 	forum := dto.ForumRequest{}
 	errBind := c.Bind(&forum)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "error bind data",
 			"response": errBind.Error(),
+		})
+	}
+
+	checkPatient, err := repository.GetPatientByID(forum.PatientID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed create forum",
+			"reponse":   err.Error(),
+		})
+	}
+	if checkPatient.UserID != user{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
 		})
 	}
 
@@ -61,6 +85,14 @@ func CreateForumController(c echo.Context) error {
 }
 
 func DeleteForumController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -69,11 +101,25 @@ func DeleteForumController(c echo.Context) error {
 		})
 	}
 
-	_, err = repository.GetForumByID(uuid)
+	checkForum, err := repository.GetForumByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed delete forum",
 			"reponse":   err.Error(),
+		})
+	}
+
+	checkPatient, err := repository.GetPatientByID(checkForum.PatientID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed delete forum",
+			"reponse":   err.Error(),
+		})
+	}
+	if checkPatient.UserID != user{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
 		})
 	}
 

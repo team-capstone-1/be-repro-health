@@ -7,13 +7,17 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAllForums(title string) ([]model.Forum, error) {
+func GetAllForums(title string, patient_id string) ([]model.Forum, error) {
 	var dataforums []model.Forum
 
 	tx := database.DB
 	
 	if title != "" {
         tx = tx.Where("title LIKE ?", "%"+title+"%")
+    }
+	
+	if patient_id != "" {
+        tx = tx.Where("patient_id = ?", patient_id)
     }
 
 	tx.Find(&dataforums)
