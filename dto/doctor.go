@@ -80,13 +80,13 @@ func ConvertToDoctorModel(doctor DoctorSignUpRequest) model.Doctor {
 
 func ConvertToDoctorResponse(doctor model.Doctor) DoctorResponse {
 	return DoctorResponse{
-		ID           : doctor.ID,
-		Name         : doctor.Name,
-		Email        : doctor.Email,
-		Price        : doctor.Price,
-		Address      : doctor.Address,
-		Phone        : doctor.Phone,
-		SpecialistID : doctor.SpecialistID,
-		ClinicID     : doctor.ClinicID,
+		ID:           doctor.ID,
+		Name:         doctor.Name,
+		Email:        doctor.Email,
+		Price:        doctor.Price,
+		Address:      doctor.Address,
+		Phone:        doctor.Phone,
+		SpecialistID: doctor.SpecialistID,
+		ClinicID:     doctor.ClinicID,
 	}
 }

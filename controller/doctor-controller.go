@@ -6,8 +6,8 @@ import (
 	"capstone-project/repository"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 func DoctorLoginController(c echo.Context) error {
@@ -81,8 +81,8 @@ func GetDoctorsController(c echo.Context) error {
 	responseData, err := repository.GetAllDoctors(name)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get doctors",
-			"response":   err.Error(),
+			"message":  "failed get doctors",
+			"response": err.Error(),
 		})
 	}
 
@@ -92,8 +92,8 @@ func GetDoctorsController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get doctors",
-		"response":   doctorResponse,
+		"message":  "success get doctors",
+		"response": doctorResponse,
 	})
 }
 
@@ -101,8 +101,8 @@ func GetDoctorController(c echo.Context) error {
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
@@ -110,15 +110,15 @@ func GetDoctorController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get doctor",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
 	doctorResponse := dto.ConvertToDoctorResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get doctor",
-		"response":    doctorResponse,
+		"message":  "success get doctor",
+		"response": doctorResponse,
 	})
 }
 
@@ -126,16 +126,16 @@ func GetDoctorsBySpecialistController(c echo.Context) error {
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
 	responseData, err := repository.GetDoctorsBySpecialist(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get doctors",
-			"response":   err.Error(),
+			"message":  "failed get doctors",
+			"response": err.Error(),
 		})
 	}
 
@@ -145,8 +145,8 @@ func GetDoctorsBySpecialistController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get doctors",
-		"response":   doctorResponse,
+		"message":  "success get doctors",
+		"response": doctorResponse,
 	})
 }
 
@@ -154,16 +154,16 @@ func GetDoctorsByClinicController(c echo.Context) error {
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
 	responseData, err := repository.GetDoctorsByClinic(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get doctors",
-			"response":   err.Error(),
+			"message":  "failed get doctors",
+			"response": err.Error(),
 		})
 	}
 
@@ -173,7 +173,7 @@ func GetDoctorsByClinicController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get doctors",
-		"response":   doctorResponse,
+		"message":  "success get doctors",
+		"response": doctorResponse,
 	})
 }

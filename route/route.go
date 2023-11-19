@@ -26,7 +26,7 @@ func New() *echo.Echo {
 	e.POST("/users/signup", controller.SignUpUserController)
 	e.POST("/users/login", controller.LoginUserController)
 	e.POST("/users/change-password", controller.ChangeUserPasswordController)
-	
+
 	// user appointment route
 	e.GET("/specialists", controller.GetSpecialistsController)
 	e.GET("/clinics", controller.GetClinicsController)
@@ -55,10 +55,14 @@ func New() *echo.Echo {
 	adm.Use(middleware.JWT([]byte(config.JWT_KEY)))
 	adm.POST("/doctors/signup", controller.SignUpDoctorController, m.CheckRole("admin"))
 
-
 	// doctor route
 	e.POST("/doctors/login", controller.DoctorLoginController)
-	// e.POST("/admins/logins", controller.AdminLoginController)
+	doctor := e.Group("/doctors")
+	doctor.Use(middleware.JWT([]byte(config.JWT_KEY)))
+	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole("doctor"))
+	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistoriesController, m.CheckRole("doctor"))
+	doctor.GET("/profile/educations", controller.GetDoctorEducationController, m.CheckRole("doctor"))
+	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole("doctor"))
 
 	return e
 }
