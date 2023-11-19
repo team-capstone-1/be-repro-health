@@ -42,3 +42,22 @@ func ExtractTokenAdmin(c echo.Context) (uuid.UUID, error) {
 
 	return uid, nil
 }
+
+func ExtractTokenDoctor(c echo.Context) (uuid.UUID, error) {
+	user := c.Get("user").(*jwt.Token)
+	if !user.Valid {
+		return uuid.Nil, echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+	}
+	claims := user.Claims.(jwt.MapClaims)
+	if claims["role"] != "doctor" {
+		return uuid.Nil, echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
+	}
+
+	userId := claims["user_id"].(string)
+	uid, err := uuid.Parse(userId)
+	if err != nil {
+		return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
+	}
+
+	return uid, nil
+}

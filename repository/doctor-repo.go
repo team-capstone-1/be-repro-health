@@ -6,8 +6,8 @@ import (
 	"capstone-project/model"
 	"errors"
 
-	"golang.org/x/crypto/bcrypt"
 	"github.com/google/uuid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func CheckDoctor(email string, password string) (model.Doctor, string, error) {
@@ -79,10 +79,10 @@ func GetAllDoctors(name string) ([]model.Doctor, error) {
 	var datadoctors []model.Doctor
 
 	tx := database.DB
-	
+
 	if name != "" {
-        tx = tx.Where("name LIKE ?", "%"+name+"%")
-    }
+		tx = tx.Where("name LIKE ?", "%"+name+"%")
+	}
 
 	tx.Find(&datadoctors)
 	if tx.Error != nil {
