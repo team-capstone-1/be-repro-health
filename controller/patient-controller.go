@@ -2,16 +2,25 @@ package controller
 
 import (
 	"net/http"
-	"strconv"
 
 	"capstone-project/repository"
 	"capstone-project/dto"
+	m "capstone-project/middleware"
 
 	"github.com/labstack/echo/v4"
+	"github.com/google/uuid"
 )
 
 func GetPatientsController(c echo.Context) error {
-	responseData, err := repository.GetAllPatients()
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+	
+	responseData, err := repository.GetAllPatients(user)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patients",
@@ -31,7 +40,15 @@ func GetPatientsController(c echo.Context) error {
 }
 
 func GetPatientController(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
+	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "error parse id",
@@ -39,11 +56,18 @@ func GetPatientController(c echo.Context) error {
 		})
 	}
 
-	responseData, err := repository.GetPatientByID(id)
+	responseData, err := repository.GetPatientByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
 			"reponse":   err.Error(),
+		})
+	}
+
+	if responseData.UserID != user{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
 		})
 	}
 
@@ -65,7 +89,16 @@ func CreatePatientController(c echo.Context) error {
 		})
 	}
 
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
 	patientData := dto.ConvertToPatientModel(patient)
+	patientData.UserID = user
 	
 	responseData, err := repository.InsertPatient(patientData)
 	if err != nil {
@@ -84,11 +117,33 @@ func CreatePatientController(c echo.Context) error {
 }
 
 func UpdatePatientController(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
+	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "error parse id",
 			"response":   err.Error(),
+		})
+	}
+
+	checkPatient, err := repository.GetPatientByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get patient",
+			"reponse":   err.Error(),
+		})
+	}
+	if checkPatient.UserID != user{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
 		})
 	}
 
@@ -102,8 +157,9 @@ func UpdatePatientController(c echo.Context) error {
 	}
 
 	patientData := dto.ConvertToPatientModel(updateData)
+	patientData.ID = uuid
 
-	responseData, err := repository.UpdatePatientByID(id, patientData)
+	responseData, err := repository.UpdatePatientByID(uuid, patientData)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message": "failed update patient",
@@ -112,7 +168,7 @@ func UpdatePatientController(c echo.Context) error {
 	}
 
 	//recall the GetById repo because if I return it from update, it only fill the updated field and leaves everything else null or 0
-	responseData, err = repository.GetPatientByID(id)
+	responseData, err = repository.GetPatientByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
@@ -129,7 +185,15 @@ func UpdatePatientController(c echo.Context) error {
 }
 
 func DeletePatientController(c echo.Context) error {
-	id, err := strconv.Atoi(c.Param("id"))
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+	
+	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "error parse id",
@@ -137,15 +201,21 @@ func DeletePatientController(c echo.Context) error {
 		})
 	}
 
-	_, err = repository.GetPatientByID(id)
+	checkPatient, err := repository.GetPatientByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed delete patient",
 			"reponse":   err.Error(),
 		})
 	}
+	if checkPatient.UserID != user{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
+		})
+	}
 
-	err = repository.DeletePatientByID(id)
+	err = repository.DeletePatientByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message": "failed delete patient",
@@ -155,6 +225,6 @@ func DeletePatientController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message": "success delete patient",
-		"response": "success delete patient with id " + strconv.Itoa(id),
+		"response": "success delete patient with id " + uuid.String(),
 	})
 }

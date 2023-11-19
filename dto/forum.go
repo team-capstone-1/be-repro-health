@@ -9,13 +9,15 @@ import (
 )
 
 type ForumRequest struct {
+	PatientID  uuid.UUID  `json:"patient_id" form:"patient_id"`
 	Title      string     `json:"title" form:"title"`
 	Content    string     `json:"content" form:"content"`
 	Anonymous  bool       `json:"anonymous" form:"anonymous"`
 }
 
 type ForumResponse struct {
-	ID    uuid.UUID `json:"id"`
+	ID    	   uuid.UUID `json:"id"`
+	PatientID  uuid.UUID `json:"patient_id"`
 	Title      string     `json:"title"`
 	Content    string     `json:"content"`
 	Anonymous  bool       `json:"anonymous"`
@@ -25,6 +27,7 @@ type ForumResponse struct {
 func ConvertToForumModel(forum ForumRequest) model.Forum {
 	return model.Forum{
 		ID:       uuid.New(),
+		PatientID:forum.PatientID,
 		Title:    forum.Title,
 		Content:  forum.Content,
 		Anonymous: forum.Anonymous,
@@ -35,6 +38,7 @@ func ConvertToForumModel(forum ForumRequest) model.Forum {
 func ConvertToForumResponse(forum model.Forum) ForumResponse {
 	return ForumResponse{
 		ID:    	   forum.ID,
+		PatientID: forum.PatientID,
 		Title:     forum.Title,
 		Content:   forum.Content,
 		Anonymous: forum.Anonymous,
