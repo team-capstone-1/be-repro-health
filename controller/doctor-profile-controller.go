@@ -34,3 +34,32 @@ func GetDoctorProfileController(c echo.Context) error {
 		"response": doctorResponse,
 	})
 }
+
+func GetDoctorWorkHistory(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "user is not valid.",
+		})
+	}
+
+	responseData, err := repository.GetDoctorWorkHistory(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get doctor work histories",
+			"response": err.Error(),
+		})
+
+	}
+
+	var doctorResponse []dto.DoctorWorkHistoryResponse
+	for _, doctor := range responseData {
+		doctorResponse = append(doctorResponse, dto.ConvertToDoctorWorkHistoryResponse(doctor))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get doctor work histories",
+		"response": doctorResponse,
+	})
+}

@@ -1,0 +1,70 @@
+package dto
+
+import (
+	"capstone-project/model"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type DoctorProfileResponse struct {
+	ID           uuid.UUID                       `json:"id"`
+	Name         string                          `json:"name"`
+	Address      string                          `json:"address"`
+	Email        string                          `json:"email"`
+	Phone        string                          `json:"phone"`
+	ProfileImage string                          `json:"profile_image"`
+	SpecialistID uuid.UUID                       `json:"specialist_id"`
+	Specialist   DoctorProfileSpecialistResponse `json:"specialist"`
+	ClinicID     uuid.UUID                       `json:"clinic_id"`
+	Clinic       DoctorProfileClinicResponse     `json:"clinic"`
+}
+
+type DoctorProfileClinicResponse struct {
+	Name     string `json:"name"`
+	City     string `json:"city"`
+	Location string `json:"location"`
+	Profile  string `json:"profile"`
+}
+
+type DoctorProfileSpecialistResponse struct {
+	Name  string `json:"name"`
+	Image string `json:"image"`
+}
+
+type DoctorWorkHistoryResponse struct {
+	ID              uuid.UUID `json:"id"`
+	DoctorProfileID uuid.UUID `json:"doctor_profile_id"`
+	StartingDate    time.Time `json:"start_date"`
+	EndingDate      time.Time `json:"end_date"`
+	Job             string    `json:"job"`
+	Workplace       string    `json:"workplace"`
+	Position        string    `json:"position"`
+}
+
+func ConvertToDoctorProfileResponse(doctor model.Doctor) DoctorProfileResponse {
+	return DoctorProfileResponse{
+		ID:           doctor.ID,
+		Name:         doctor.Name,
+		Address:      doctor.Address,
+		Email:        doctor.Email,
+		Phone:        doctor.Phone,
+		ProfileImage: doctor.ProfileImage,
+		SpecialistID: doctor.SpecialistID,
+		ClinicID:     doctor.ClinicID,
+		Specialist:   DoctorProfileSpecialistResponse{Name: doctor.Specialist.Name, Image: doctor.Specialist.Image},
+		Clinic:       DoctorProfileClinicResponse{Name: doctor.Clinic.Name, City: doctor.Clinic.City, Location: doctor.Clinic.Location, Profile: doctor.Clinic.Location},
+	}
+}
+
+func ConvertToDoctorWorkHistoryResponse(workHistory model.DoctorWorkHistory) DoctorWorkHistoryResponse {
+	return DoctorWorkHistoryResponse{
+		ID:              workHistory.ID,
+		DoctorProfileID: workHistory.DoctorProfileID,
+		StartingDate:    workHistory.StartingDate,
+		EndingDate:      workHistory.EndingDate,
+		Job:             workHistory.Job,
+		Workplace:       workHistory.Workplace,
+		Position:        workHistory.Position,
+	}
+}

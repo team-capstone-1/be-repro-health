@@ -55,12 +55,12 @@ func New() *echo.Echo {
 	adm.Use(middleware.JWT([]byte(config.JWT_KEY)))
 	adm.POST("/doctors/signup", controller.SignUpDoctorController, m.CheckRole("admin"))
 
-
 	// doctor route
 	e.POST("/doctors/login", controller.DoctorLoginController)
 	doctor := e.Group("/doctors")
 	doctor.Use(middleware.JWT([]byte(config.JWT_KEY)))
-	doctor.GET("/profile", controller.GetDoctorProfileController)
+	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole("doctor"))
+	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistory, m.CheckRole("doctor"))
 
 	return e
 }
