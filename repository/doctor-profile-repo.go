@@ -30,3 +30,15 @@ func GetDoctorWorkHistory(id uuid.UUID) ([]model.DoctorWorkHistory, error) {
 
 	return workHistory, nil
 }
+
+func GetDoctorEducation(id uuid.UUID) ([]model.DoctorEducation, error) {
+	var doctorEducation []model.DoctorEducation
+
+	tx := database.DB.Where("doctor_profile_id = ?", id).Find(&doctorEducation)
+
+	if tx.Error != nil {
+		return doctorEducation, tx.Error
+	}
+
+	return doctorEducation, nil
+}

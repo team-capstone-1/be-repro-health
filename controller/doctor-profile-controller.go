@@ -35,7 +35,7 @@ func GetDoctorProfileController(c echo.Context) error {
 	})
 }
 
-func GetDoctorWorkHistory(c echo.Context) error {
+func GetDoctorWorkHistoriesController(c echo.Context) error {
 	user := m.ExtractTokenUserId(c)
 	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
@@ -53,13 +53,56 @@ func GetDoctorWorkHistory(c echo.Context) error {
 
 	}
 
+	if len(responseData) == 0 {
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
+			"message":  "no doctor work histories found",
+			"response": nil,
+		})
+	}
+
 	var doctorResponse []dto.DoctorWorkHistoryResponse
 	for _, doctor := range responseData {
-		doctorResponse = append(doctorResponse, dto.ConvertToDoctorWorkHistoryResponse(doctor))
+		doctorResponse = append(doctorResponse, dto.ConvertToDoctorWorkHistoriesResponse(doctor))
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get doctor work histories",
+		"response": doctorResponse,
+	})
+}
+
+func GetDoctorEducationController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "user is not valid.",
+		})
+	}
+
+	responseData, err := repository.GetDoctorEducation(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get doctor educations",
+			"response": err.Error(),
+		})
+
+	}
+
+	if len(responseData) == 0 {
+		return c.JSON(http.StatusNotFound, map[string]interface{}{
+			"message":  "no doctor education found",
+			"response": nil,
+		})
+	}
+
+	var doctorResponse []dto.DoctorEducationResponse
+	for _, doctor := range responseData {
+		doctorResponse = append(doctorResponse, dto.ConvertToDoctorEducationResponse(doctor))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get doctor educations",
 		"response": doctorResponse,
 	})
 }
