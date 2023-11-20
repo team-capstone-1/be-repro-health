@@ -8,7 +8,6 @@ import (
 type Doctor struct {
 	gorm.Model
 	ID           uuid.UUID      `json:"id" form:"id"`
-	DoctorID     uuid.UUID      `gorm:"column:doctor_id;index" json:"doctor_id"`
 	Name         string         `gorm:"size:255"`
 	Email        string         `gorm:"size:255"`
 	Password     string         `gorm:"size:255"`

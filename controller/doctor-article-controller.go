@@ -2,6 +2,7 @@ package controller
 
 import (
 	"capstone-project/dto"
+	m "capstone-project/middleware"
 	"capstone-project/repository"
 	"net/http"
 
@@ -10,28 +11,38 @@ import (
 )
 
 func GetAllArticleDotorsController(c echo.Context) error {
-	responseData, err := repository.GetAllDoctorsArticles()
+	doctor_id := c.FormValue("doctor_id")
+
+	responseData, err := repository.GetAllArticles(doctor_id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed get doctor articles",
+			"message":  "failed get article",
 			"response": err.Error(),
 		})
 	}
 
-	var doctorArticleResponse []dto.DoctorArticleResponse
+	var articleResponse []dto.DoctorArticleResponse
 	for _, article := range responseData {
-		doctorArticleResponse = append(doctorArticleResponse, dto.ConvertToDoctorArticleResponse(article))
+		articleResponse = append(articleResponse, dto.ConvertToDoctorArticleResponse(article))
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success get articles",
-		"response": doctorArticleResponse,
+		"message":  "success get article",
+		"response": articleResponse,
 	})
 }
 
 func CreateDoctorArticleController(c echo.Context) error {
+	doctor := m.ExtractTokenDoctorId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
+		})
+	}
+
 	article := dto.DoctorArticleRequest{}
-	errBind := c.Bind(&article)
+	errBind := c.Bind(&doctor)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error bind data",
@@ -39,12 +50,26 @@ func CreateDoctorArticleController(c echo.Context) error {
 		})
 	}
 
-	articleData := dto.ConvertToDoctorArticleModel(article)
-
-	responseData, err := repository.InsertDoctorArticle(articleData)
+	checkDoctor, err := repository.GetPatientByID(article.DoctorID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed create article",
+			"message": "failed create article",
+			"reponse": err.Error(),
+		})
+	}
+	if checkDoctor.UserID != doctor {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
+		})
+	}
+
+	articleData := dto.ConvertToDoctorArticleModel(article)
+
+	responseData, err := repository.InsertArticle(articleData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed create forum",
 			"response": err.Error(),
 		})
 	}
@@ -52,61 +77,21 @@ func CreateDoctorArticleController(c echo.Context) error {
 	articleResponse := dto.ConvertToDoctorArticleResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success create new article",
+		"message":  "success create new forum",
 		"response": articleResponse,
 	})
 }
 
-func UpdateDoctorArticleController(c echo.Context) error {
-	idParam := c.Param("id")
-
-	id, err := uuid.Parse(idParam)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error parse id",
-			"response": err.Error(),
-		})
-	}
-
-	updateArticleData := dto.DoctorArticleRequest{} // Ganti dengan tipe DTO yang sesuai untuk entitas dokter
-	errBind := c.Bind(&updateArticleData)
-	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error bind data",
-			"response": errBind.Error(),
-		})
-	}
-
-	doctorData := dto.ConvertToDoctorArticleModel(updateArticleData)
-
-	responseData, err := repository.UpdateDoctorArticleByID(id, doctorData)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]any{
-			"message":  "failed update doctor",
-			"response": err.Error(),
-		})
-	}
-
-	responseData, err = repository.GetDoctorArticleByID(id)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get doctor",
-			"reponse": err.Error(),
-		})
-	}
-
-	doctorResponse := dto.ConvertToDoctorArticleResponse(responseData)
-
-	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success update doctor",
-		"response": doctorResponse,
-	})
-}
-
 func DeleteDoctorArticleController(c echo.Context) error {
-	idParam := c.Param("id")
+	doctor := m.ExtractTokenDoctorId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
+		})
+	}
 
-	id, err := uuid.Parse(idParam)
+	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error parse id",
@@ -114,15 +99,29 @@ func DeleteDoctorArticleController(c echo.Context) error {
 		})
 	}
 
-	_, err = repository.GetDoctorArticleByID(id) // Ganti dengan repository yang sesuai
+	checkArticle, err := repository.GetArticleByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed delete doctor",
+			"message": "failed delete article",
 			"reponse": err.Error(),
 		})
 	}
 
-	err = repository.DeleteDoctorArticleByID(id) // Ganti dengan repository yang sesuai
+	checkDoctor, err := repository.GetArticleByID(checkArticle.DoctorID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed delete article",
+			"reponse": err.Error(),
+		})
+	}
+	if checkDoctor.DoctorID != doctor {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user doctor data.",
+		})
+	}
+
+	err = repository.DeleteArticleByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message": "failed delete doctor",
@@ -132,6 +131,6 @@ func DeleteDoctorArticleController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success delete doctor",
-		"response": "success delete doctor with id " + id.String(),
+		"response": "success delete doctor with id " + uuid.String(),
 	})
 }

@@ -30,7 +30,6 @@ func ConvertToDoctorArticleModel(doctor DoctorArticleRequest) model.Article {
 		Title:    doctor.Title,
 		Content:  doctor.Content,
 		Date:     time.Now(),
-		Image:    doctor.Image,
 	}
 }
 

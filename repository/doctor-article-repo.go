@@ -7,27 +7,33 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAllDoctorsArticles() ([]model.Article, error) {
-	var datadoctorarticles []model.Article
+func GetAllArticles(doctor_id string) ([]model.Article, error) {
+	var dataarticles []model.Article
 
-	tx := database.DB.Find(&datadoctorarticles)
+	tx := database.DB
+
+	if doctor_id != "" {
+		tx = tx.Where("doctor_id = ?", doctor_id)
+	}
+
+	tx.Find(&dataarticles)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	return datadoctorarticles, nil
+	return dataarticles, nil
 }
 
-func GetDoctorArticleByID(id uuid.UUID) (model.Article, error) {
-	var datadoctorarticles model.Article
+func GetArticleByID(id uuid.UUID) (model.Article, error) {
+	var dataarticle model.Article
 
-	tx := database.DB.First(&datadoctorarticles, id)
+	tx := database.DB.First(&dataarticle, id)
 	if tx.Error != nil {
 		return model.Article{}, tx.Error
 	}
-	return datadoctorarticles, nil
+	return dataarticle, nil
 }
 
-func InsertDoctorArticle(data model.Article) (model.Article, error) {
+func InsertArticle(data model.Article) (model.Article, error) {
 	tx := database.DB.Save(&data)
 	if tx.Error != nil {
 		return model.Article{}, tx.Error
@@ -35,7 +41,7 @@ func InsertDoctorArticle(data model.Article) (model.Article, error) {
 	return data, nil
 }
 
-func DeleteDoctorArticleByID(id uuid.UUID) error {
+func DeleteArticleByID(id uuid.UUID) error {
 	tx := database.DB.Delete(&model.Article{}, id)
 	if tx.Error != nil {
 		return tx.Error
@@ -43,10 +49,66 @@ func DeleteDoctorArticleByID(id uuid.UUID) error {
 	return nil
 }
 
-func UpdateDoctorArticleByID(id uuid.UUID, updateData model.Article) (model.Article, error) {
-	tx := database.DB.Model(&updateData).Where("id = ?", id).Updates(updateData)
-	if tx.Error != nil {
-		return model.Article{}, tx.Error
-	}
-	return updateData, nil
-}
+// type DoctorArticleRepository struct {
+// 	DB *gorm.DB
+// }
+
+// func NewDoctorArticleRepository(db *gorm.DB) *DoctorArticleRepository {
+// 	return &DoctorArticleRepository{
+// 		DB: db,
+// 	}
+// }
+
+// func (r *DoctorArticleRepository) GetAllArticles() ([]model.Article, error) {
+// 	var articles []model.Article
+// 	if err := r.DB.Find(&articles).Error; err != nil {
+// 		return nil, err
+// 	}
+// 	return articles, nil
+// }
+
+// func (r *DoctorArticleRepository) GetArticleByID(id uint) (*model.Article, error) {
+// 	var article model.Article
+// 	if err := r.DB.First(&article, id).Error; err != nil {
+// 		return nil, err
+// 	}
+// 	return &article, nil
+// }
+
+// func (r *DoctorArticleRepository) CreateArticle(article *model.Article) error {
+// 	tx := r.DB.Begin()
+// 	if err := tx.Create(article).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+// 	tx.Commit()
+// 	return nil
+// }
+
+// func (r *DoctorArticleRepository) UpdateArticle(article *model.Article) error {
+// 	tx := r.DB.Begin()
+// 	if err := tx.Save(article).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+// 	tx.Commit()
+// 	return nil
+// }
+
+// func (r *DoctorArticleRepository) DeleteArticle(id uint) error {
+// 	tx := r.DB.Begin()
+// 	if err := tx.Delete(&model.Article{}, id).Error; err != nil {
+// 		tx.Rollback()
+// 		return err
+// 	}
+// 	tx.Commit()
+// 	return nil
+// }
+
+// func (r *DoctorArticleRepository) GetArticlesByDoctorID(doctorID uint) ([]model.Article, error) {
+// 	var articles []model.Article
+// 	if err := r.DB.Where("doctor_id = ?", doctorID).Find(&articles).Error; err != nil {
+// 		return nil, err
+// 	}
+// 	return articles, nil
+// }

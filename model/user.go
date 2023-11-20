@@ -10,4 +10,5 @@ type User struct {
 	ID       uuid.UUID `json:"id" form:"id"`
 	Email    string    `json:"email" form:"email"`
 	Password string    `json:"password" form:"password"`
+	Patients []Patient `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
