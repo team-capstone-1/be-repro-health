@@ -43,3 +43,10 @@ func ConvertToDoctorArticleResponse(article model.Article) DoctorArticleResponse
 		Image:    article.Image,
 	}
 }
+
+func ConvertToDoctorArticleDashboardResponse(article model.Article) DoctorArticleResponse {
+	return DoctorArticleResponse{
+		ID:       article.ID,
+		DoctorID: article.DoctorID,
+	}
+}

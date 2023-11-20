@@ -10,7 +10,7 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetAllArticleDotorsController(c echo.Context) error {
+func GetAllArticleDoctorsController(c echo.Context) error {
 	doctor_id := c.FormValue("doctor_id")
 
 	responseData, err := repository.GetAllArticles(doctor_id)
@@ -33,7 +33,7 @@ func GetAllArticleDotorsController(c echo.Context) error {
 }
 
 func CreateDoctorArticleController(c echo.Context) error {
-	doctor := m.ExtractTokenDoctorId(c)
+	doctor, err := m.ExtractTokenDoctorId(c)
 	if doctor == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
@@ -42,7 +42,7 @@ func CreateDoctorArticleController(c echo.Context) error {
 	}
 
 	article := dto.DoctorArticleRequest{}
-	errBind := c.Bind(&doctor)
+	errBind := c.Bind(&article)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error bind data",
@@ -50,17 +50,17 @@ func CreateDoctorArticleController(c echo.Context) error {
 		})
 	}
 
-	checkDoctor, err := repository.GetPatientByID(article.DoctorID)
+	checkDoctor, err := repository.GetDoctorByID(article.DoctorID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create article",
-			"reponse": err.Error(),
+			"message":  "failed create article",
+			"response": err.Error(),
 		})
 	}
-	if checkDoctor.UserID != doctor {
+	if checkDoctor.ID != doctor {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "unauthorized",
-			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
+			"message":  "unauthorized",
+			"response": "Permission Denied: You are not allowed to access other user doctor data.",
 		})
 	}
 
@@ -69,7 +69,7 @@ func CreateDoctorArticleController(c echo.Context) error {
 	responseData, err := repository.InsertArticle(articleData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed create forum",
+			"message":  "failed create article",
 			"response": err.Error(),
 		})
 	}
@@ -77,13 +77,13 @@ func CreateDoctorArticleController(c echo.Context) error {
 	articleResponse := dto.ConvertToDoctorArticleResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success create new forum",
+		"message":  "success create new article",
 		"response": articleResponse,
 	})
 }
 
 func DeleteDoctorArticleController(c echo.Context) error {
-	doctor := m.ExtractTokenDoctorId(c)
+	doctor, err := m.ExtractTokenDoctorId(c)
 	if doctor == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",

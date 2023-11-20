@@ -23,6 +23,16 @@ func GetAllArticles(doctor_id string) ([]model.Article, error) {
 	return dataarticles, nil
 }
 
+func GetAllArticleDashboard() ([]model.Article, error) {
+	var dataarticles []model.Article
+
+	tx := database.DB.Find(&dataarticles)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return dataarticles, nil
+}
+
 func GetArticleByID(id uuid.UUID) (model.Article, error) {
 	var dataarticle model.Article
 
