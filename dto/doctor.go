@@ -24,6 +24,7 @@ type DoctorSignUpRequest struct {
 	Price        float64   `json:"price" form:"price"`
 	Address      string    `json:"address" form:"address"`
 	Phone        string    `json:"phone" form:"phone"`
+	ProfileImage string    `json:"profile_image"`
 	SpecialistID uuid.UUID `json:"specialist_id" form:"specialist_id"`
 	ClinicID     uuid.UUID `json:"clinic_id" form:"clinic_id"`
 }
@@ -73,6 +74,7 @@ func ConvertToDoctorModel(doctor DoctorSignUpRequest) model.Doctor {
 		Price:        doctor.Price,
 		Address:      doctor.Address,
 		Phone:        doctor.Phone,
+		ProfileImage: doctor.ProfileImage,
 		SpecialistID: doctor.SpecialistID,
 		ClinicID:     doctor.ClinicID,
 	}

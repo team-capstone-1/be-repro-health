@@ -72,7 +72,7 @@ func SignUpDoctorController(c echo.Context) error {
 	response := dto.ConvertToDoctorSignUpResponse(data)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success receive user data",
+		"message":  "success create doctor data",
 		"response": response,
 	})
 }
