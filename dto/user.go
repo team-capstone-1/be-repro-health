@@ -6,6 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
+type LoginRequest struct {
+	Email    string `json:"email" form:"email"`
+	Password string `json:"password" form:"password"`
+}
+
 type UserRequest struct {
 	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`

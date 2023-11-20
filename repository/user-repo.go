@@ -13,6 +13,7 @@ import (
 func CheckUser(email string, password string) (model.User, string, error) {
 	var data model.User
 
+
 	tx := database.DB.Where("email = ?", email).First(&data)
 	if tx.Error != nil {
 		return model.User{}, "", errors.New("Invalid Email or Password")
@@ -27,6 +28,30 @@ func CheckUser(email string, password string) (model.User, string, error) {
 	if tx.RowsAffected > 0 {
 		var errToken error
 		token, errToken = middleware.CreateToken(data.ID, "user")
+		if errToken != nil {
+			return model.User{}, "", errToken
+		}
+	}
+	return data, token, nil
+}
+
+func CheckAdmin(email string, password string) (model.User, string, error) {
+	var data model.User
+
+	tx := database.DB.Where("email = ?", email).First(&data)
+	if tx.Error != nil {
+		return model.User{}, "", errors.New("Invalid Email or Password")
+	}
+
+	err := bcrypt.CompareHashAndPassword([]byte(data.Password), []byte(password))
+	if err != nil {
+		return model.User{}, "", errors.New("Invalid Email or Password")
+	}
+
+	var token string
+	if tx.RowsAffected > 0 {
+		var errToken error
+		token, errToken = middleware.CreateToken(data.ID, "admin")
 		if errToken != nil {
 			return model.User{}, "", errToken
 		}
