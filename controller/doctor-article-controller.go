@@ -11,12 +11,10 @@ import (
 )
 
 func GetAllArticleDoctorsController(c echo.Context) error {
-	doctor_id := c.FormValue("doctor_id")
-
-	responseData, err := repository.GetAllArticles(doctor_id)
+	responseData, err := repository.GetAllArticles()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed get article",
+			"message":  "failed get article data",
 			"response": err.Error(),
 		})
 	}
@@ -27,13 +25,13 @@ func GetAllArticleDoctorsController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success get article",
+		"message":  "success get transaction data",
 		"response": articleResponse,
 	})
 }
 
 func CreateDoctorArticleController(c echo.Context) error {
-	doctor, err := m.ExtractTokenDoctorId(c)
+	doctor := m.ExtractTokenUserId(c)
 	if doctor == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
@@ -83,17 +81,17 @@ func CreateDoctorArticleController(c echo.Context) error {
 }
 
 func DeleteDoctorArticleController(c echo.Context) error {
-	doctor, err := m.ExtractTokenDoctorId(c)
+	doctor := m.ExtractTokenUserId(c)
 	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]any{
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 			"message":  "unauthorized",
-			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
+			"response": "Permission Denied: Doctor is not valid.",
 		})
 	}
 
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message":  "error parse id",
 			"response": err.Error(),
 		})
@@ -101,35 +99,35 @@ func DeleteDoctorArticleController(c echo.Context) error {
 
 	checkArticle, err := repository.GetArticleByID(uuid)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message": "failed delete article",
-			"reponse": err.Error(),
+			"response": err.Error(),
 		})
 	}
 
-	checkDoctor, err := repository.GetArticleByID(checkArticle.DoctorID)
+	checkDoctor, err := repository.GetDoctorByID(checkArticle.DoctorID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message": "failed delete article",
-			"reponse": err.Error(),
+			"response": err.Error(),
 		})
 	}
-	if checkDoctor.DoctorID != doctor {
-		return c.JSON(http.StatusBadRequest, map[string]any{
+	if checkDoctor.ID != doctor {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message": "unauthorized",
-			"reponse": "Permission Denied: You are not allowed to access other user doctor data.",
+			"response": "Permission Denied: You are not allowed to access other user doctor data.",
 		})
 	}
 
 	err = repository.DeleteArticleByID(uuid)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]any{
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 			"message": "failed delete doctor",
-			"reponse": err.Error(),
+			"response": err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]any{
+	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message":  "success delete doctor",
 		"response": "success delete doctor with id " + uuid.String(),
 	})

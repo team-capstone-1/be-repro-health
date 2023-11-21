@@ -20,7 +20,7 @@ var (
 func Init() {
 	InitDB()
 	InitialMigration()
-	Seeders()
+	// Seeders()
 }
 
 type DbSetup struct {

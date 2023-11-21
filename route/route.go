@@ -68,9 +68,9 @@ func New() *echo.Echo {
 	e.POST("/doctors/login", controller.DoctorLoginController)
 
 	// doctor article route
-	e.GET("/articles/", controller.GetAllArticleDoctorsController)
-	e.POST("/articles", controller.CreateDoctorArticleController)
-	e.DELETE("/articles/:id", controller.DeleteDoctorArticleController)
+	e.GET("/articles", controller.GetAllArticleDoctorsController)
+	r.POST("/articles", controller.CreateDoctorArticleController)
+	r.DELETE("/articles/:id", controller.DeleteDoctorArticleController)
 
 	// doctor dashboard
 	e.GET("/consultations-dashboard", controller.GetConsultationSchedulesForDoctorDashboardController)

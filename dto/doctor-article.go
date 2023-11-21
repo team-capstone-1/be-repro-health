@@ -29,6 +29,7 @@ func ConvertToDoctorArticleModel(doctor DoctorArticleRequest) model.Article {
 		DoctorID: doctor.DoctorID,
 		Title:    doctor.Title,
 		Content:  doctor.Content,
+		Image:    doctor.Image,
 		Date:     time.Now(),
 	}
 }
@@ -48,5 +49,9 @@ func ConvertToDoctorArticleDashboardResponse(article model.Article) DoctorArticl
 	return DoctorArticleResponse{
 		ID:       article.ID,
 		DoctorID: article.DoctorID,
+		Title:    article.Title,
+		Content:  article.Content,
+		Date:     article.Date,
+		Image:    article.Image,
 	}
 }

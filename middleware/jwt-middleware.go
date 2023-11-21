@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"errors"
 	"net/http"
 	"time"
 
@@ -80,37 +79,3 @@ func ExtractTokenDoctor(c echo.Context) (uuid.UUID, error) {
 
 	return uid, nil
 }
-
-func ExtractTokenDoctorId(e echo.Context) (uuid.UUID, error) {
-	doctor := e.Get("doctor")
-	if doctor == nil {
-		// Handle case where "doctor" is nil, perhaps return an error or take appropriate action
-		return uuid.Nil, errors.New("doctor token is nil")
-	}
-
-	doctorToken, ok := doctor.(*jwt.Token)
-	if !ok || !doctorToken.Valid {
-		// Handle case where "doctor" is not a valid *jwt.Token
-		return uuid.Nil, errors.New("invalid doctor token")
-	}
-
-	claims, ok := doctorToken.Claims.(jwt.MapClaims)
-	if !ok {
-		// Handle case where claims cannot be extracted
-		return uuid.Nil, errors.New("unable to extract claims from doctor token")
-	}
-
-	doctorID, ok := claims["doctor_id"].(string)
-	if !ok {
-		// Handle case where "doctor_id" is not present or not a string
-		return uuid.Nil, errors.New("doctor_id not present or not a string")
-	}
-	
-	parsedUUID, err := uuid.Parse(doctorID)
-	if err != nil {
-		// Handle case where parsing UUID fails
-		return uuid.Nil, err
-	}
-	return parsedUUID, nil
-}
-

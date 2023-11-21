@@ -77,13 +77,13 @@ func GetArticleForDoctorDashboardController(c echo.Context) error {
 		})
 	}
 
-	var articleResponse []dto.DoctorArticleResponse
+	var articleDashboardResponse []dto.DoctorArticleResponse
 	for _, article := range responseData {
-		articleResponse = append(articleResponse, dto.ConvertToDoctorArticleDashboardResponse(article))
+		articleDashboardResponse = append(articleDashboardResponse, dto.ConvertToDoctorArticleDashboardResponse(article))
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get transaction data",
-		"response": articleResponse,
+		"response": articleDashboardResponse,
 	})
 }

@@ -7,23 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAllArticles(doctor_id string) ([]model.Article, error) {
-	var dataarticles []model.Article
-
-	tx := database.DB
-
-	if doctor_id != "" {
-		tx = tx.Where("doctor_id = ?", doctor_id)
-	}
-
-	tx.Find(&dataarticles)
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
-	return dataarticles, nil
-}
-
-func GetAllArticleDashboard() ([]model.Article, error) {
+func GetAllArticles() ([]model.Article, error) {
 	var dataarticles []model.Article
 
 	tx := database.DB.Find(&dataarticles)
@@ -31,6 +15,16 @@ func GetAllArticleDashboard() ([]model.Article, error) {
 		return nil, tx.Error
 	}
 	return dataarticles, nil
+}
+
+func GetAllArticleDashboard() ([]model.Article, error) {
+	var dataarticlesdashboard []model.Article
+
+	tx := database.DB.Find(&dataarticlesdashboard)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return dataarticlesdashboard, nil
 }
 
 func GetArticleByID(id uuid.UUID) (model.Article, error) {
