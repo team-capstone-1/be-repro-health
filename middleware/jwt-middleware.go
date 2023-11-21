@@ -29,7 +29,7 @@ func CheckRole(role string) echo.MiddlewareFunc {
 		return func(c echo.Context) error {
 			user := c.Get("user").(*jwt.Token)
 			if !user.Valid {
-				return c.JSON(http.StatusUnauthorized, map[string]any{
+				return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 					"message":  "unauthorized",
 					"response": "Permission Denied: User is not valid",
 				})
@@ -42,7 +42,7 @@ func CheckRole(role string) echo.MiddlewareFunc {
 				return next(c)
 			}
 
-			return c.JSON(http.StatusUnauthorized, map[string]any{
+			return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 				"message":  "unauthorized",
 				"response": "Permission Denied: Only " + role + " roles are allowed to perform this operation.",
 			})

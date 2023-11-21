@@ -13,7 +13,6 @@ import (
 func CheckUser(email string, password string) (model.User, string, error) {
 	var data model.User
 
-
 	tx := database.DB.Where("email = ?", email).First(&data)
 	if tx.Error != nil {
 		return model.User{}, "", errors.New("Invalid Email or Password")
@@ -51,7 +50,7 @@ func CheckAdmin(email string, password string) (model.User, string, error) {
 	var token string
 	if tx.RowsAffected > 0 {
 		var errToken error
-		token, errToken = middleware.CreateToken(data.ID, "admin")
+		token, errToken = middleware.CreateToken(data.ID, "user")
 		if errToken != nil {
 			return model.User{}, "", errToken
 		}

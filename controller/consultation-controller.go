@@ -3,12 +3,12 @@ package controller
 import (
 	"net/http"
 
-	"capstone-project/repository"
 	"capstone-project/dto"
 	m "capstone-project/middleware"
+	"capstone-project/repository"
 
-	"github.com/labstack/echo/v4"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 func CreateConsultationController(c echo.Context) error {
@@ -24,7 +24,7 @@ func CreateConsultationController(c echo.Context) error {
 	errBind := c.Bind(&consultation)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
+			"message":  "error bind data",
 			"response": errBind.Error(),
 		})
 	}
@@ -33,10 +33,10 @@ func CreateConsultationController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed delete forum",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
-	if checkPatient.UserID != user{
+	if checkPatient.UserID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
 			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
@@ -44,12 +44,12 @@ func CreateConsultationController(c echo.Context) error {
 	}
 
 	consultationData := dto.ConvertToConsultationModel(consultation)
-	
+
 	clinicData, err := repository.GetClinicByDoctorID(consultationData.DoctorID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get clinic",
-			"response":  err.Error(),
+			"message":  "failed get clinic",
+			"response": err.Error(),
 		})
 	}
 
@@ -58,15 +58,15 @@ func CreateConsultationController(c echo.Context) error {
 	responseData, err := repository.InsertConsultation(consultationData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create consultation",
-			"response":  err.Error(),
+			"message":  "failed create consultation",
+			"response": err.Error(),
 		})
 	}
 
 	consultationResponse := dto.ConvertToConsultationResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success create new consultation",
-		"response":    consultationResponse,
+		"message":  "success create new consultation",
+		"response": consultationResponse,
 	})
 }

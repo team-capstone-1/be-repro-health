@@ -2,7 +2,6 @@ package controller
 
 import (
 	"capstone-project/dto"
-	// "capstone-project/middleware"
 	"capstone-project/repository"
 	"net/http"
 
@@ -27,6 +26,9 @@ func DoctorLoginController(c echo.Context) error {
 			"response": err.Error(),
 		})
 	}
+
+	c.Set("doctor_id", data.ID)
+
 	response := map[string]any{
 		"doctor_id": data.ID,
 		"email":     data.Email,
