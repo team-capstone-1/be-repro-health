@@ -19,6 +19,16 @@ func GetAllPatients(user uuid.UUID) ([]model.Patient, error) {
 	return datapatients, nil
 }
 
+func GetAllPatientsDashboard() ([]model.Patient, error) {
+	var datapatiens []model.Patient
+
+	tx := database.DB.Find(&datapatiens)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return datapatiens, nil
+}
+
 func GetPatientByID(id uuid.UUID) (model.Patient, error) {
 	var datapatient model.Patient
 

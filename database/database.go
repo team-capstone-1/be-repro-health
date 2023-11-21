@@ -20,7 +20,7 @@ var (
 func Init() {
 	InitDB()
 	InitialMigration()
-	Seeders()
+	// Seeders()
 }
 
 type DbSetup struct {
@@ -58,8 +58,10 @@ func InitDB() {
 func InitialMigration() {
 	DB.AutoMigrate(&model.User{}, &model.Doctor{}, &model.DoctorWorkHistory{}, &model.DoctorEducation{}, &model.DoctorCertification{})
 	DB.AutoMigrate(&model.Patient{})
+	DB.AutoMigrate(&model.Article{})
 	DB.AutoMigrate(&model.Specialist{})
 	DB.AutoMigrate(&model.Consultation{})
+	DB.AutoMigrate(&model.Transaction{})
 	DB.AutoMigrate(&model.Forum{})
 }
 
