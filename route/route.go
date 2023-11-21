@@ -15,6 +15,7 @@ func New() *echo.Echo {
 	e := echo.New()
 
 	// Trailing Slash for slashing in endpoint
+	e.Use(middleware.CORS())
 	e.Pre(middleware.RemoveTrailingSlash())
 
 	//JWT Group
