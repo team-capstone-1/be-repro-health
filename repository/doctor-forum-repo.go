@@ -3,6 +3,8 @@ package repository
 import (
 	"capstone-project/database"
 	"capstone-project/model"
+
+	"github.com/google/uuid"
 )
 
 func DoctorGetAllForums(title string, patient_id string) ([]model.Forum, error) {
@@ -30,5 +32,23 @@ func CreateDoctorReplyForum(data model.ForumReply) (model.ForumReply, error) {
 	if tx.Error != nil {
 		return model.ForumReply{}, tx.Error
 	}
+	return data, nil
+}
+
+func UpdateDoctorReplyForum(data model.ForumReply) (model.ForumReply, error) {
+	tx := database.DB.Updates(&data)
+	if tx.Error != nil {
+		return model.ForumReply{}, tx.Error
+	}
+	return data, nil
+}
+
+func GetDoctorReplyForumByID(forumID uuid.UUID, data model.ForumReply) (model.ForumReply, error) {
+	tx := database.DB.Where("id = ?", forumID).First(&data)
+
+	if tx.Error != nil {
+		return model.ForumReply{}, tx.Error
+	}
+
 	return data, nil
 }
