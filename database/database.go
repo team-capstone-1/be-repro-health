@@ -63,6 +63,7 @@ func InitialMigration() {
 	DB.AutoMigrate(&model.Consultation{})
 	DB.AutoMigrate(&model.Transaction{})
 	DB.AutoMigrate(&model.Forum{})
+	DB.AutoMigrate(&model.ForumReply{})
 }
 
 func Seeders() {
