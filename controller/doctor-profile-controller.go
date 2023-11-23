@@ -35,6 +35,8 @@ func GetDoctorProfileController(c echo.Context) error {
 	})
 }
 
+// Work History
+
 func GetDoctorWorkHistoriesController(c echo.Context) error {
 	user := m.ExtractTokenUserId(c)
 	if user == uuid.Nil {
@@ -71,6 +73,167 @@ func GetDoctorWorkHistoriesController(c echo.Context) error {
 	})
 }
 
+func CreateDoctorWorkHistoryController(c echo.Context) error {
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
+		})
+	}
+
+	workHistory := dto.DoctorWorkHistoryRequest{}
+	errBind := c.Bind(&workHistory)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	workData := dto.ConvertToDoctorWorkHistoryModel(workHistory)
+	workData.DoctorProfileID = doctor
+
+	responseData, err := repository.InsertDoctorWorkHistory(workData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed create article",
+			"response": err.Error(),
+		})
+	}
+
+	workResponse := dto.ConvertToDoctorWorkHistoriesResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success create new article",
+		"response": workResponse,
+	})
+}
+
+func UpdateDoctorWorkHistoryController(c echo.Context) error {
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Doctor is not valid.",
+		})
+	}
+
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed update doctor work history",
+			"response": err.Error(),
+		})
+	}
+
+	checkWork, err := repository.GetDoctorWorkHistoryByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed check doctor work history",
+			"response": err.Error(),
+		})
+	}
+
+	if checkWork.DoctorProfileID != doctor {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Doctor is not valid.",
+		})
+	}
+
+	workHistory := dto.DoctorWorkHistoryRequest{}
+	errBind := c.Bind(&workHistory)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	workData := dto.ConvertToDoctorWorkHistoryModel(workHistory)
+	workData.ID = uuid
+
+	responseData, err := repository.UpdateDoctorWorkHistoryByID(uuid, workData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed update doctor work history",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err = repository.GetDoctorWorkHistoryByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed update doctor work history",
+			"response": err.Error(),
+		})
+	}
+
+	workResponse := dto.ConvertToDoctorWorkHistoriesResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success update doctor work history",
+		"response": workResponse,
+	})
+}
+
+func DeleteDoctorWorkHistoryController(c echo.Context) error {
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Doctor is not valid.",
+		})
+	}
+
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed delete doctor work history",
+			"response": err.Error(),
+		})
+	}
+
+	checkWork, err := repository.GetDoctorWorkHistoryByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed check doctor work history",
+			"response": err.Error(),
+		})
+	}
+
+	checkDoctorProfileID, err := repository.GetDoctorByID(checkWork.DoctorProfileID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed check doctor work history",
+			"response": err.Error(),
+		})
+	}
+
+	if checkDoctorProfileID.ID != doctor {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: You are not allowed to access other user doctor profile data.",
+		})
+	}
+
+	err = repository.DeleteDoctorWorkHistoryByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed delete doctor work history",
+			"response": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success delete doctor work history",
+		"response": nil,
+	})
+}
+
+// Education
+
 func GetDoctorEducationController(c echo.Context) error {
 	user := m.ExtractTokenUserId(c)
 	if user == uuid.Nil {
@@ -106,6 +269,8 @@ func GetDoctorEducationController(c echo.Context) error {
 		"response": doctorResponse,
 	})
 }
+
+// Certification
 
 func GetDoctorCertificationController(c echo.Context) error {
 	user := m.ExtractTokenUserId(c)
