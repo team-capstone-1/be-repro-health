@@ -48,21 +48,8 @@ func CreateDoctorArticleController(c echo.Context) error {
 		})
 	}
 
-	checkDoctor, err := repository.GetDoctorByID(article.DoctorID)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed create article",
-			"response": err.Error(),
-		})
-	}
-	if checkDoctor.ID != doctor {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "unauthorized",
-			"response": "Permission Denied: You are not allowed to access other user doctor data.",
-		})
-	}
-
 	articleData := dto.ConvertToDoctorArticleModel(article)
+	articleData.DoctorID = doctor
 
 	responseData, err := repository.InsertArticle(articleData)
 	if err != nil {
