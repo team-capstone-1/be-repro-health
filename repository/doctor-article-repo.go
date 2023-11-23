@@ -7,10 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAllArticles() ([]model.Article, error) {
+func GetAllArticles(doctorID uuid.UUID) ([]model.Article, error) {
 	var dataarticles []model.Article
 
-	tx := database.DB.Find(&dataarticles)
+	tx := database.DB.Where("doctor_id = ?", doctorID).Find(&dataarticles)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
