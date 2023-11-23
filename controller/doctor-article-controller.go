@@ -77,7 +77,7 @@ func CreateDoctorArticleController(c echo.Context) error {
 func DeleteDoctorArticleController(c echo.Context) error {
 	doctor := m.ExtractTokenUserId(c)
 	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Doctor is not valid.",
 		})
@@ -85,7 +85,7 @@ func DeleteDoctorArticleController(c echo.Context) error {
 
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error parse id",
 			"response": err.Error(),
 		})
@@ -93,7 +93,7 @@ func DeleteDoctorArticleController(c echo.Context) error {
 
 	checkArticle, err := repository.GetArticleByID(uuid)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed delete article",
 			"response": err.Error(),
 		})
@@ -101,13 +101,13 @@ func DeleteDoctorArticleController(c echo.Context) error {
 
 	checkDoctor, err := repository.GetDoctorByID(checkArticle.DoctorID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed delete article",
 			"response": err.Error(),
 		})
 	}
 	if checkDoctor.ID != doctor {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: You are not allowed to access other user doctor data.",
 		})
@@ -115,13 +115,13 @@ func DeleteDoctorArticleController(c echo.Context) error {
 
 	err = repository.DeleteArticleByID(uuid)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message":  "failed delete doctor",
 			"response": err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success delete doctor",
 		"response": "success delete doctor with id " + uuid.String(),
 	})

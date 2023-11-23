@@ -61,8 +61,14 @@ func New() *echo.Echo {
 	doctor := e.Group("/doctors")
 	doctor.Use(middleware.JWT([]byte(config.JWT_KEY)))
 	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole("doctor"))
+	// doctor work history
 	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistoriesController, m.CheckRole("doctor"))
+	doctor.POST("/profile/work-histories", controller.CreateDoctorWorkHistoryController, m.CheckRole("doctor"))
+	doctor.PUT("/profile/work-histories/:id", controller.UpdateDoctorWorkHistoryController, m.CheckRole("doctor"))
+	doctor.DELETE("/profile/work-histories/:id", controller.DeleteDoctorWorkHistoryController, m.CheckRole("doctor"))
+	// doctor education
 	doctor.GET("/profile/educations", controller.GetDoctorEducationController, m.CheckRole("doctor"))
+	// doctor certification
 	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole("doctor"))
 
 	// doctor route
