@@ -68,6 +68,9 @@ func New() *echo.Echo {
 	doctor.DELETE("/profile/work-histories/:id", controller.DeleteDoctorWorkHistoryController, m.CheckRole("doctor"))
 	// doctor education
 	doctor.GET("/profile/educations", controller.GetDoctorEducationController, m.CheckRole("doctor"))
+	doctor.POST("/profile/educations", controller.CreateDoctorEducationController, m.CheckRole("doctor"))
+	doctor.PUT("/profile/educations/:id", controller.UpdateDoctorEducationController, m.CheckRole("doctor"))
+	doctor.DELETE("/profile/educations/:id", controller.DeleteDoctorEducationController, m.CheckRole("doctor"))
 	// doctor certification
 	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole("doctor"))
 

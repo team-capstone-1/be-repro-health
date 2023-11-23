@@ -270,6 +270,157 @@ func GetDoctorEducationController(c echo.Context) error {
 	})
 }
 
+func CreateDoctorEducationController(c echo.Context) error {
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "user is not valid.",
+		})
+	}
+
+	education := dto.DoctorEducationRequest{}
+	errBind := c.Bind(&education)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	educationData := dto.ConvertToDoctorEducationModel(education)
+	educationData.DoctorProfileID = doctor
+
+	responseData, err := repository.InsertDoctorEducation(educationData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed create doctor education",
+			"response": err.Error(),
+		})
+	}
+
+	educationResponse := dto.ConvertToDoctorEducationResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success create doctor education",
+		"response": educationResponse,
+	})
+}
+
+func UpdateDoctorEducationController(c echo.Context) error {
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "user is not valid.",
+		})
+	}
+
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed update doctor education",
+			"response": err.Error(),
+		})
+	}
+
+	checkEducation, err := repository.GetDoctorEducationByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed check doctor education",
+			"response": err.Error(),
+		})
+	}
+
+	if checkEducation.DoctorProfileID != doctor {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: You are not allowed to access other user doctor profile data.",
+		})
+	}
+
+	education := dto.DoctorEducationRequest{}
+	errBind := c.Bind(&education)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	educationData := dto.ConvertToDoctorEducationModel(education)
+	educationData.ID = uuid
+
+	responseData, err := repository.UpdateDoctorEducationByID(uuid, educationData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed update doctor education",
+			"response": err.Error(),
+		})
+	}
+
+	educationResponse := dto.ConvertToDoctorEducationResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success update doctor education",
+		"response": educationResponse,
+	})
+}
+
+func DeleteDoctorEducationController(c echo.Context) error {
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Doctor is not valid.",
+		})
+	}
+
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed delete doctor education",
+			"response": err.Error(),
+		})
+	}
+
+	checkEducation, err := repository.GetDoctorEducationByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed check doctor education",
+			"response": err.Error(),
+		})
+	}
+
+	checkDoctorProfileID, err := repository.GetDoctorByID(checkEducation.DoctorProfileID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed check doctor profile",
+			"response": err.Error(),
+		})
+	}
+
+	if checkDoctorProfileID.ID != doctor {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: You are not allowed to access other user doctor profile data.",
+		})
+	}
+
+	err = repository.DeleteDoctorEducationByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed delete doctor education",
+			"response": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success delete doctor education",
+		"response": nil,
+	})
+}
+
 // Certification
 
 func GetDoctorCertificationController(c echo.Context) error {
