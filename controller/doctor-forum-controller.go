@@ -42,7 +42,7 @@ func CreateDoctorReplyForum(c echo.Context) error {
 		})
 	}
 
-	forum := dto.DoctorForumReplyRequest{}
+	forum := dto.DoctorForumReplyRequest{DoctorID: user}
 	errBind := c.Bind(&forum)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -95,12 +95,12 @@ func UpdateDoctorReplyForum(c echo.Context) error {
 		})
 	}
 
-	patientData := dto.ConvertToDoctorUpdateForumReplyModel(updateData)
+	forumReply := dto.ConvertToDoctorUpdateForumReplyModel(updateData)
 
-	responseData, err := repository.UpdateDoctorReplyForum(patientData)
+	responseData, err := repository.UpdateDoctorReplyForum(uuid, forumReply)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
-			"message":  "failed update patient",
+			"message":  "failed update forum reply",
 			"response": err.Error(),
 		})
 	}
@@ -108,16 +108,16 @@ func UpdateDoctorReplyForum(c echo.Context) error {
 	//recall the GetById repo because if I return it from update, it only fill the updated field and leaves everything else null or 0
 	responseData, err = repository.GetDoctorReplyForumByID(uuid)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get patient",
+		return c.JSON(http.StatusNotFound, map[string]any{
+			"message": "failed get forum reply",
 			"reponse": err.Error(),
 		})
 	}
 
-	patientResponse := dto.ConvertToPatientResponse(responseData)
+	patientResponse := dto.ConvertToDoctorForumReplyResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success update patient",
+		"message":  "success update forum reply",
 		"response": patientResponse,
 	})
 }

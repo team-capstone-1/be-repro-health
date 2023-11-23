@@ -35,15 +35,16 @@ func CreateDoctorReplyForum(data model.ForumReply) (model.ForumReply, error) {
 	return data, nil
 }
 
-func UpdateDoctorReplyForum(data model.ForumReply) (model.ForumReply, error) {
-	tx := database.DB.Updates(&data)
+func UpdateDoctorReplyForum(forumID uuid.UUID, data model.ForumReply) (model.ForumReply, error) {
+	tx := database.DB.Where("id = ?", forumID).Updates(&data)
 	if tx.Error != nil {
 		return model.ForumReply{}, tx.Error
 	}
 	return data, nil
 }
 
-func GetDoctorReplyForumByID(forumID uuid.UUID, data model.ForumReply) (model.ForumReply, error) {
+func GetDoctorReplyForumByID(forumID uuid.UUID) (model.ForumReply, error) {
+	var data model.ForumReply
 	tx := database.DB.Where("id = ?", forumID).First(&data)
 
 	if tx.Error != nil {

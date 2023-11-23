@@ -9,6 +9,7 @@ import (
 
 type DoctorForumReplyRequest struct {
 	ForumsID uuid.UUID `json:"forum_id" form:"forum_id"`
+	DoctorID uuid.UUID `json:"doctor_id" form:"doctor_id"`
 	Content  string    `json:"content" form:"content"`
 	Date     time.Time `json:"date" form:"date"`
 }
@@ -16,6 +17,7 @@ type DoctorForumReplyRequest struct {
 type DoctorForumReplyResponse struct {
 	ID       uuid.UUID `json:"id"`
 	ForumsID uuid.UUID `json:"forum_id"`
+	DoctorID uuid.UUID `json:"doctor_id"`
 	Content  string    `json:"content"`
 	Date     time.Time `json:"date"`
 }
@@ -34,6 +36,7 @@ func ConvertToDoctorReplyModel(forum DoctorForumReplyRequest) model.ForumReply {
 	return model.ForumReply{
 		ID:       uuid.New(),
 		ForumsID: forum.ForumsID,
+		DoctorID: forum.DoctorID,
 		Content:  forum.Content,
 		Date:     time.Now(),
 	}
@@ -43,6 +46,7 @@ func ConvertToDoctorForumReplyResponse(forum model.ForumReply) DoctorForumReplyR
 	return DoctorForumReplyResponse{
 		ID:       forum.ID,
 		ForumsID: forum.ForumsID,
+		DoctorID: forum.DoctorID,
 		Content:  forum.Content,
 		Date:     forum.Date,
 	}
