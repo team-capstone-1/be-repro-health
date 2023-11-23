@@ -15,6 +15,13 @@ type DoctorWorkHistoryRequest struct {
 	Position     string    `json:"position"`
 }
 
+type DoctorEducationRequest struct {
+	StartingDate     time.Time `json:"start_date"`
+	EndingDate       time.Time `json:"end_date"`
+	EducationProgram string    `json:"education_program"`
+	University       string    `json:"university"`
+}
+
 type DoctorProfileResponse struct {
 	ID           uuid.UUID                       `json:"id"`
 	Name         string                          `json:"name"`
@@ -93,6 +100,16 @@ func ConvertToDoctorWorkHistoryModel(workHistory DoctorWorkHistoryRequest) model
 		Job:             workHistory.Job,
 		Workplace:       workHistory.Workplace,
 		Position:        workHistory.Position,
+	}
+}
+
+func ConvertToDoctorEducationModel(education DoctorEducationRequest) model.DoctorEducation {
+	return model.DoctorEducation{
+		ID:               uuid.New(),
+		StartingDate:     education.StartingDate,
+		EndingDate:       education.EndingDate,
+		EducationProgram: education.EducationProgram,
+		University:       education.University,
 	}
 }
 
