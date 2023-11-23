@@ -3,17 +3,20 @@ package repository
 import (
 	"capstone-project/database"
 	"capstone-project/model"
+
+	"github.com/google/uuid"
 )
 
-func GetAllConsultation() ([]model.Consultation, error) {
-	var dataconsultations []model.Consultation
+func GetConsultationsByDoctorID(doctorID uuid.UUID) ([]model.Consultation, error) {
+	var dataConsultations []model.Consultation
 
-	tx := database.DB.Find(&dataconsultations)
+	tx := database.DB.Where("doctor_id = ?", doctorID).Find(&dataConsultations)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	return dataconsultations, nil
+	return dataConsultations, nil
 }
+
 
 func InsertConsultation(data model.Consultation) (model.Consultation, error) {
 	tx := database.DB.Save(&data)
