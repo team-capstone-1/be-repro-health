@@ -66,6 +66,8 @@ func New() *echo.Echo {
 	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole("doctor"))
 	doctor.POST("/forum-replies", controller.CreateDoctorReplyForum, m.CheckRole("doctor"))
 	doctor.PUT("/forum-replies/:id", controller.UpdateDoctorReplyForum, m.CheckRole("doctor"))
+	doctor.GET("/forum-replies/:id", controller.GetDoctorForumReplyID, m.CheckRole("doctor"))
+	doctor.DELETE("/forum-replies/:id", controller.DeleteDoctorForumReplyController, m.CheckRole("doctor"))
 
 	// doctor article route
 	e.GET("/articles", controller.GetAllArticleDoctorsController)

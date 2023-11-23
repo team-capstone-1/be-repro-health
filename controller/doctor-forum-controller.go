@@ -106,7 +106,43 @@ func UpdateDoctorReplyForum(c echo.Context) error {
 	}
 
 	//recall the GetById repo because if I return it from update, it only fill the updated field and leaves everything else null or 0
-	responseData, err = repository.GetDoctorReplyForumByID(uuid)
+	responseData, err = repository.GetDoctorForumReplyByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]any{
+			"message": "failed get forum reply",
+			"reponse": err.Error(),
+		})
+	}
+
+	forumReplyResponse := dto.ConvertToDoctorForumReplyResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success update forum reply",
+		"response": forumReplyResponse,
+	})
+}
+
+func GetDoctorForumReplyID(c echo.Context) error {
+	// BUTUH GET FORUM REPLY ID SUPAYA BISA UPDATE
+
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	//recall the GetById repo because if I return it from update, it only fill the updated field and leaves everything else null or 0
+	responseData, err := repository.GetDoctorForumReplyByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]any{
 			"message": "failed get forum reply",
@@ -119,5 +155,58 @@ func UpdateDoctorReplyForum(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success update forum reply",
 		"response": patientResponse,
+	})
+}
+
+func DeleteDoctorForumReplyController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	checkForum, err := repository.GetDoctorForumReplyByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed delete forum reply",
+			"reponse": err.Error(),
+		})
+	}
+
+	checkDoctor, err := repository.GetDoctorByID(checkForum.DoctorID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed delete forum",
+			"reponse": err.Error(),
+		})
+	}
+	if checkDoctor.ID != user {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "unauthorized",
+			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
+		})
+	}
+
+	err = repository.DeleteForumReplyByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message": "failed delete forum reply",
+			"reponse": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success delete forum reply",
+		"response": "success delete forum reply with id " + uuid.String(),
 	})
 }

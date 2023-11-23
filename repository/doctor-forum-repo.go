@@ -43,7 +43,7 @@ func UpdateDoctorReplyForum(forumID uuid.UUID, data model.ForumReply) (model.For
 	return data, nil
 }
 
-func GetDoctorReplyForumByID(forumID uuid.UUID) (model.ForumReply, error) {
+func GetDoctorForumReplyByID(forumID uuid.UUID) (model.ForumReply, error) {
 	var data model.ForumReply
 	tx := database.DB.Where("id = ?", forumID).First(&data)
 
@@ -52,4 +52,12 @@ func GetDoctorReplyForumByID(forumID uuid.UUID) (model.ForumReply, error) {
 	}
 
 	return data, nil
+}
+
+func DeleteForumReplyByID(id uuid.UUID) error {
+	tx := database.DB.Delete(&model.ForumReply{}, id)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
 }
