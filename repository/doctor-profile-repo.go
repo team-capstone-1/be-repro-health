@@ -130,3 +130,38 @@ func GetDoctorCertification(id uuid.UUID) ([]model.DoctorCertification, error) {
 
 	return certification, nil
 }
+
+func GetDoctorCertificationByID(id uuid.UUID) (model.DoctorCertification, error) {
+	var certification model.DoctorCertification
+
+	tx := database.DB.First(&certification, id)
+	if tx.Error != nil {
+		return certification, tx.Error
+	}
+
+	return certification, nil
+}
+
+func InsertDoctorCertification(data model.DoctorCertification) (model.DoctorCertification, error) {
+	tx := database.DB.Save(&data)
+	if tx.Error != nil {
+		return model.DoctorCertification{}, tx.Error
+	}
+	return data, nil
+}
+
+func UpdateDoctorCertificationByID(id uuid.UUID, updateData model.DoctorCertification) (model.DoctorCertification, error) {
+	tx := database.DB.Model(&updateData).Where("id = ?", id).Updates(updateData)
+	if tx.Error != nil {
+		return model.DoctorCertification{}, tx.Error
+	}
+	return updateData, nil
+}
+
+func DeleteDoctorCertificationByID(id uuid.UUID) error {
+	tx := database.DB.Delete(&model.DoctorCertification{}, id)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}

@@ -22,6 +22,15 @@ type DoctorEducationRequest struct {
 	University       string    `json:"university"`
 }
 
+type DoctorCertificationRequest struct {
+	StartingDate    time.Time `json:"start_date"`
+	EndingDate      time.Time `json:"end_date"`
+	Description     string    `json:"description"`
+	CertificateType string    `json:"certificate_type"`
+	FileSize        string    `json:"file_size"`
+	Details         string    `json:"details"`
+}
+
 type DoctorProfileResponse struct {
 	ID           uuid.UUID                       `json:"id"`
 	Name         string                          `json:"name"`
@@ -110,6 +119,18 @@ func ConvertToDoctorEducationModel(education DoctorEducationRequest) model.Docto
 		EndingDate:       education.EndingDate,
 		EducationProgram: education.EducationProgram,
 		University:       education.University,
+	}
+}
+
+func ConvertToDoctorCertificationModel(certification DoctorCertificationRequest) model.DoctorCertification {
+	return model.DoctorCertification{
+		ID:              uuid.New(),
+		StartingDate:    certification.StartingDate,
+		EndingDate:      certification.EndingDate,
+		Description:     certification.Description,
+		CertificateType: certification.CertificateType,
+		FileSize:        certification.FileSize,
+		Details:         certification.Details,
 	}
 }
 
