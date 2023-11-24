@@ -6,6 +6,7 @@ import (
 	"capstone-project/database"
 	"capstone-project/middleware"
 	"capstone-project/model"
+	"capstone-project/constant"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -26,7 +27,7 @@ func CheckUser(email string, password string) (model.User, string, error) {
 	var token string
 	if tx.RowsAffected > 0 {
 		var errToken error
-		token, errToken = middleware.CreateToken(data.ID, "user", data.Name)
+		token, errToken = middleware.CreateToken(data.ID, constant.ROLE_USER, data.Name)
 		if errToken != nil {
 			return model.User{}, "", errToken
 		}
@@ -50,7 +51,7 @@ func CheckAdmin(email string, password string) (model.User, string, error) {
 	var token string
 	if tx.RowsAffected > 0 {
 		var errToken error
-		token, errToken = middleware.CreateToken(data.ID, "admin", data.Name)
+		token, errToken = middleware.CreateToken(data.ID, constant.ROLE_ADMIN, data.Name)
 		if errToken != nil {
 			return model.User{}, "", errToken
 		}
