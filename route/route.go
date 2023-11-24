@@ -46,6 +46,7 @@ func New() *echo.Echo {
 	
 	// user forum
 	e.GET("/forums", controller.GetForumsController)
+	e.GET("/forums/:id", controller.GetForumController)
 	r.POST("/forums", controller.CreateForumController)
 	r.DELETE("/forums/:id", controller.DeleteForumController)
 	

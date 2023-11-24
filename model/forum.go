@@ -15,5 +15,6 @@ type Forum struct {
 	Content    string     `gorm:"size:255"`
 	Anonymous  bool       `gorm:"default:false"`
 	Date       time.Time  `gorm:"type:datetime"`
+	View       int        `gorm:"type:int;default:0"`
 	// ForumReply ForumReply `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

@@ -34,6 +34,8 @@ func GetForumByID(id uuid.UUID) (model.Forum, error) {
 	if tx.Error != nil {
 		return model.Forum{}, tx.Error
 	}
+	database.DB.Model(&dataforum).Where("id = ?", id).Updates(map[string]interface{}{"View": dataforum.View+1})
+
 	return dataforum, nil
 }
 
