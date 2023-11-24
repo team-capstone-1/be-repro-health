@@ -26,7 +26,7 @@ func CheckUser(email string, password string) (model.User, string, error) {
 	var token string
 	if tx.RowsAffected > 0 {
 		var errToken error
-		token, errToken = middleware.CreateToken(data.ID, "user")
+		token, errToken = middleware.CreateToken(data.ID, "user", data.Name)
 		if errToken != nil {
 			return model.User{}, "", errToken
 		}
@@ -50,7 +50,7 @@ func CheckAdmin(email string, password string) (model.User, string, error) {
 	var token string
 	if tx.RowsAffected > 0 {
 		var errToken error
-		token, errToken = middleware.CreateToken(data.ID, "admin")
+		token, errToken = middleware.CreateToken(data.ID, "admin", data.Name)
 		if errToken != nil {
 			return model.User{}, "", errToken
 		}
