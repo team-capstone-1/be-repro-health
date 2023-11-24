@@ -43,11 +43,14 @@ func New() *echo.Echo {
 	r.POST("/patients", controller.CreatePatientController, m.CheckRole("user"))
 	r.PUT("/patients/:id", controller.UpdatePatientController, m.CheckRole("user"))
 	r.DELETE("/patients/:id", controller.DeletePatientController, m.CheckRole("user"))
-
+	
 	// user forum
 	e.GET("/forums", controller.GetForumsController)
 	r.POST("/forums", controller.CreateForumController)
 	r.DELETE("/forums/:id", controller.DeleteForumController)
+	
+	// transaction
+	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole("user"))
 	// davin
 
 	// admin route
