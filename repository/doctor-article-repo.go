@@ -8,24 +8,23 @@ import (
 )
 
 func GetAllArticles(doctorID uuid.UUID) ([]model.Article, error) {
-	var dataArticles []model.Article
+	var dataarticles []model.Article
 
-	tx := database.DB.Where("doctor_id = ?", doctorID).Find(&dataArticles)
+	tx := database.DB.Where("doctor_id = ?", doctorID).Find(&dataarticles)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	return dataArticles, nil
+	return dataarticles, nil
 }
 
-func GetAllArticleDashboard(doctorID uuid.UUID) ([]model.Article, error) {
-	var dataArticlesDashboard []model.Article
+func GetAllArticleDashboard() ([]model.Article, error) {
+	var dataarticlesdashboard []model.Article
 
-	tx := database.DB.Where("published = ? AND doctor_id = ?", true, doctorID).Find(&dataArticlesDashboard)
+	tx := database.DB.Find(&dataarticlesdashboard)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
-	return dataArticlesDashboard, nil
+	return dataarticlesdashboard, nil
 }
 
 func GetArticleByID(id uuid.UUID) (model.Article, error) {

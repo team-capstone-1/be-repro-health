@@ -43,10 +43,6 @@ type PatientDashboardResponse struct {
 	UserID       uuid.UUID `json:"user_id"`
 	Name         string    `json:"name"`
 	ProfileImage string    `json:"profile_image"`
-	DateOfBirth  time.Time `json:"date_of_birth"`
-	Relation     string    `json:"relation"`
-	Weight       float64   `json:"weight"`
-	Height       float64   `json:"height"`
 }
 
 func ConvertToPatientModel(patient PatientRequest) model.Patient {
@@ -84,15 +80,9 @@ func ConvertToPatientResponse(patient model.Patient) PatientResponse {
 	}
 }
 
-func ConvertToPatientDashboardResponse(patient model.Patient) PatientDashboardResponse {
-	return PatientDashboardResponse{
+func ConvertToPatientDashboardResponse(patient model.Patient) PatientResponse {
+	return PatientResponse{
 		ID:           patient.ID,
 		UserID:       patient.UserID,
-		Name:         patient.Name,
-		ProfileImage: patient.ProfileImage,
-		DateOfBirth:  patient.DateOfBirth,
-		Relation:     patient.Relation,
-		Weight:       patient.Weight,
-		Height:       patient.Height,
 	}
 }

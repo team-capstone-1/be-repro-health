@@ -66,19 +66,19 @@ func New() *echo.Echo {
 	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole("doctor"))
 	// doctor work history
 	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistoriesController, m.CheckRole("doctor"))
-	adm.POST("/profile/work-history", controller.CreateDoctorWorkHistoryController, m.CheckRole("admin"))
-	adm.PUT("/profile/work-history/:id", controller.UpdateDoctorWorkHistoryController, m.CheckRole("admin"))
-	adm.DELETE("/profile/work-history/:id", controller.DeleteDoctorWorkHistoryController, m.CheckRole("admin"))
+	doctor.POST("/profile/work-history", controller.CreateDoctorWorkHistoryController, m.CheckRole("doctor"))
+	doctor.PUT("/profile/work-history/:id", controller.UpdateDoctorWorkHistoryController, m.CheckRole("doctor"))
+	doctor.DELETE("/profile/work-history/:id", controller.DeleteDoctorWorkHistoryController, m.CheckRole("doctor"))
 	// doctor education
 	doctor.GET("/profile/educations", controller.GetDoctorEducationController, m.CheckRole("doctor"))
-	adm.POST("/profile/education", controller.CreateDoctorEducationController, m.CheckRole("admin"))
-	adm.PUT("/profile/education/:id", controller.UpdateDoctorEducationController, m.CheckRole("admin"))
-	adm.DELETE("/profile/education/:id", controller.DeleteDoctorEducationController, m.CheckRole("admin"))
+	doctor.POST("/profile/education", controller.CreateDoctorEducationController, m.CheckRole("doctor"))
+	doctor.PUT("/profile/education/:id", controller.UpdateDoctorEducationController, m.CheckRole("doctor"))
+	doctor.DELETE("/profile/education/:id", controller.DeleteDoctorEducationController, m.CheckRole("doctor"))
 	// doctor certification
 	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole("doctor"))
-	adm.POST("/profile/certification", controller.CreateDoctorCertificationController, m.CheckRole("admin"))
-	adm.PUT("/profile/certification/:id", controller.UpdateDoctorCertificationController, m.CheckRole("admin"))
-	adm.DELETE("/profile/certification/:id", controller.DeleteDoctorCertificationController, m.CheckRole("admin"))
+	doctor.POST("/profile/certification", controller.CreateDoctorCertificationController, m.CheckRole("doctor"))
+	doctor.PUT("/profile/certification/:id", controller.UpdateDoctorCertificationController, m.CheckRole("doctor"))
+	doctor.DELETE("/profile/certification/:id", controller.DeleteDoctorCertificationController, m.CheckRole("doctor"))
 
 	// doctor route
 	e.POST("/doctors/login", controller.DoctorLoginController)
@@ -90,7 +90,7 @@ func New() *echo.Echo {
 
 	// doctor dashboard
 	doctor.GET("/consultations-dashboard", controller.GetConsultationSchedulesForDoctorDashboardController, m.CheckRole("doctor"))
-	doctor.GET("/patients-dashboard", controller.GetPatientsForDoctorDashboardController, m.CheckRole("doctor"))
+	doctor.GET("/patients-dashboard", controller.GetPatientsForDoctorDashboardController)
 	doctor.GET("/transactions-dashboard", controller.GetTransactionsForDoctorDashboardController)
 	doctor.GET("/articles-dashboard", controller.GetArticleForDoctorDashboardController)
 
