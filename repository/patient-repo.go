@@ -1,6 +1,7 @@
 package repository
 
 import (
+
 	"capstone-project/database"
 	"capstone-project/model"
 
@@ -8,25 +9,24 @@ import (
 )
 
 func GetAllPatients(user uuid.UUID) ([]model.Patient, error) {
-	var dataPatients []model.Patient
+	var datapatients []model.Patient
 
-	tx := database.DB.Where("user_id = ?", user).Find(&dataPatients)
+	tx := database.DB.Where("user_id = ?", user).Find(&datapatients)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
-	return dataPatients, nil
+	
+	return datapatients, nil
 }
 
-func GetAllPatientsDashboard(doctorID uuid.UUID) ([]model.Patient, error) {
-	var dataPatients []model.Patient
+func GetAllPatientsDashboard() ([]model.Patient, error) {
+	var datapatiens []model.Patient
 
-	tx := database.DB.Where("user_id = ?", doctorID).Find(&dataPatients)
+	tx := database.DB.Find(&datapatiens)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
-	return dataPatients, nil
+	return datapatiens, nil
 }
 
 func GetPatientByID(id uuid.UUID) (model.Patient, error) {

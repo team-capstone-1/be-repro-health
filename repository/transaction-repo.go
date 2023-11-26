@@ -1,10 +1,9 @@
 package repository
 
 import (
+	"gorm.io/gorm"
 	"fmt"
 	"time"
-
-	"gorm.io/gorm"
 
 	"capstone-project/database"
 	"capstone-project/model"
@@ -12,25 +11,24 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAllTransactions(doctorID uuid.UUID) ([]model.Transaction, error) {
-	var dataTransactions []model.Transaction
+func GetAllTransactions() ([]model.Transaction, error) {
+	var datatransactions []model.Transaction
 
-	tx := database.DB.Preload("Consultation").Find(&dataTransactions)
+	tx := database.DB.Preload("Consultation").Find(&datatransactions)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-
-	return dataTransactions, nil
+	return datatransactions, nil
 }
 
 func GetTransactionByID(id uuid.UUID) (model.Transaction, error) {
-	var dataTransaction model.Transaction
+	var datatransaction model.Transaction
 
-	tx := database.DB.Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").First(&dataTransaction, id)
+	tx := database.DB.Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").First(&datatransaction, id)
 	if tx.Error != nil {
 		return model.Transaction{}, tx.Error
 	}
-	return dataTransaction, nil
+	return datatransaction, nil
 }
 
 func InsertTransaction(data model.Transaction) (model.Transaction, error) {
@@ -42,27 +40,27 @@ func InsertTransaction(data model.Transaction) (model.Transaction, error) {
 }
 
 func GenerateNextInvoice() (string, time.Time, error) {
-	now := time.Now()
-	year, month, day := now.Year(), now.Month(), now.Day()
+    now := time.Now()
+    year, month, day := now.Year(), now.Month(), now.Day()
 
-	formattedInvoice := fmt.Sprintf("INV/%d/%02d/%02d/", year, month, day)
+    formattedInvoice := fmt.Sprintf("INV/%d/%02d/%02d/", year, month, day)
 
-	var lastInvoice model.Transaction
-	if err := database.DB.Where("invoice LIKE ?", formattedInvoice+"%").Order("invoice DESC").First(&lastInvoice).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			formattedInvoice += "0001"
-		} else {
-			return "", now, err
-		}
-	} else {
-		var sequence int
-		_, err := fmt.Sscanf(lastInvoice.Invoice, formattedInvoice+"%04d", &sequence)
-		if err != nil {
-			return "", now, err
-		}
+    var lastInvoice model.Transaction
+    if err := database.DB.Where("invoice LIKE ?", formattedInvoice+"%").Order("invoice DESC").First(&lastInvoice).Error; err != nil {
+        if err == gorm.ErrRecordNotFound {
+            formattedInvoice += "0001"
+        } else {
+            return "", now, err
+        }
+    } else {
+        var sequence int
+        _, err := fmt.Sscanf(lastInvoice.Invoice, formattedInvoice+"%04d", &sequence)
+        if err != nil {
+            return "", now, err
+        }
 
-		formattedInvoice += fmt.Sprintf("%04d", sequence+1)
-	}
+        formattedInvoice += fmt.Sprintf("%04d", sequence+1)
+    }
 
-	return formattedInvoice, now, nil
+    return formattedInvoice, now, nil
 }
