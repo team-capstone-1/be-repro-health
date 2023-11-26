@@ -26,7 +26,7 @@ type Transaction struct {
 	Total          float64           `gorm:"type:decimal(15,2)"`
 	Status         TransactionStatus `gorm:"type:ENUM('processed', 'done', 'cancelled')"`
 	PaymentStatus  TransactionStatus `gorm:"type:ENUM('processed', 'done', 'cancelled')"`
-	Refunds        Refunds           `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Refund         Refund            `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Payment        Payment           `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Consultation   Consultation      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

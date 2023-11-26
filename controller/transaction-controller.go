@@ -177,3 +177,64 @@ func RescheduleController(c echo.Context) error {
 		"response":    transactionResponse,
 	})
 }
+
+func CreateRefundController(c echo.Context) error {
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	paymentExist := repository.CheckPayment(uuid)
+	if !paymentExist{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed create refund",
+			"response": errors.New("This transaction doesn't have any payment yet").Error(),
+		})
+	}
+
+	refundExist := repository.CheckRefund(uuid)
+	if refundExist{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed create refund",
+			"response": errors.New("Refund Already Exist").Error(),
+		})
+	}
+
+	refund := dto.RefundRequest{}
+	errBind := c.Bind(&refund)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	_, err = repository.GetTransactionByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed create refund",
+			"reponse":   err.Error(),
+		})
+	}
+
+	refundData := dto.ConvertToRefundModel(refund)
+	refundData.TransactionID = uuid
+	
+	responseData, err := repository.InsertRefund(refundData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed create refund",
+			"response":  err.Error(),
+		})
+	}
+
+	refundResponse := dto.ConvertToRefundResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message": "success create new refund",
+		"response":    refundResponse,
+	})
+}

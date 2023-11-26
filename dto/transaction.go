@@ -28,7 +28,7 @@ type TransactionResponse struct {
 	Total          float64              `json:"total"`
 	Status         string               `json:"status"`
 	PaymentStatus  string               `json:"payment_status"`
-	Refunds        float64              `json:"refunds"`
+	Refund         RefundResponse       `json:"refund"`
 	Payment        PaymentResponse      `json:"payment"`
 }
 
@@ -56,6 +56,7 @@ func ConvertToTransactionResponse(transaction model.Transaction) TransactionResp
 		Total:          transaction.Total,
 		Status:         string(transaction.Status),
 		PaymentStatus:  string(transaction.PaymentStatus),
+		Refund:        	ConvertToRefundResponse(transaction.Refund),
 		Payment:        ConvertToPaymentResponse(transaction.Payment),
 	}
 }
