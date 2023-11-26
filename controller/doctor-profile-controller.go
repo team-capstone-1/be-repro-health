@@ -54,7 +54,7 @@ func GetDoctorWorkHistoriesController(c echo.Context) error {
 	}
 
 	if len(responseData) == 0 {
-		return c.JSON(http.StatusNotFound, map[string]interface{}{
+		return c.JSON(http.StatusNotFound, map[string]any{
 			"message":  "no doctor work histories found",
 			"response": nil,
 		})
@@ -90,7 +90,7 @@ func GetDoctorEducationController(c echo.Context) error {
 	}
 
 	if len(responseData) == 0 {
-		return c.JSON(http.StatusNotFound, map[string]interface{}{
+		return c.JSON(http.StatusNotFound, map[string]any{
 			"message":  "no doctor education found",
 			"response": nil,
 		})
@@ -126,7 +126,7 @@ func GetDoctorCertificationController(c echo.Context) error {
 	}
 
 	if len(responseData) == 0 {
-		return c.JSON(http.StatusNotFound, map[string]interface{}{
+		return c.JSON(http.StatusNotFound, map[string]any{
 			"message":  "no doctor certifications found",
 			"response": nil,
 		})

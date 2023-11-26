@@ -12,9 +12,9 @@ import (
 
 func GetDoctorAllForumsController(c echo.Context) error {
 	title := c.FormValue("title")
-	patient_id := c.FormValue("patient_id")
+	patientID := c.FormValue("patient_id")
 
-	responseData, err := repository.DoctorGetAllForums(title, patient_id)
+	responseData, err := repository.DoctorGetAllForums(title, patientID, uuid.Nil)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get forums",
@@ -28,7 +28,7 @@ func GetDoctorAllForumsController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success get forums",
+		"message":  "success get all forums",
 		"response": forumResponse,
 	})
 }
@@ -42,8 +42,8 @@ func CreateDoctorReplyForum(c echo.Context) error {
 		})
 	}
 
-	forum := dto.DoctorForumReplyRequest{DoctorID: user}
-	errBind := c.Bind(&forum)
+	forumReply := dto.DoctorForumReplyRequest{DoctorID: user}
+	errBind := c.Bind(&forumReply)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error bind data",
@@ -51,13 +51,36 @@ func CreateDoctorReplyForum(c echo.Context) error {
 		})
 	}
 
-	forumData := dto.ConvertToDoctorReplyModel(forum)
+	forum, err := repository.GetForumByID(forumReply.ForumsID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]any{
+			"message":  "error get forum id",
+			"response": err.Error(),
+		})
+	}
+
+	if forum.Status {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed create forum reply because reply already exist",
+			"response": nil,
+		})
+	}
+
+	forumData := dto.ConvertToDoctorForumReplyModel(forumReply)
 
 	responseData, err := repository.CreateDoctorReplyForum(forumData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed create forum reply",
 			"response": err.Error(),
+		})
+	}
+
+	errUpdateStatus := repository.UpdateForumStatus(forum, true)
+	if errUpdateStatus != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "failed update status forum",
+			"response": errUpdateStatus.Error(),
 		})
 	}
 
@@ -97,7 +120,7 @@ func UpdateDoctorReplyForum(c echo.Context) error {
 
 	forumReply := dto.ConvertToDoctorUpdateForumReplyModel(updateData)
 
-	responseData, err := repository.UpdateDoctorReplyForum(uuid, forumReply)
+	_, err = repository.UpdateDoctorReplyForum(uuid, forumReply)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message":  "failed update forum reply",
@@ -106,7 +129,7 @@ func UpdateDoctorReplyForum(c echo.Context) error {
 	}
 
 	//recall the GetById repo because if I return it from update, it only fill the updated field and leaves everything else null or 0
-	responseData, err = repository.GetDoctorForumReplyByID(uuid)
+	responseData, err := repository.GetDoctorForumReplyByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]any{
 			"message": "failed get forum reply",
@@ -177,23 +200,46 @@ func DeleteDoctorForumReplyController(c echo.Context) error {
 
 	checkForum, err := repository.GetDoctorForumReplyByID(uuid)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed delete forum reply",
+		return c.JSON(http.StatusNotFound, map[string]any{
+			"message": "failed delete forum reply because doctor forum reply not found",
 			"reponse": err.Error(),
 		})
 	}
 
 	checkDoctor, err := repository.GetDoctorByID(checkForum.DoctorID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed delete forum",
+		return c.JSON(http.StatusNotFound, map[string]any{
+			"message": "failed delete forum reply because doctor not found",
 			"reponse": err.Error(),
 		})
 	}
 	if checkDoctor.ID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
-			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
+			"reponse": "Permission Denied: You are not allowed to delete other forum reply.",
+		})
+	}
+
+	forum, err := repository.GetForumByID(checkForum.ForumsID)
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]any{
+			"message":  "error get forum id",
+			"response": err.Error(),
+		})
+	}
+
+	if !forum.Status {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed create forum reply because reply already deleted",
+			"response": nil,
+		})
+	}
+
+	errUpdateStatus := repository.UpdateForumStatus(forum, false)
+	if errUpdateStatus != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "failed update status forum",
+			"response": errUpdateStatus.Error(),
 		})
 	}
 
