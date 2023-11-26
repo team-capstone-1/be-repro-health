@@ -4,6 +4,7 @@ import (
 	"capstone-project/database"
 	"capstone-project/middleware"
 	"capstone-project/model"
+	"capstone-project/constant"
 	"errors"
 
 	"github.com/google/uuid"
@@ -26,7 +27,7 @@ func CheckDoctor(email string, password string) (model.Doctor, string, error) {
 	var token string
 	if tx.RowsAffected > 0 {
 		var errToken error
-		token, errToken = middleware.CreateToken(data.ID, "doctor", data.Name)
+		token, errToken = middleware.CreateToken(data.ID, constant.ROLE_DOCTOR, data.Name)
 		if errToken != nil {
 			return model.Doctor{}, "", errToken
 		}

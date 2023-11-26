@@ -15,6 +15,7 @@ type Forum struct {
 	Content    string       `gorm:"size:255"`
 	Anonymous  bool         `gorm:"default:false"`
 	Date       time.Time    `gorm:"type:datetime"`
+	View       int          `gorm:"type:int;default:0"`
 	Status     bool         `json:"status" gorm:"default:false"`
 	ForumReply []ForumReply `gorm:"foreignKey:ForumsID" json:"forum_reply"`
 }

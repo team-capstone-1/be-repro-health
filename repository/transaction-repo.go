@@ -21,10 +21,24 @@ func GetAllTransactions() ([]model.Transaction, error) {
 	return datatransactions, nil
 }
 
+func GetPatientTransactions(id uuid.UUID) ([]model.Transaction, error) {
+	var datatransactions []model.Transaction
+
+	tx := database.DB.
+		Preload("Refund").Preload("Payment").Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.patient_id = ?", id).
+		Find(&datatransactions)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return datatransactions, nil
+}
+
 func GetTransactionByID(id uuid.UUID) (model.Transaction, error) {
 	var datatransaction model.Transaction
 
-	tx := database.DB.Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").First(&datatransaction, id)
+	tx := database.DB.Preload("Refund").Preload("Payment").Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").First(&datatransaction, id)
 	if tx.Error != nil {
 		return model.Transaction{}, tx.Error
 	}
@@ -63,4 +77,26 @@ func GenerateNextInvoice() (string, time.Time, error) {
     }
 
     return formattedInvoice, now, nil
+}
+
+func UpdateTransactionStatus(id uuid.UUID, status string) error {
+	var datatransaction model.Transaction
+    tx := database.DB.Model(&datatransaction).Where("id = ?", id).Update("status", status)
+
+    if tx.Error != nil {
+        return tx.Error
+    }
+
+    return nil
+}
+
+func UpdateTransactionPaymentStatus(id uuid.UUID, status string) error {
+	var datatransaction model.Transaction
+    tx := database.DB.Model(&datatransaction).Where("id = ?", id).Update("payment_status", status)
+
+    if tx.Error != nil {
+        return tx.Error
+    }
+
+    return nil
 }

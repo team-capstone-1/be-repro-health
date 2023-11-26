@@ -8,7 +8,13 @@ import (
 )
 
 type ConsultationRequest struct {
+	DoctorID  uuid.UUID `json:"doctor_id" form:"doctor_id"`
 	PatientID uuid.UUID `json:"patient_id" form:"patient_id"`
+	Date      time.Time `json:"date" form:"date"`
+	Session   string    `json:"session" form:"session"`
+}
+
+type ConsultationRescheduleRequest struct {
 	Date      time.Time `json:"date" form:"date"`
 	Session   string    `json:"session" form:"session"`
 }
@@ -27,7 +33,16 @@ type ConsultationResponse struct {
 func ConvertToConsultationModel(consultation ConsultationRequest) model.Consultation {
 	return model.Consultation{
 		ID:        uuid.New(),
+		DoctorID:  consultation.DoctorID,
 		PatientID: consultation.PatientID,
+		Date:      consultation.Date,
+		Session:   consultation.Session,
+	}
+}
+
+func ConvertToConsultationRescheduleModel(consultation ConsultationRescheduleRequest, id uuid.UUID) model.Consultation {
+	return model.Consultation{
+		ID:        id,
 		Date:      consultation.Date,
 		Session:   consultation.Session,
 	}

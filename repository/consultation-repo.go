@@ -36,3 +36,25 @@ func GetConsultationByID(id uuid.UUID) (model.Consultation, error) {
 	}
 	return dataconsultation, nil
 }
+
+func RescheduleConsultation(id uuid.UUID, updateData model.Consultation) (model.Consultation, error) {
+	tx := database.DB.Model(&updateData).Where("id = ?", id).Updates(updateData)
+	if tx.Error != nil {
+		return model.Consultation{}, tx.Error
+	}
+	return updateData, nil
+}
+
+func GetConsultationByTransactionID(transactionID uuid.UUID) (model.Consultation, error) {
+    var dataconsultation model.Consultation
+
+    tx := database.DB.Joins("JOIN transactions ON consultations.id = transactions.consultation_id").
+        Where("transactions.id = ?", transactionID).
+        First(&dataconsultation)
+
+    if tx.Error != nil {
+        return model.Consultation{}, tx.Error
+    }
+
+    return dataconsultation, nil
+}
