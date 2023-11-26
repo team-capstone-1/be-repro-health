@@ -74,8 +74,8 @@ func GetDoctorWorkHistoriesController(c echo.Context) error {
 }
 
 func CreateDoctorWorkHistoryController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
@@ -92,12 +92,12 @@ func CreateDoctorWorkHistoryController(c echo.Context) error {
 	}
 
 	workData := dto.ConvertToDoctorWorkHistoryModel(workHistory)
-	workData.DoctorProfileID = doctor
+	workData.DoctorProfileID = user
 
 	responseData, err := repository.InsertDoctorWorkHistory(workData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed create article",
+			"message":  "failed create new work history",
 			"response": err.Error(),
 		})
 	}
@@ -105,14 +105,14 @@ func CreateDoctorWorkHistoryController(c echo.Context) error {
 	workResponse := dto.ConvertToDoctorWorkHistoriesResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success create new article",
+		"message":  "success create new work history",
 		"response": workResponse,
 	})
 }
 
 func UpdateDoctorWorkHistoryController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Doctor is not valid.",
@@ -135,7 +135,7 @@ func UpdateDoctorWorkHistoryController(c echo.Context) error {
 		})
 	}
 
-	if checkWork.DoctorProfileID != doctor {
+	if checkWork.DoctorProfileID != user {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Doctor is not valid.",
@@ -179,8 +179,8 @@ func UpdateDoctorWorkHistoryController(c echo.Context) error {
 }
 
 func DeleteDoctorWorkHistoryController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Doctor is not valid.",
@@ -211,7 +211,7 @@ func DeleteDoctorWorkHistoryController(c echo.Context) error {
 		})
 	}
 
-	if checkDoctorProfileID.ID != doctor {
+	if checkDoctorProfileID.ID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: You are not allowed to access other user doctor profile data.",
@@ -271,8 +271,8 @@ func GetDoctorEducationController(c echo.Context) error {
 }
 
 func CreateDoctorEducationController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "user is not valid.",
@@ -289,7 +289,7 @@ func CreateDoctorEducationController(c echo.Context) error {
 	}
 
 	educationData := dto.ConvertToDoctorEducationModel(education)
-	educationData.DoctorProfileID = doctor
+	educationData.DoctorProfileID = user
 
 	responseData, err := repository.InsertDoctorEducation(educationData)
 	if err != nil {
@@ -308,8 +308,8 @@ func CreateDoctorEducationController(c echo.Context) error {
 }
 
 func UpdateDoctorEducationController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "user is not valid.",
@@ -332,7 +332,7 @@ func UpdateDoctorEducationController(c echo.Context) error {
 		})
 	}
 
-	if checkEducation.DoctorProfileID != doctor {
+	if checkEducation.DoctorProfileID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: You are not allowed to access other user doctor profile data.",
@@ -368,8 +368,8 @@ func UpdateDoctorEducationController(c echo.Context) error {
 }
 
 func DeleteDoctorEducationController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Doctor is not valid.",
@@ -400,7 +400,7 @@ func DeleteDoctorEducationController(c echo.Context) error {
 		})
 	}
 
-	if checkDoctorProfileID.ID != doctor {
+	if checkDoctorProfileID.ID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: You are not allowed to access other user doctor profile data.",
@@ -460,8 +460,8 @@ func GetDoctorCertificationController(c echo.Context) error {
 }
 
 func CreateDoctorCertificationController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "user is not valid.",
@@ -478,7 +478,7 @@ func CreateDoctorCertificationController(c echo.Context) error {
 	}
 
 	certificationData := dto.ConvertToDoctorCertificationModel(certification)
-	certificationData.DoctorProfileID = doctor
+	certificationData.DoctorProfileID = user
 
 	responseData, err := repository.InsertDoctorCertification(certificationData)
 	if err != nil {
@@ -497,8 +497,8 @@ func CreateDoctorCertificationController(c echo.Context) error {
 }
 
 func UpdateDoctorCertificationController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "user is not valid.",
@@ -521,7 +521,7 @@ func UpdateDoctorCertificationController(c echo.Context) error {
 		})
 	}
 
-	if checkCertification.DoctorProfileID != doctor {
+	if checkCertification.DoctorProfileID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: You are not allowed to access other user doctor profile data.",
@@ -557,8 +557,8 @@ func UpdateDoctorCertificationController(c echo.Context) error {
 }
 
 func DeleteDoctorCertificationController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "user is not valid.",
@@ -581,7 +581,7 @@ func DeleteDoctorCertificationController(c echo.Context) error {
 		})
 	}
 
-	if checkCertification.DoctorProfileID != doctor {
+	if checkCertification.DoctorProfileID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: You are not allowed to access other user doctor profile data.",
