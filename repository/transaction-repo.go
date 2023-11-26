@@ -78,3 +78,25 @@ func GenerateNextInvoice() (string, time.Time, error) {
 
     return formattedInvoice, now, nil
 }
+
+func UpdateTransactionStatus(id uuid.UUID, status string) error {
+	var datatransaction model.Transaction
+    tx := database.DB.Model(&datatransaction).Where("id = ?", id).Update("status", status)
+
+    if tx.Error != nil {
+        return tx.Error
+    }
+
+    return nil
+}
+
+func UpdateTransactionPaymentStatus(id uuid.UUID, status string) error {
+	var datatransaction model.Transaction
+    tx := database.DB.Model(&datatransaction).Where("id = ?", id).Update("payment_status", status)
+
+    if tx.Error != nil {
+        return tx.Error
+    }
+
+    return nil
+}

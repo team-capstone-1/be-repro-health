@@ -41,7 +41,7 @@ func ConvertToTransactionModel(transaction TransactionRequest) model.Transaction
 		AdminPrice:     transaction.AdminPrice,
 		Total:          transaction.Total,
 		Status:         model.TransactionStatus(transaction.Status),
-		PaymentStatus:  model.TransactionStatus(transaction.PaymentStatus),
+		PaymentStatus:  transaction.PaymentStatus,
 	}
 }
 

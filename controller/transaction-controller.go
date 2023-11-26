@@ -178,7 +178,7 @@ func RescheduleController(c echo.Context) error {
 	})
 }
 
-func CreateRefundController(c echo.Context) error {
+func CancelTransactionController(c echo.Context) error {
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -187,32 +187,7 @@ func CreateRefundController(c echo.Context) error {
 		})
 	}
 
-	paymentExist := repository.CheckPayment(uuid)
-	if !paymentExist{
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create refund",
-			"response": errors.New("This transaction doesn't have any payment yet").Error(),
-		})
-	}
-
-	refundExist := repository.CheckRefund(uuid)
-	if refundExist{
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create refund",
-			"response": errors.New("Refund Already Exist").Error(),
-		})
-	}
-
-	refund := dto.RefundRequest{}
-	errBind := c.Bind(&refund)
-	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
-			"response": errBind.Error(),
-		})
-	}
-
-	_, err = repository.GetTransactionByID(uuid)
+	transaction, err := repository.GetTransactionByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed create refund",
@@ -220,21 +195,102 @@ func CreateRefundController(c echo.Context) error {
 		})
 	}
 
-	refundData := dto.ConvertToRefundModel(refund)
-	refundData.TransactionID = uuid
+	if transaction.Payment.Method == "clinic_payment"{
+		err := repository.UpdateTransactionStatus(uuid, "cancelled")
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message": "failed cancel transaction",
+				"response":  err.Error(),
+			})
+		}
+
+		transaction, err := repository.GetTransactionByID(uuid)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message": "failed cancel transaction",
+				"reponse":   err.Error(),
+			})
+		}
+
+		return c.JSON(http.StatusOK, map[string]any{
+			"message": "success cancel appointment",
+			"response":    transaction,
+		})
+	}else{
+		paymentExist := repository.CheckPayment(uuid)
+		if !paymentExist{
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message": "failed create refund",
+				"response": errors.New("This transaction doesn't have any payment yet").Error(),
+			})
+		}
 	
-	responseData, err := repository.InsertRefund(refundData)
+		refundExist := repository.CheckRefund(uuid)
+		if refundExist{
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message": "failed create refund",
+				"response": errors.New("Refund Already Exist").Error(),
+			})
+		}
+	
+		refund := dto.RefundRequest{}
+		errBind := c.Bind(&refund)
+		if errBind != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message": "error bind data",
+				"response": errBind.Error(),
+			})
+		}
+	
+		refundData := dto.ConvertToRefundModel(refund)
+		refundData.TransactionID = uuid
+		
+		responseData, err := repository.InsertRefund(refundData)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message": "failed create refund",
+				"response":  err.Error(),
+			})
+		}
+
+		err = repository.UpdateTransactionPaymentStatus(uuid, "refund")
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message": "failed create refund",
+				"response":  err.Error(),
+			})
+		}
+	
+		refundResponse := dto.ConvertToRefundResponse(responseData)
+	
+		return c.JSON(http.StatusOK, map[string]any{
+			"message": "success create new refund",
+			"response":    refundResponse,
+		})
+	}
+}
+
+func ValidateRefund(c echo.Context) error {
+	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create refund",
-			"response":  err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err := repository.UpdateRefundStatus(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed update refund",
+			"reponse": err.Error(),
 		})
 	}
 
 	refundResponse := dto.ConvertToRefundResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success create new refund",
-		"response":    refundResponse,
+		"message":  "success update refund",
+		"response": refundResponse,
 	})
 }

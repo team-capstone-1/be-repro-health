@@ -24,3 +24,24 @@ func CheckRefund(id uuid.UUID) bool {
 
 	return true
 }
+
+func UpdateRefundStatus(id uuid.UUID) (model.Refund, error) {
+	var datarefund model.Refund
+    tx := database.DB.Model(&model.Refund{}).Where("id = ?", id).Update("status", "success")
+
+    if tx.Error != nil {
+        return model.Refund{}, tx.Error
+    }
+
+	tx = database.DB.First(&datarefund, id)
+	if tx.Error != nil {
+		return model.Refund{}, tx.Error
+	}
+
+	tx = database.DB.Model(&model.Transaction{}).Where("id = ?", datarefund.TransactionID).Update("status", "cancelled")
+	if tx.Error != nil {
+		return model.Refund{}, tx.Error
+	}
+
+    return datarefund, nil
+}
