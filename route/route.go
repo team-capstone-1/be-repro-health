@@ -48,6 +48,9 @@ func New() *echo.Echo {
 	e.GET("/forums", controller.GetForumsController)
 	r.POST("/forums", controller.CreateForumController)
 	r.DELETE("/forums/:id", controller.DeleteForumController)
+
+	// transaction
+	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole("user"))
 	// davin
 
 	// admin route
@@ -61,25 +64,40 @@ func New() *echo.Echo {
 	doctor := e.Group("/doctors")
 	doctor.Use(middleware.JWT([]byte(config.JWT_KEY)))
 	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole("doctor"))
+	// doctor work history
 	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistoriesController, m.CheckRole("doctor"))
+	doctor.POST("/profile/work-history", controller.CreateDoctorWorkHistoryController, m.CheckRole("doctor"))
+	doctor.PUT("/profile/work-history/:id", controller.UpdateDoctorWorkHistoryController, m.CheckRole("doctor"))
+	doctor.DELETE("/profile/work-history/:id", controller.DeleteDoctorWorkHistoryController, m.CheckRole("doctor"))
+	// doctor education
 	doctor.GET("/profile/educations", controller.GetDoctorEducationController, m.CheckRole("doctor"))
+	doctor.POST("/profile/education", controller.CreateDoctorEducationController, m.CheckRole("doctor"))
+	doctor.PUT("/profile/education/:id", controller.UpdateDoctorEducationController, m.CheckRole("doctor"))
+	doctor.DELETE("/profile/education/:id", controller.DeleteDoctorEducationController, m.CheckRole("doctor"))
+	// doctor certification
 	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole("doctor"))
 	doctor.GET("/forums", controller.GetDoctorAllForumsController, m.CheckRole("doctor"))
 	doctor.POST("/forum-replies", controller.CreateDoctorReplyForum, m.CheckRole("doctor"))
 	doctor.PUT("/forum-replies/:id", controller.UpdateDoctorReplyForum, m.CheckRole("doctor"))
 	doctor.GET("/forum-replies/:id", controller.GetDoctorForumReplyID, m.CheckRole("doctor"))
 	doctor.DELETE("/forum-replies/:id", controller.DeleteDoctorForumReplyController, m.CheckRole("doctor"))
+	doctor.POST("/profile/certification", controller.CreateDoctorCertificationController, m.CheckRole("doctor"))
+	doctor.PUT("/profile/certification/:id", controller.UpdateDoctorCertificationController, m.CheckRole("doctor"))
+	doctor.DELETE("/profile/certification/:id", controller.DeleteDoctorCertificationController, m.CheckRole("doctor"))
+
+	// doctor route
+	e.POST("/doctors/login", controller.DoctorLoginController)
 
 	// doctor article route
-	e.GET("/articles", controller.GetAllArticleDoctorsController)
-	r.POST("/articles", controller.CreateDoctorArticleController)
-	r.DELETE("/articles/:id", controller.DeleteDoctorArticleController)
+	doctor.GET("/articles", controller.GetAllArticleDoctorsController, m.CheckRole("doctor"))
+	doctor.POST("/articles", controller.CreateDoctorArticleController, m.CheckRole("doctor"))
+	doctor.DELETE("/articles/:id", controller.DeleteDoctorArticleController, m.CheckRole("doctor"))
 
 	// doctor dashboard
-	e.GET("/consultations-dashboard", controller.GetConsultationSchedulesForDoctorDashboardController)
-	e.GET("/patients-dashboard", controller.GetPatientsForDoctorDashboardController)
-	e.GET("/transactions-dashboard", controller.GetTransactionsForDoctorDashboardController)
-	e.GET("/articles-dashboard", controller.GetArticleForDoctorDashboardController)
+	doctor.GET("/consultations-dashboard", controller.GetConsultationSchedulesForDoctorDashboardController, m.CheckRole("doctor"))
+	doctor.GET("/patients-dashboard", controller.GetPatientsForDoctorDashboardController)
+	doctor.GET("/transactions-dashboard", controller.GetTransactionsForDoctorDashboardController)
+	doctor.GET("/articles-dashboard", controller.GetArticleForDoctorDashboardController)
 
 	return e
 }

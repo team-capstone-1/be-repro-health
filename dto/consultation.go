@@ -1,16 +1,16 @@
 package dto
 
 import (
-	"time"
-	"github.com/google/uuid"
 	"capstone-project/model"
+	"time"
+
+	"github.com/google/uuid"
 )
 
 type ConsultationRequest struct {
-	DoctorID    uuid.UUID `json:"doctor_id" form:"doctor_id"`
-	PatientID   uuid.UUID `json:"patient_id" form:"patient_id"`
-	Date        time.Time `json:"date" form:"date"`
-	Session     string    `json:"session" form:"session"`
+	PatientID uuid.UUID `json:"patient_id" form:"patient_id"`
+	Date      time.Time `json:"date" form:"date"`
+	Session   string    `json:"session" form:"session"`
 }
 
 type ConsultationResponse struct {
@@ -20,25 +20,28 @@ type ConsultationResponse struct {
 	ClinicID    uuid.UUID `json:"clinic_id"`
 	Date        time.Time `json:"date"`
 	Session     string    `json:"session"`
+	Clinic      ClinicResponse    `json:"clinic"`
+	Doctor      DoctorResponse    `json:"doctor"`
 }
 
 func ConvertToConsultationModel(consultation ConsultationRequest) model.Consultation {
 	return model.Consultation{
-		ID: uuid.New(),
-		DoctorID: consultation.DoctorID,
+		ID:        uuid.New(),
 		PatientID: consultation.PatientID,
-		Date: consultation.Date,
-		Session: consultation.Session,
+		Date:      consultation.Date,
+		Session:   consultation.Session,
 	}
 }
 
 func ConvertToConsultationResponse(consultation model.Consultation) ConsultationResponse {
 	return ConsultationResponse{
-		ID:    consultation.ID,
-		DoctorID: consultation.DoctorID,
+		ID:        consultation.ID,
+		DoctorID:  consultation.DoctorID,
 		PatientID: consultation.PatientID,
 		ClinicID: consultation.ClinicID,
 		Date: consultation.Date,
 		Session: consultation.Session,
+		Clinic: ConvertToClinicResponse(consultation.Clinic),
+		Doctor: ConvertToDoctorResponse(consultation.Doctor),
 	}
 }

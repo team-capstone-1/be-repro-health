@@ -27,6 +27,7 @@ func LoginUserController(c echo.Context) error {
 	}
 	response := map[string]any{
 		"user_id": data.ID,
+		"name": data.Name,
 		"token":   token,
 		"email":   data.Email,
 	}

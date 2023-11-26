@@ -7,6 +7,30 @@ import (
 	"github.com/google/uuid"
 )
 
+type DoctorWorkHistoryRequest struct {
+	StartingDate time.Time `json:"start_date"`
+	EndingDate   time.Time `json:"end_date"`
+	Job          string    `json:"job"`
+	Workplace    string    `json:"workplace"`
+	Position     string    `json:"position"`
+}
+
+type DoctorEducationRequest struct {
+	StartingDate     time.Time `json:"start_date"`
+	EndingDate       time.Time `json:"end_date"`
+	EducationProgram string    `json:"education_program"`
+	University       string    `json:"university"`
+}
+
+type DoctorCertificationRequest struct {
+	StartingDate    time.Time `json:"start_date"`
+	EndingDate      time.Time `json:"end_date"`
+	Description     string    `json:"description"`
+	CertificateType string    `json:"certificate_type"`
+	FileSize        string    `json:"file_size"`
+	Details         string    `json:"details"`
+}
+
 type DoctorProfileResponse struct {
 	ID           uuid.UUID                       `json:"id"`
 	Name         string                          `json:"name"`
@@ -74,6 +98,39 @@ func ConvertToDoctorProfileResponse(doctor model.Doctor) DoctorProfileResponse {
 		ClinicID:     doctor.ClinicID,
 		Specialist:   DoctorProfileSpecialistResponse{Name: doctor.Specialist.Name, Image: doctor.Specialist.Image},
 		Clinic:       DoctorProfileClinicResponse{Name: doctor.Clinic.Name, City: doctor.Clinic.City, Location: doctor.Clinic.Location, Profile: doctor.Clinic.Location},
+	}
+}
+
+func ConvertToDoctorWorkHistoryModel(workHistory DoctorWorkHistoryRequest) model.DoctorWorkHistory {
+	return model.DoctorWorkHistory{
+		ID:              uuid.New(),
+		StartingDate:    workHistory.StartingDate,
+		EndingDate:      workHistory.EndingDate,
+		Job:             workHistory.Job,
+		Workplace:       workHistory.Workplace,
+		Position:        workHistory.Position,
+	}
+}
+
+func ConvertToDoctorEducationModel(education DoctorEducationRequest) model.DoctorEducation {
+	return model.DoctorEducation{
+		ID:               uuid.New(),
+		StartingDate:     education.StartingDate,
+		EndingDate:       education.EndingDate,
+		EducationProgram: education.EducationProgram,
+		University:       education.University,
+	}
+}
+
+func ConvertToDoctorCertificationModel(certification DoctorCertificationRequest) model.DoctorCertification {
+	return model.DoctorCertification{
+		ID:              uuid.New(),
+		StartingDate:    certification.StartingDate,
+		EndingDate:      certification.EndingDate,
+		Description:     certification.Description,
+		CertificateType: certification.CertificateType,
+		FileSize:        certification.FileSize,
+		Details:         certification.Details,
 	}
 }
 

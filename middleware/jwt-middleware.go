@@ -11,11 +11,12 @@ import (
 	"capstone-project/config"
 )
 
-func CreateToken(userId uuid.UUID, role string) (string, error) {
+func CreateToken(userId uuid.UUID, role, name string) (string, error) {
 	claims := jwt.MapClaims{}
 	// token kedua (payload)
 	claims["authorized"] = true
 	claims["user_id"] = userId
+	claims["name"] = name
 	claims["role"] = role
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
 	// token pertama (header)
@@ -59,23 +60,4 @@ func ExtractTokenUserId(e echo.Context) uuid.UUID {
 		return uuid
 	}
 	return uuid.Nil
-}
-
-func ExtractTokenDoctor(c echo.Context) (uuid.UUID, error) {
-	user := c.Get("user").(*jwt.Token)
-	if !user.Valid {
-		return uuid.Nil, echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
-	}
-	claims := user.Claims.(jwt.MapClaims)
-	if claims["role"] != "doctor" {
-		return uuid.Nil, echo.NewHTTPError(http.StatusUnauthorized, "Unauthorized")
-	}
-
-	userId := claims["user_id"].(string)
-	uid, err := uuid.Parse(userId)
-	if err != nil {
-		return uuid.Nil, echo.NewHTTPError(http.StatusInternalServerError, "Internal Server Error")
-	}
-
-	return uid, nil
 }

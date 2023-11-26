@@ -8,7 +8,6 @@ import (
 )
 
 type DoctorArticleRequest struct {
-	DoctorID uuid.UUID `json:"doctor_id"`
 	Title    string    `json:"title"`
 	Content  string    `json:"content"`
 	Image    string    `json:"image"`
@@ -26,7 +25,6 @@ type DoctorArticleResponse struct {
 func ConvertToDoctorArticleModel(doctor DoctorArticleRequest) model.Article {
 	return model.Article{
 		ID:       uuid.New(),
-		DoctorID: doctor.DoctorID,
 		Title:    doctor.Title,
 		Content:  doctor.Content,
 		Image:    doctor.Image,
