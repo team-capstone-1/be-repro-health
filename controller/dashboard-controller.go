@@ -75,7 +75,7 @@ func GetTransactionsForDoctorDashboardController(c echo.Context) error {
 		})
 	}
 
-	responseData, err := repository.GetDoctorTransactions(doctor)
+	responseData, err := repository.GetAllTransactions(doctor)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get transaction data",
