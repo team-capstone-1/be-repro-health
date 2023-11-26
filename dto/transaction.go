@@ -21,6 +21,7 @@ type TransactionRequest struct {
 type TransactionResponse struct {
 	ID             uuid.UUID `json:"id"`
 	ConsultationID uuid.UUID `json:"consultation_id"`
+	Consultation   ConsultationResponse `json:"consultation"`
 	Invoice        string    `json:"invoice"`
 	Price          float64   `json:"price"`
 	AdminPrice     float64   `json:"admin_price"`
@@ -41,6 +42,20 @@ func ConvertToTransactionModel(transaction TransactionRequest) model.Transaction
 		Total:          transaction.Total,
 		Status:         model.TransactionStatus(transaction.Status),
 		PaymentStatus:  model.TransactionStatus(transaction.PaymentStatus),
+	}
+}
+
+func ConvertToTransactionResponse(transaction model.Transaction) TransactionResponse {
+	return TransactionResponse{
+		ID:             transaction.ID,
+		ConsultationID: transaction.ConsultationID,
+		Consultation: 	ConvertToConsultationResponse(transaction.Consultation),
+		Invoice:        transaction.Invoice,
+		Price:          transaction.Price,
+		AdminPrice:     transaction.AdminPrice,
+		Total:          transaction.Total,
+		Status:         string(transaction.Status),
+		PaymentStatus:  string(transaction.PaymentStatus),
 	}
 }
 
