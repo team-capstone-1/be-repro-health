@@ -44,14 +44,12 @@ func GetDoctorWorkHistoryByID(id uuid.UUID) (model.DoctorWorkHistory, error) {
 	return workHistory, nil
 }
 
-func InsertDoctorWorkHistory(doctorID uuid.UUID, data model.DoctorWorkHistory) (model.DoctorWorkHistory, error) {
-    data.DoctorProfileID = doctorID
-    
-    tx := database.DB.Save(&data)
-    if tx.Error != nil {
-        return model.DoctorWorkHistory{}, tx.Error
-    }
-    return data, nil
+func InsertDoctorWorkHistory(data model.DoctorWorkHistory) (model.DoctorWorkHistory, error) {
+	tx := database.DB.Save(&data)
+	if tx.Error != nil {
+		return model.DoctorWorkHistory{}, tx.Error
+	}
+	return data, nil
 }
 
 func DeleteDoctorWorkHistoryByID(id uuid.UUID) error {
@@ -95,16 +93,13 @@ func GetDoctorEducationByID(id uuid.UUID) (model.DoctorEducation, error) {
 	return education, nil
 }
 
-func InsertDoctorEducation(doctorID uuid.UUID, data model.DoctorEducation) (model.DoctorEducation, error) {
-    data.DoctorProfileID = doctorID
-    
-    tx := database.DB.Save(&data)
-    if tx.Error != nil {
-        return model.DoctorEducation{}, tx.Error
-    }
-    return data, nil
+func InsertDoctorEducation(data model.DoctorEducation) (model.DoctorEducation, error) {
+	tx := database.DB.Save(&data)
+	if tx.Error != nil {
+		return model.DoctorEducation{}, tx.Error
+	}
+	return data, nil
 }
-
 
 func UpdateDoctorEducationByID(id uuid.UUID, updateData model.DoctorEducation) (model.DoctorEducation, error) {
 	tx := database.DB.Model(&updateData).Where("id = ?", id).Updates(updateData)
@@ -147,16 +142,13 @@ func GetDoctorCertificationByID(id uuid.UUID) (model.DoctorCertification, error)
 	return certification, nil
 }
 
-func InsertDoctorCertification(doctorID uuid.UUID, data model.DoctorCertification) (model.DoctorCertification, error) {
-    data.DoctorProfileID = doctorID
-    
-    tx := database.DB.Save(&data)
-    if tx.Error != nil {
-        return model.DoctorCertification{}, tx.Error
-    }
-    return data, nil
+func InsertDoctorCertification(data model.DoctorCertification) (model.DoctorCertification, error) {
+	tx := database.DB.Save(&data)
+	if tx.Error != nil {
+		return model.DoctorCertification{}, tx.Error
+	}
+	return data, nil
 }
-
 
 func UpdateDoctorCertificationByID(id uuid.UUID, updateData model.DoctorCertification) (model.DoctorCertification, error) {
 	tx := database.DB.Model(&updateData).Where("id = ?", id).Updates(updateData)
