@@ -116,3 +116,64 @@ func CreatePaymentController(c echo.Context) error {
 		"response":    paymentResponse,
 	})
 }
+
+func RescheduleController(c echo.Context) error {
+	transactionID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "error parse id",
+			"response":   err.Error(),
+		})
+	}
+
+	_, err = repository.GetTransactionByID(transactionID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get transaction",
+			"reponse":   err.Error(),
+		})
+	}
+
+	consultation, err := repository.GetConsultationByTransactionID(transactionID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get consultation",
+			"reponse":   err.Error(),
+		})
+	}
+
+	updateData := dto.ConsultationRescheduleRequest{}
+	errBind := c.Bind(&updateData)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	rescheduleData := dto.ConvertToConsultationRescheduleModel(updateData, consultation.ID)
+
+	_, err = repository.RescheduleConsultation(consultation.ID, rescheduleData)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message": "failed update consultation",
+			"response":   err.Error(),
+		})
+	}
+
+	//recall the GetById repo because if I return it from update, it only fill the updated field and leaves everything else null or 0
+	returnData, err := repository.GetTransactionByID(transactionID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get transaction",
+			"reponse":   err.Error(),
+		})
+	}
+
+	transactionResponse := dto.ConvertToTransactionResponse(returnData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message": "success update consultation",
+		"response":    transactionResponse,
+	})
+}

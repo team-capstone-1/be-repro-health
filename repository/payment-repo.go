@@ -8,12 +8,28 @@ import (
 )
 
 func InsertPayment(data model.Payment) (model.Payment, error) {
-	tx := database.DB.Save(&data)
-	if tx.Error != nil {
-		return model.Payment{}, tx.Error
-	}
-	
-	return data, nil
+    tx := database.DB.Begin()
+
+    if err := tx.Error; err != nil {
+        return model.Payment{}, err
+    }
+
+    if err := tx.Save(&data).Error; err != nil {
+        tx.Rollback()
+        return model.Payment{}, err
+    }
+
+    if err := tx.Model(&model.Transaction{}).Where("id = ?", data.TransactionID).Updates(map[string]interface{}{"payment_status": "done"}).Error; err != nil {
+        tx.Rollback()
+        return model.Payment{}, err
+    }
+
+    if err := tx.Commit().Error; err != nil {
+        tx.Rollback()
+        return model.Payment{}, err
+    }
+
+    return data, nil
 }
 
 func CheckPayment(id uuid.UUID) bool {
