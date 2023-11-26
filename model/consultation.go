@@ -15,6 +15,6 @@ type Consultation struct {
 	ClinicID    uuid.UUID   `gorm:"index" json:"clinic_id"`
 	Date        time.Time   `gorm:"type:date"`
 	Session     string      `gorm:"type:enum('pagi', 'siang', 'malam')"`
-	Clinic      Clinic      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"` // Menambah relasi ke Clinic
-	Transaction Transaction `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Clinic      Clinic      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Doctor      Doctor      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

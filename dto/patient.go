@@ -10,6 +10,7 @@ import (
 
 type PatientRequest struct {
 	Name               string    `json:"name" form:"name"`
+	TelephoneNumber    string    `json:"telephone_number" form:"telephone_number"`
 	ProfileImage       string    `json:"profile_image" form:"profile_image"`
 	DateOfBirth        time.Time `json:"date_of_birth" form:"date_of_birth"`
 	Relation           string    `json:"relation" form:"relation"`
@@ -25,6 +26,7 @@ type PatientResponse struct {
 	ID                 uuid.UUID `json:"id"`
 	UserID             uuid.UUID `json:"user_id"`
 	Name               string    `json:"name"`
+	TelephoneNumber    string    `json:"telephone_number"`
 	ProfileImage       string    `json:"profile_image"`
 	DateOfBirth        time.Time `json:"date_of_birth"`
 	Relation           string    `json:"relation"`
@@ -51,6 +53,7 @@ func ConvertToPatientModel(patient PatientRequest) model.Patient {
 	return model.Patient{
 		ID:                 uuid.New(),
 		Name:               patient.Name,
+		TelephoneNumber:    patient.TelephoneNumber,
 		ProfileImage:       patient.ProfileImage,
 		DateOfBirth:        patient.DateOfBirth,
 		Relation:           patient.Relation,
@@ -68,6 +71,7 @@ func ConvertToPatientResponse(patient model.Patient) PatientResponse {
 		ID:                 patient.ID,
 		UserID:             patient.UserID,
 		Name:               patient.Name,
+		TelephoneNumber:    patient.TelephoneNumber,
 		ProfileImage:       patient.ProfileImage,
 		DateOfBirth:        patient.DateOfBirth,
 		Relation:           patient.Relation,
