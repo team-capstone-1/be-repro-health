@@ -3,12 +3,13 @@ package controller
 import (
 	"net/http"
 
-	"capstone-project/repository"
 	"capstone-project/dto"
 	m "capstone-project/middleware"
+	"capstone-project/repository"
+	"capstone-project/util"
 
-	"github.com/labstack/echo/v4"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 func GetPatientsController(c echo.Context) error {
@@ -19,12 +20,12 @@ func GetPatientsController(c echo.Context) error {
 			"response": "Permission Denied: Permission Denied: User is not valid.",
 		})
 	}
-	
+
 	responseData, err := repository.GetAllPatients(user)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get patients",
-			"response":   err.Error(),
+			"message":  "failed get patients",
+			"response": err.Error(),
 		})
 	}
 
@@ -34,8 +35,8 @@ func GetPatientsController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get patients",
-		"response":   patientResponse,
+		"message":  "success get patients",
+		"response": patientResponse,
 	})
 }
 
@@ -51,8 +52,8 @@ func GetPatientController(c echo.Context) error {
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
@@ -60,11 +61,11 @@ func GetPatientController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
-	if responseData.UserID != user{
+	if responseData.UserID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
 			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
@@ -74,8 +75,8 @@ func GetPatientController(c echo.Context) error {
 	patientResponse := dto.ConvertToPatientResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get patient",
-		"response":    patientResponse,
+		"message":  "success get patient",
+		"response": patientResponse,
 	})
 }
 
@@ -84,7 +85,7 @@ func CreatePatientController(c echo.Context) error {
 	errBind := c.Bind(&patient)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
+			"message":  "error bind data",
 			"response": errBind.Error(),
 		})
 	}
@@ -97,22 +98,73 @@ func CreatePatientController(c echo.Context) error {
 		})
 	}
 
+	profileImage, err := c.FormFile("profile_image")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error upload profile image",
+			"response": err.Error(),
+		})
+	}
+
+	ktpImage, err := c.FormFile("ktp_image")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error upload ktp image",
+			"response": err.Error(),
+		})
+	}
+
+	kartuKeluargaImage, err := c.FormFile("kartu_keluarga_image")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error upload ktp image",
+			"response": err.Error(),
+		})
+	}
+
+	profileURL, err := util.UploadToCloudinary(profileImage)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error upload profile image to Cloudinary",
+			"response": err.Error(),
+		})
+	}
+
+	ktpURL, err := util.UploadToCloudinary(ktpImage)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error upload ktp image to Cloudinary",
+			"response": err.Error(),
+		})
+	}
+
+	kartuKeluargaURL, err := util.UploadToCloudinary(kartuKeluargaImage)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error upload kartu keluarga image to Cloudinary",
+			"response": err.Error(),
+		})
+	}
+
 	patientData := dto.ConvertToPatientModel(patient)
+	patientData.ProfileImage = profileURL
+	patientData.KTPImage = ktpURL
+	patientData.KartuKeluargaImage = kartuKeluargaURL
 	patientData.UserID = user
-	
+
 	responseData, err := repository.InsertPatient(patientData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create patient",
-			"response":  err.Error(),
+			"message":  "failed create patient",
+			"response": err.Error(),
 		})
 	}
 
 	patientResponse := dto.ConvertToPatientResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success create new patient",
-		"response":    patientResponse,
+		"message":  "success create new patient",
+		"response": patientResponse,
 	})
 }
 
@@ -128,8 +180,8 @@ func UpdatePatientController(c echo.Context) error {
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
@@ -137,10 +189,10 @@ func UpdatePatientController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
-	if checkPatient.UserID != user{
+	if checkPatient.UserID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
 			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
@@ -151,7 +203,7 @@ func UpdatePatientController(c echo.Context) error {
 	errBind := c.Bind(&updateData)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
+			"message":  "error bind data",
 			"response": errBind.Error(),
 		})
 	}
@@ -162,8 +214,8 @@ func UpdatePatientController(c echo.Context) error {
 	responseData, err := repository.UpdatePatientByID(uuid, patientData)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
-			"message": "failed update patient",
-			"response":   err.Error(),
+			"message":  "failed update patient",
+			"response": err.Error(),
 		})
 	}
 
@@ -172,15 +224,15 @@ func UpdatePatientController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
 	patientResponse := dto.ConvertToPatientResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success update patient",
-		"response":    patientResponse,
+		"message":  "success update patient",
+		"response": patientResponse,
 	})
 }
 
@@ -192,12 +244,12 @@ func DeletePatientController(c echo.Context) error {
 			"response": "Permission Denied: Permission Denied: User is not valid.",
 		})
 	}
-	
+
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
@@ -205,10 +257,10 @@ func DeletePatientController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed delete patient",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
-	if checkPatient.UserID != user{
+	if checkPatient.UserID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
 			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
@@ -219,12 +271,12 @@ func DeletePatientController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message": "failed delete patient",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success delete patient",
+		"message":  "success delete patient",
 		"response": "success delete patient with id " + uuid.String(),
 	})
 }
