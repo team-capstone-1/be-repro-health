@@ -73,26 +73,24 @@ func New() *echo.Echo {
 	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole(constant.ROLE_DOCTOR))
 	// doctor work history
 	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistoriesController, m.CheckRole(constant.ROLE_DOCTOR))
-	adm.POST("/profile/work-history", controller.CreateDoctorWorkHistoryController, m.CheckRole(constant.ROLE_ADMIN))
-	adm.PUT("/profile/work-history/:id", controller.UpdateDoctorWorkHistoryController, m.CheckRole(constant.ROLE_ADMIN))
-	adm.DELETE("/profile/work-history/:id", controller.DeleteDoctorWorkHistoryController, m.CheckRole(constant.ROLE_ADMIN)) // fixing
+	doctor.POST("/profile/work-history", controller.CreateDoctorWorkHistoryController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/profile/work-history/:id", controller.UpdateDoctorWorkHistoryController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.DELETE("/profile/work-history/:id", controller.DeleteDoctorWorkHistoryController, m.CheckRole(constant.ROLE_DOCTOR))
 	// doctor education
 	doctor.GET("/profile/educations", controller.GetDoctorEducationController, m.CheckRole(constant.ROLE_DOCTOR))
-	adm.POST("/profile/education", controller.CreateDoctorEducationController, m.CheckRole(constant.ROLE_ADMIN))
-	adm.PUT("/profile/education/:id", controller.UpdateDoctorEducationController, m.CheckRole(constant.ROLE_ADMIN))
-	adm.DELETE("/profile/education/:id", controller.DeleteDoctorEducationController, m.CheckRole(constant.ROLE_ADMIN)) // fixing
+	doctor.POST("/profile/education", controller.CreateDoctorEducationController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/profile/education/:id", controller.UpdateDoctorEducationController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.DELETE("/profile/education/:id", controller.DeleteDoctorEducationController, m.CheckRole(constant.ROLE_DOCTOR))
 	// doctor certification
 	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
-	adm.POST("/profile/certification", controller.CreateDoctorCertificationController, m.CheckRole(constant.ROLE_ADMIN))
-	adm.PUT("/profile/certification/:id", controller.UpdateDoctorCertificationController, m.CheckRole(constant.ROLE_ADMIN))
-	adm.DELETE("/profile/certification/:id", controller.DeleteDoctorCertificationController, m.CheckRole(constant.ROLE_ADMIN))
-
-	// doctor forum
 	doctor.GET("/forums", controller.GetDoctorAllForumsController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.POST("/forum-replies", controller.CreateDoctorReplyForum, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.PUT("/forum-replies/:id", controller.UpdateDoctorReplyForum, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/forum-replies/:id", controller.GetDoctorForumReplyID, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.DELETE("/forum-replies/:id", controller.DeleteDoctorForumReplyController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.POST("/profile/certification", controller.CreateDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/profile/certification/:id", controller.UpdateDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.DELETE("/profile/certification/:id", controller.DeleteDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
 
 	// doctor route
 	e.POST("/doctors/login", controller.DoctorLoginController)
