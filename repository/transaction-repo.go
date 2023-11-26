@@ -25,7 +25,7 @@ func GetPatientTransactions(id uuid.UUID) ([]model.Transaction, error) {
 	var datatransactions []model.Transaction
 
 	tx := database.DB.
-		Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").
+		Preload("Payment").Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").
 		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
 		Where("consultations.patient_id = ?", id).
 		Find(&datatransactions)
@@ -38,7 +38,7 @@ func GetPatientTransactions(id uuid.UUID) ([]model.Transaction, error) {
 func GetTransactionByID(id uuid.UUID) (model.Transaction, error) {
 	var datatransaction model.Transaction
 
-	tx := database.DB.Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").First(&datatransaction, id)
+	tx := database.DB.Preload("Payment").Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").First(&datatransaction, id)
 	if tx.Error != nil {
 		return model.Transaction{}, tx.Error
 	}

@@ -62,6 +62,7 @@ func InitialMigration() {
 	DB.AutoMigrate(&model.Specialist{})
 	DB.AutoMigrate(&model.Consultation{})
 	DB.AutoMigrate(&model.Transaction{})
+	DB.AutoMigrate(&model.Payment{})
 	DB.AutoMigrate(&model.Forum{})
 }
 

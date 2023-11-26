@@ -54,6 +54,7 @@ func New() *echo.Echo {
 	// transaction
 	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole(constant.ROLE_USER))
 	r.GET("/transactions/patients/:id", controller.GetPatientTransactionsController, m.CheckRole(constant.ROLE_USER))
+	r.POST("/transactions/:id/payments", controller.CreatePaymentController, m.CheckRole(constant.ROLE_USER))
 	// davin
 
 	// admin route

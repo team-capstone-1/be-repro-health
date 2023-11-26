@@ -20,7 +20,7 @@ func LoginUserController(c echo.Context) error {
 
 	data, token, err := repository.CheckUser(loginReq.Email, loginReq.Password)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]any{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "fail login",
 			"response": err.Error(),
 		})

@@ -15,21 +15,21 @@ type TransactionRequest struct {
 	Status         string    `json:"status" form:"status"`
 	PaymentStatus  string    `json:"payment_status" form:"payment_status"`
 	Refunds        float64   `json:"refunds" form:"refunds"`
-	PaymentMethods string    `json:"payment_methods" form:"payment_methods"`
+	Payment        PaymentRequest    `json:"payment" form:"payment"`
 }
 
 type TransactionResponse struct {
-	ID             uuid.UUID `json:"id"`
-	ConsultationID uuid.UUID `json:"consultation_id"`
+	ID             uuid.UUID            `json:"id"`
+	ConsultationID uuid.UUID            `json:"consultation_id"`
 	Consultation   ConsultationResponse `json:"consultation"`
-	Invoice        string    `json:"invoice"`
-	Price          float64   `json:"price"`
-	AdminPrice     float64   `json:"admin_price"`
-	Total          float64   `json:"total"`
-	Status         string    `json:"status"`
-	PaymentStatus  string    `json:"payment_status"`
-	Refunds        float64   `json:"refunds"`
-	PaymentMethods string    `json:"payment_methods"`
+	Invoice        string               `json:"invoice"`
+	Price          float64              `json:"price"`
+	AdminPrice     float64              `json:"admin_price"`
+	Total          float64              `json:"total"`
+	Status         string               `json:"status"`
+	PaymentStatus  string               `json:"payment_status"`
+	Refunds        float64              `json:"refunds"`
+	Payment        PaymentResponse      `json:"payment"`
 }
 
 func ConvertToTransactionModel(transaction TransactionRequest) model.Transaction {
@@ -49,13 +49,14 @@ func ConvertToTransactionResponse(transaction model.Transaction) TransactionResp
 	return TransactionResponse{
 		ID:             transaction.ID,
 		ConsultationID: transaction.ConsultationID,
-		Consultation: 	ConvertToConsultationResponse(transaction.Consultation),
+		Consultation:   ConvertToConsultationResponse(transaction.Consultation),
 		Invoice:        transaction.Invoice,
 		Price:          transaction.Price,
 		AdminPrice:     transaction.AdminPrice,
 		Total:          transaction.Total,
 		Status:         string(transaction.Status),
 		PaymentStatus:  string(transaction.PaymentStatus),
+		Payment:        ConvertToPaymentResponse(transaction.Payment),
 	}
 }
 

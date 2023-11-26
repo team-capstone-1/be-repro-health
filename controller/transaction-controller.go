@@ -2,7 +2,7 @@ package controller
 
 import (
 	"net/http"
-	"fmt"
+	"errors"
 
 	"capstone-project/repository"
 	"capstone-project/dto"
@@ -37,9 +37,7 @@ func GetTransactionController(c echo.Context) error {
 }
 
 func GetPatientTransactionsController(c echo.Context) error {
-	fmt.Println("tesss")
 	uuid, err := uuid.Parse(c.Param("id"))
-	fmt.Println(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error parse id",
@@ -63,5 +61,58 @@ func GetPatientTransactionsController(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get transaction",
 		"response": transactionResponse,
+	})
+}
+
+func CreatePaymentController(c echo.Context) error {
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	paymentExist := repository.CheckPayment(uuid)
+	if paymentExist{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed create payment",
+			"response": errors.New("Payment Already Exist").Error(),
+		})
+	}
+
+	payment := dto.PaymentRequest{}
+	errBind := c.Bind(&payment)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	_, err = repository.GetTransactionByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed create payment",
+			"reponse":   err.Error(),
+		})
+	}
+
+	paymentData := dto.ConvertToPaymentModel(payment)
+	paymentData.TransactionID = uuid
+	
+	responseData, err := repository.InsertPayment(paymentData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed create payment",
+			"response":  err.Error(),
+		})
+	}
+
+	paymentResponse := dto.ConvertToPaymentResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message": "success create new payment",
+		"response":    paymentResponse,
 	})
 }
