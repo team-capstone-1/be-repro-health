@@ -9,11 +9,13 @@ import (
 
 type Forum struct {
 	gorm.Model
-	ID         uuid.UUID  `json:"id" form:"id"`
-	PatientID  uuid.UUID  `gorm:"index" json:"patient_id"`
-	Title      string     `gorm:"size:255"`
-	Content    string     `gorm:"size:255"`
-	Anonymous  bool       `gorm:"default:false"`
-	Date       time.Time  `gorm:"type:datetime"`
-	// ForumReply ForumReply `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	ID         uuid.UUID    `json:"id" form:"id"`
+	PatientID  uuid.UUID    `gorm:"index" json:"patient_id"`
+	Title      string       `gorm:"size:255"`
+	Content    string       `gorm:"size:255"`
+	Anonymous  bool         `gorm:"default:false"`
+	Date       time.Time    `gorm:"type:datetime"`
+	View       int          `gorm:"type:int;default:0"`
+	Status     bool         `json:"status" gorm:"default:false"`
+	ForumReply []ForumReply `gorm:"foreignKey:ForumsID" json:"forum_reply"`
 }

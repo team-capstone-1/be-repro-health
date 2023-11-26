@@ -98,7 +98,7 @@ func generateTransaction(consultation dto.ConsultationResponse) error {
 		AdminPrice: constant.ADMIN_FEE,
 		Total: consultation.Doctor.Price + constant.ADMIN_FEE,
 		Status: model.Processed,
-		PaymentStatus: model.Processed,
+		PaymentStatus: "pending",
 	}
 
 	_, err = repository.InsertTransaction(transaction)
