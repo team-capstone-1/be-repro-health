@@ -2,8 +2,8 @@ package route
 
 import (
 	"capstone-project/config"
-	"capstone-project/controller"
 	"capstone-project/constant"
+	"capstone-project/controller"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -39,18 +39,18 @@ func New() *echo.Echo {
 	r.POST("/consultations", controller.CreateConsultationController)
 
 	// patient route
-	r.GET("/patients", controller.GetPatientsController, m.CheckRole(constant.ROLE_USER))
-	r.GET("/patients/:id", controller.GetPatientController, m.CheckRole(constant.ROLE_USER))
-	r.POST("/patients", controller.CreatePatientController, m.CheckRole(constant.ROLE_USER))
-	r.PUT("/patients/:id", controller.UpdatePatientController, m.CheckRole(constant.ROLE_USER))
-	r.DELETE("/patients/:id", controller.DeletePatientController, m.CheckRole(constant.ROLE_USER))
-	
+	r.GET("/patients", controller.GetPatientsController, m.CheckRole("user"))
+	r.GET("/patients/:id", controller.GetPatientController, m.CheckRole("user"))
+	r.POST("/patients", controller.CreatePatientController, m.CheckRole("user"))
+	r.PUT("/patients/:id", controller.UpdatePatientController, m.CheckRole("user"))
+	r.DELETE("/patients/:id", controller.DeletePatientController, m.CheckRole("user"))
+
 	// user forum
 	e.GET("/forums", controller.GetForumsController)
 	e.GET("/forums/:id", controller.GetForumController)
 	r.POST("/forums", controller.CreateForumController)
 	r.DELETE("/forums/:id", controller.DeleteForumController)
-	
+
 	// transaction
 	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole(constant.ROLE_USER))
 	r.GET("/transactions/patients/:id", controller.GetPatientTransactionsController, m.CheckRole(constant.ROLE_USER))
@@ -83,6 +83,11 @@ func New() *echo.Echo {
 	doctor.DELETE("/profile/education/:id", controller.DeleteDoctorEducationController, m.CheckRole(constant.ROLE_DOCTOR))
 	// doctor certification
 	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/forums", controller.GetDoctorAllForumsController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.POST("/forum-replies", controller.CreateDoctorReplyForum, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/forum-replies/:id", controller.UpdateDoctorReplyForum, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/forum-replies/:id", controller.GetDoctorForumReplyID, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.DELETE("/forum-replies/:id", controller.DeleteDoctorForumReplyController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.POST("/profile/certification", controller.CreateDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.PUT("/profile/certification/:id", controller.UpdateDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.DELETE("/profile/certification/:id", controller.DeleteDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
