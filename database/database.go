@@ -283,3 +283,34 @@ func Seeders() {
 		}
 	}
 }
+
+// CreateOrUpdateArticle creates a new article or updates an existing one.
+func CreateOrUpdateArticle(title, content, image string) error {
+	article := &model.Article{
+		Title:     title,
+		Content:   content,
+		Image:     image,
+		Published: true,
+		// Add other properties as needed
+	}
+
+	// Check if an article with the same title already exists
+	var existingArticle model.Article
+	err := DB.Where("title = ?", title).First(&existingArticle).Error
+
+	if err != nil {
+		// If the article doesn't exist, create a new one
+		err := DB.Create(article).Error
+		if err != nil {
+			return err
+		}
+	} else {
+		// If the article already exists, update the 'Published' status
+		err := DB.Model(&existingArticle).Update("Published", true).Error
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}

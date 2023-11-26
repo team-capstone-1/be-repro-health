@@ -87,7 +87,7 @@ func New() *echo.Echo {
 
 	// doctor dashboard
 	doctor.GET("/consultations-dashboard", controller.GetConsultationSchedulesForDoctorDashboardController, m.CheckRole("doctor"))
-	doctor.GET("/patients-dashboard", controller.GetPatientsForDoctorDashboardController)
+	doctor.GET("/patients-dashboard", controller.GetPatientsForDoctorDashboardController, m.CheckRole("doctor"))
 	doctor.GET("/transactions-dashboard", controller.GetTransactionsForDoctorDashboardController)
 	doctor.GET("/articles-dashboard", controller.GetArticleForDoctorDashboardController)
 

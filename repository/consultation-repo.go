@@ -7,7 +7,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetConsultationsByDoctorID(doctorID uuid.UUID) ([]model.Consultation, error) {
+func GetConsultationsByDoctorIDDahsboard(doctorID uuid.UUID) ([]model.Consultation, error) {
 	var dataConsultations []model.Consultation
 
 	tx := database.DB.Where("doctor_id = ?", doctorID).Find(&dataConsultations)
