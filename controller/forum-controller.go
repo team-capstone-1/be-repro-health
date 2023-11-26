@@ -34,6 +34,31 @@ func GetForumsController(c echo.Context) error {
 	})
 }
 
+func GetForumController(c echo.Context) error {
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err := repository.GetForumByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get forum",
+			"reponse": err.Error(),
+		})
+	}
+
+	forumResponse := dto.ConvertToForumResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get forum",
+		"response": forumResponse,
+	})
+}
+
 func CreateForumController(c echo.Context) error {
 	user := m.ExtractTokenUserId(c)
 	if user == uuid.Nil {

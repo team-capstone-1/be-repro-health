@@ -18,10 +18,11 @@ type ForumRequest struct {
 type ForumResponse struct {
 	ID    	   uuid.UUID `json:"id"`
 	PatientID  uuid.UUID `json:"patient_id"`
-	Title      string     `json:"title"`
-	Content    string     `json:"content"`
-	Anonymous  bool       `json:"anonymous"`
-	Date       time.Time  `json:"date"`
+	Title      string    `json:"title"`
+	View       int       `json:"view"`
+	Content    string    `json:"content"`
+	Anonymous  bool      `json:"anonymous"`
+	Date       time.Time `json:"date"`
 }
 
 func ConvertToForumModel(forum ForumRequest) model.Forum {
@@ -40,6 +41,7 @@ func ConvertToForumResponse(forum model.Forum) ForumResponse {
 		ID:    	   forum.ID,
 		PatientID: forum.PatientID,
 		Title:     forum.Title,
+		View:      forum.View,
 		Content:   forum.Content,
 		Anonymous: forum.Anonymous,
 		Date:      forum.Date,
