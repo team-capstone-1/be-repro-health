@@ -1,14 +1,15 @@
 package controller
 
 import (
-	"net/http"
 	"errors"
+	"net/http"
 
-	"capstone-project/repository"
 	"capstone-project/dto"
+	"capstone-project/repository"
+	"capstone-project/util"
 
-	"github.com/labstack/echo/v4"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 func GetTransactionController(c echo.Context) error {
@@ -74,9 +75,9 @@ func CreatePaymentController(c echo.Context) error {
 	}
 
 	paymentExist := repository.CheckPayment(uuid)
-	if paymentExist{
+	if paymentExist {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create payment",
+			"message":  "failed create payment",
 			"response": errors.New("Payment Already Exist").Error(),
 		})
 	}
@@ -85,7 +86,7 @@ func CreatePaymentController(c echo.Context) error {
 	errBind := c.Bind(&payment)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
+			"message":  "error bind data",
 			"response": errBind.Error(),
 		})
 	}
@@ -94,26 +95,43 @@ func CreatePaymentController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed create payment",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
+		})
+	}
+
+	paymentImage, err := c.FormFile("image")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error upload payment image",
+			"response": err.Error(),
+		})
+	}
+
+	paymentImageURL, err := util.UploadToCloudinary(paymentImage)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error upload profile image to Cloudinary",
+			"response": err.Error(),
 		})
 	}
 
 	paymentData := dto.ConvertToPaymentModel(payment)
+	paymentData.Image = paymentImageURL
 	paymentData.TransactionID = uuid
-	
+
 	responseData, err := repository.InsertPayment(paymentData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create payment",
-			"response":  err.Error(),
+			"message":  "failed create payment",
+			"response": err.Error(),
 		})
 	}
 
 	paymentResponse := dto.ConvertToPaymentResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success create new payment",
-		"response":    paymentResponse,
+		"message":  "success create new payment",
+		"response": paymentResponse,
 	})
 }
 
@@ -121,8 +139,8 @@ func RescheduleController(c echo.Context) error {
 	transactionID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
@@ -130,7 +148,7 @@ func RescheduleController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get transaction",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
@@ -138,7 +156,7 @@ func RescheduleController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get consultation",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
@@ -146,7 +164,7 @@ func RescheduleController(c echo.Context) error {
 	errBind := c.Bind(&updateData)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
+			"message":  "error bind data",
 			"response": errBind.Error(),
 		})
 	}
@@ -156,8 +174,8 @@ func RescheduleController(c echo.Context) error {
 	_, err = repository.RescheduleConsultation(consultation.ID, rescheduleData)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
-			"message": "failed update consultation",
-			"response":   err.Error(),
+			"message":  "failed update consultation",
+			"response": err.Error(),
 		})
 	}
 
@@ -166,15 +184,15 @@ func RescheduleController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get transaction",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
 	transactionResponse := dto.ConvertToTransactionResponse(returnData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success update consultation",
-		"response":    transactionResponse,
+		"message":  "success update consultation",
+		"response": transactionResponse,
 	})
 }
 
@@ -191,16 +209,16 @@ func CancelTransactionController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed create refund",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
-	if transaction.Payment.Method == "clinic_payment"{
+	if transaction.Payment.Method == "clinic_payment" {
 		err := repository.UpdateTransactionStatus(uuid, "cancelled")
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]any{
-				"message": "failed cancel transaction",
-				"response":  err.Error(),
+				"message":  "failed cancel transaction",
+				"response": err.Error(),
 			})
 		}
 
@@ -208,64 +226,64 @@ func CancelTransactionController(c echo.Context) error {
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]any{
 				"message": "failed cancel transaction",
-				"reponse":   err.Error(),
+				"reponse": err.Error(),
 			})
 		}
 
 		return c.JSON(http.StatusOK, map[string]any{
-			"message": "success cancel appointment",
-			"response":    transaction,
+			"message":  "success cancel appointment",
+			"response": transaction,
 		})
-	}else{
+	} else {
 		paymentExist := repository.CheckPayment(uuid)
-		if !paymentExist{
+		if !paymentExist {
 			return c.JSON(http.StatusBadRequest, map[string]any{
-				"message": "failed create refund",
+				"message":  "failed create refund",
 				"response": errors.New("This transaction doesn't have any payment yet").Error(),
 			})
 		}
-	
+
 		refundExist := repository.CheckRefund(uuid)
-		if refundExist{
+		if refundExist {
 			return c.JSON(http.StatusBadRequest, map[string]any{
-				"message": "failed create refund",
+				"message":  "failed create refund",
 				"response": errors.New("Refund Already Exist").Error(),
 			})
 		}
-	
+
 		refund := dto.RefundRequest{}
 		errBind := c.Bind(&refund)
 		if errBind != nil {
 			return c.JSON(http.StatusBadRequest, map[string]any{
-				"message": "error bind data",
+				"message":  "error bind data",
 				"response": errBind.Error(),
 			})
 		}
-	
+
 		refundData := dto.ConvertToRefundModel(refund)
 		refundData.TransactionID = uuid
-		
+
 		responseData, err := repository.InsertRefund(refundData)
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]any{
-				"message": "failed create refund",
-				"response":  err.Error(),
+				"message":  "failed create refund",
+				"response": err.Error(),
 			})
 		}
 
 		err = repository.UpdateTransactionPaymentStatus(uuid, "refund")
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]any{
-				"message": "failed create refund",
-				"response":  err.Error(),
+				"message":  "failed create refund",
+				"response": err.Error(),
 			})
 		}
-	
+
 		refundResponse := dto.ConvertToRefundResponse(responseData)
-	
+
 		return c.JSON(http.StatusOK, map[string]any{
-			"message": "success create new refund",
-			"response":    refundResponse,
+			"message":  "success create new refund",
+			"response": refundResponse,
 		})
 	}
 }
