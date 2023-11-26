@@ -94,7 +94,7 @@ func CreateDoctorWorkHistoryController(c echo.Context) error {
 	workData := dto.ConvertToDoctorWorkHistoryModel(workHistory)
 	workData.DoctorProfileID = doctor
 
-	responseData, err := repository.InsertDoctorWorkHistory(workData)
+	responseData, err := repository.InsertDoctorWorkHistory(doctor, workData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed create article",
@@ -291,7 +291,7 @@ func CreateDoctorEducationController(c echo.Context) error {
 	educationData := dto.ConvertToDoctorEducationModel(education)
 	educationData.DoctorProfileID = doctor
 
-	responseData, err := repository.InsertDoctorEducation(educationData)
+	responseData, err := repository.InsertDoctorEducation(doctor, educationData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed create doctor education",
@@ -480,7 +480,7 @@ func CreateDoctorCertificationController(c echo.Context) error {
 	certificationData := dto.ConvertToDoctorCertificationModel(certification)
 	certificationData.DoctorProfileID = doctor
 
-	responseData, err := repository.InsertDoctorCertification(certificationData)
+	responseData, err := repository.InsertDoctorCertification(doctor, certificationData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed create doctor certification",
