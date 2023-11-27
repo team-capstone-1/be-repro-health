@@ -59,56 +59,50 @@ func New() *echo.Echo {
 	r.PUT("/refund/:id", controller.ValidateRefund, m.CheckRole(constant.ROLE_ADMIN))
 	// davin
 
-	// admin route
+	// ADMIN ROUTE
 	e.POST("/admins/login", controller.AdminLoginController)
 	adm := e.Group("/admins")
 	adm.Use(middleware.JWT([]byte(config.JWT_KEY)))
 	adm.POST("/doctors/signup", controller.SignUpDoctorController, m.CheckRole("admin"))
-
-	// doctor route
-	e.POST("/doctors/login", controller.DoctorLoginController)
-	adm.POST("/doctors/signup", controller.SignUpDoctorController, m.CheckRole(constant.ROLE_ADMIN))
-
-	// doctor route
-	e.POST("/doctors/login", controller.DoctorLoginController)
-	doctor := e.Group("/doctors")
-	doctor.Use(middleware.JWT([]byte(config.JWT_KEY)))
-	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole(constant.ROLE_DOCTOR))
-	// specialist route
+	// SPECIALIST
 	adm.GET("/specialists", controller.GetSpecialistsController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.POST("/specialists", controller.CreateSpecialistController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.PUT("/specialists/:id", controller.UpdateSpecialistController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.DELETE("/specialists/:id", controller.DeleteSpecialistController, m.CheckRole(constant.ROLE_ADMIN))
-	// doctor work history
-	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistoriesController, m.CheckRole(constant.ROLE_DOCTOR))
+	// WORK HISTORY
 	adm.POST("/profile/work-history", controller.CreateDoctorWorkHistoryController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.PUT("/profile/work-history/:id", controller.UpdateDoctorWorkHistoryController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.DELETE("/profile/work-history/:id", controller.DeleteDoctorWorkHistoryController, m.CheckRole(constant.ROLE_ADMIN))
-	// doctor education
-	doctor.GET("/profile/educations", controller.GetDoctorEducationController, m.CheckRole(constant.ROLE_DOCTOR))
+	// EDUCATION
 	adm.POST("/profile/education", controller.CreateDoctorEducationController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.PUT("/profile/education/:id", controller.UpdateDoctorEducationController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.DELETE("/profile/education/:id", controller.DeleteDoctorEducationController, m.CheckRole(constant.ROLE_ADMIN))
-	// doctor certification
-	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
-	doctor.GET("/forums", controller.GetDoctorAllForumsController, m.CheckRole(constant.ROLE_DOCTOR))
-	adm.POST("/forum-replies", controller.CreateDoctorReplyForum, m.CheckRole(constant.ROLE_ADMIN))
-	adm.PUT("/forum-replies/:id", controller.UpdateDoctorReplyForum, m.CheckRole(constant.ROLE_ADMIN))
-	adm.GET("/forum-replies/:id", controller.GetDoctorForumReplyID, m.CheckRole(constant.ROLE_ADMIN))
-	doctor.DELETE("/forum-replies/:id", controller.DeleteDoctorForumReplyController, m.CheckRole(constant.ROLE_DOCTOR))
+	// CERTIFICATION
 	adm.POST("/profile/certification", controller.CreateDoctorCertificationController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.PUT("/profile/certification/:id", controller.UpdateDoctorCertificationController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.DELETE("/profile/certification/:id", controller.DeleteDoctorCertificationController, m.CheckRole(constant.ROLE_ADMIN))
 
-	// doctor route
+	// DOCTOR ROUTE
 	e.POST("/doctors/login", controller.DoctorLoginController)
+	doctor := e.Group("/doctors")
+	doctor.Use(middleware.JWT([]byte(config.JWT_KEY)))
+	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistoriesController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/profile/educations", controller.GetDoctorEducationController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
+	// DOCTOR FORUM
+	doctor.GET("/forums", controller.GetDoctorAllForumsController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.POST("/forum-replies", controller.CreateDoctorReplyForum, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/forum-replies/:id", controller.UpdateDoctorReplyForum, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/forum-replies/:id", controller.GetDoctorForumReplyID, m.CheckRole(constant.ROLE_ADMIN))
+	doctor.DELETE("/forum-replies/:id", controller.DeleteDoctorForumReplyController, m.CheckRole(constant.ROLE_DOCTOR))
 
-	// doctor article route
+	// DOCTOR ARTICLE ROUTE
 	doctor.GET("/articles", controller.GetAllArticleDoctorsController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.POST("/articles", controller.CreateDoctorArticleController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.DELETE("/articles/:id", controller.DeleteDoctorArticleController, m.CheckRole(constant.ROLE_DOCTOR))
 
-	// doctor dashboard
+	// DOCTOR DASHBOARD
 	doctor.GET("/consultations-dashboard", controller.GetConsultationSchedulesForDoctorDashboardController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/patients-dashboard", controller.GetPatientsForDoctorDashboardController)
 	doctor.GET("/transactions-dashboard", controller.GetTransactionsForDoctorDashboardController)
