@@ -18,6 +18,7 @@ type SpecialistResponse struct {
 
 func ConvertToSpecialistModel(specialist SpecialistRequest) model.Specialist {
 	return model.Specialist{
+		ID: uuid.New(),
 		Name: specialist.Name,
 		Image: specialist.Image,
 	}

@@ -28,7 +28,9 @@ func GetSpecialistByID(id uuid.UUID) (model.Specialist, error) {
 	return specialist, nil
 }
 
-func InsertSpecialist(data model.Specialist) (model.Specialist, error) {
+func InsertSpecialist(ID uuid.UUID, data model.Specialist) (model.Specialist, error) {
+	data.ID = ID
+
 	tx := database.DB.Save(&data)
 	if tx.Error != nil {
 		return model.Specialist{}, tx.Error
@@ -44,10 +46,10 @@ func DeleteSpecialistByID(id uuid.UUID) error {
 	return nil
 }
 
-func UpdateSpecialist(data model.Specialist) (model.Specialist, error) {
-	tx := database.DB.Save(&data)
+func UpdateSpecialistDoctorByID(id uuid.UUID, updateData model.Specialist) (model.Specialist, error) {
+	tx := database.DB.Model(&updateData).Where("id = ?", id).Updates(&updateData)
 	if tx.Error != nil {
 		return model.Specialist{}, tx.Error
 	}
-	return data, nil
+	return updateData, nil
 }

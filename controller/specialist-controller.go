@@ -12,15 +12,15 @@ import (
 )
 
 func GetSpecialistsController(c echo.Context) error {
-	uuid, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "bad request",
-			"response": err.Error(),
+	admin := m.ExtractTokenUserId(c)
+	if admin == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
 		})
 	}
 
-	specialists, err := repository.GetSpecialists(uuid)
+	responseData, err := repository.GetSpecialists(admin)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get specialists",
@@ -28,39 +28,46 @@ func GetSpecialistsController(c echo.Context) error {
 		})
 	}
 
-	var specialistsResponse []dto.SpecialistResponse
-	for _, specialist := range specialists {
-		specialistsResponse = append(specialistsResponse, dto.ConvertToSpecialistResponse(specialist))
+	if len(responseData) == 0 {
+		return c.JSON(http.StatusNotFound, map[string]any{
+			"message":  "no specialists found",
+			"response": nil,
+		})
+	}
+
+	var specialistResponses []dto.SpecialistResponse
+	for _, specialist := range responseData {
+		specialistResponses = append(specialistResponses, dto.ConvertToSpecialistResponse(specialist))
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get specialists",
-		"response": specialists,
+		"response": specialistResponses,
 	})
 }
 
 func CreateSpecialistController(c echo.Context) error {
-	uuid, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "bad request",
-			"response": err.Error(),
+	admin := m.ExtractTokenUserId(c)
+	if admin == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
 		})
 	}
 
-	specialist := dto.SpecialistRequest{}
-	errBind := c.Bind(&specialist)
+	specialistRequest := dto.SpecialistRequest{}
+	errBind := c.Bind(&specialistRequest)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error bind data",
+			"message":  "bad request",
 			"response": errBind.Error(),
 		})
 	}
+	
+	specialistData := dto.ConvertToSpecialistModel(specialistRequest)
+	specialistData.ID = admin
 
-	specialistData := dto.ConvertToSpecialistModel(specialist)
-	specialistData.ID = uuid
-
-	responseData, err := repository.InsertSpecialist(specialistData)
+	responseData, err := repository.InsertSpecialist(admin, specialistData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed create specialist",
@@ -68,17 +75,17 @@ func CreateSpecialistController(c echo.Context) error {
 		})
 	}
 
-	articleResponse := dto.ConvertToSpecialistResponse(responseData)
+	specialistResponse := dto.ConvertToSpecialistResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success create specialist",
-		"response": articleResponse,
+		"response": specialistResponse,
 	})
 }
 
 func UpdateSpecialistController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	admin := m.ExtractTokenUserId(c)
+	if admin == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "user is not valid.",
@@ -101,28 +108,37 @@ func UpdateSpecialistController(c echo.Context) error {
 		})
 	}
 
-	if checkSpecialist.ID != doctor {
+	if checkSpecialist.ID != admin {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "user is not valid.",
 		})
 	}
 
-	specialist := new(dto.SpecialistRequest)
-	if err := c.Bind(specialist); err != nil {
+	specialistRequest := dto.SpecialistRequest{}
+	errBind := c.Bind(&specialistRequest)
+	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "bad request",
+			"response": errBind.Error(),
+		})
+	}
+
+	specialistData := dto.ConvertToSpecialistModel(specialistRequest)
+	specialistData.ID = admin
+
+	responseData, err := repository.UpdateSpecialistDoctorByID(admin, specialistData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed update specialist",
 			"response": err.Error(),
 		})
 	}
 
-	specialistModel := dto.ConvertToSpecialistModel(*specialist)
-	specialistModel.ID = uuid
-
-	responseData, err := repository.UpdateSpecialist(specialistModel)
+	responseData, err = repository.GetSpecialistByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed update specialist",
+			"message":  "failed get specialist",
 			"response": err.Error(),
 		})
 	}
@@ -136,8 +152,8 @@ func UpdateSpecialistController(c echo.Context) error {
 }
 
 func DeleteSpecialistController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	admin := m.ExtractTokenUserId(c)
+	if admin == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "user is not valid.",
@@ -160,7 +176,7 @@ func DeleteSpecialistController(c echo.Context) error {
 		})
 	}
 
-	checkID, err := repository.GetDoctorByID(checkSpecialist.ID)
+	checkID, err := repository.GetSpecialistByID(checkSpecialist.ID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed delete specialist",
@@ -168,7 +184,7 @@ func DeleteSpecialistController(c echo.Context) error {
 		})
 	}
 
-	if checkID.ID != doctor {
+	if checkID.ID != admin {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "user is not valid.",
