@@ -4,7 +4,6 @@ import (
 	"capstone-project/config"
 	"capstone-project/constant"
 	"capstone-project/controller"
-	"capstone-project/repository"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -75,25 +74,21 @@ func New() *echo.Echo {
 	doctor := e.Group("/doctors")
 	doctor.Use(middleware.JWT([]byte(config.JWT_KEY)))
 	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole(constant.ROLE_DOCTOR))
-
 	// specialist route
 	adm.GET("/specialists", controller.GetSpecialistsController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.POST("/specialists", controller.CreateSpecialistController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.PUT("/specialists/:id", controller.UpdateSpecialistController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.DELETE("/specialists/:id", controller.DeleteSpecialistController, m.CheckRole(constant.ROLE_ADMIN))
-
 	// doctor work history
 	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistoriesController, m.CheckRole(constant.ROLE_DOCTOR))
 	adm.POST("/profile/work-history", controller.CreateDoctorWorkHistoryController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.PUT("/profile/work-history/:id", controller.UpdateDoctorWorkHistoryController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.DELETE("/profile/work-history/:id", controller.DeleteDoctorWorkHistoryController, m.CheckRole(constant.ROLE_ADMIN))
-
 	// doctor education
 	doctor.GET("/profile/educations", controller.GetDoctorEducationController, m.CheckRole(constant.ROLE_DOCTOR))
 	adm.POST("/profile/education", controller.CreateDoctorEducationController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.PUT("/profile/education/:id", controller.UpdateDoctorEducationController, m.CheckRole(constant.ROLE_ADMIN))
 	adm.DELETE("/profile/education/:id", controller.DeleteDoctorEducationController, m.CheckRole(constant.ROLE_ADMIN))
-
 	// doctor certification
 	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/forums", controller.GetDoctorAllForumsController, m.CheckRole(constant.ROLE_DOCTOR))
@@ -118,16 +113,6 @@ func New() *echo.Echo {
 	doctor.GET("/patients-dashboard", controller.GetPatientsForDoctorDashboardController)
 	doctor.GET("/transactions-dashboard", controller.GetTransactionsForDoctorDashboardController)
 	doctor.GET("/articles-dashboard", controller.GetArticleForDoctorDashboardController)
-
-	// Inisialisasi repository dan controller
-	aiRepo := repository.NewAIRepository()
-	aiController := controller.NewAIController(aiRepo)
-
-	// User AI Routes
-	e.POST("/users/health-recommendation", aiController.GetHealthRecommendation)
-
-	// Doctor AI Routes
-	doctor.POST("/doctors/health-recommendation", aiController.GetHealthRecommendation)
 
 	return e
 }
