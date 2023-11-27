@@ -30,7 +30,6 @@ func New() *echo.Echo {
 	e.POST("/users/change-password", controller.ChangeUserPasswordController)
 
 	// user appointment route
-	e.GET("/specialists", controller.GetSpecialistsController)
 	e.GET("/clinics", controller.GetClinicsController)
 	e.GET("/specialists/:id/doctors", controller.GetDoctorsBySpecialistController)
 	e.GET("/clinics/:id/doctors", controller.GetDoctorsByClinicController)
@@ -64,6 +63,10 @@ func New() *echo.Echo {
 	e.POST("/admins/login", controller.AdminLoginController)
 	adm := e.Group("/admins")
 	adm.Use(middleware.JWT([]byte(config.JWT_KEY)))
+	adm.POST("/doctors/signup", controller.SignUpDoctorController, m.CheckRole("admin"))
+
+	// doctor route
+	e.POST("/doctors/login", controller.DoctorLoginController)
 	adm.POST("/doctors/signup", controller.SignUpDoctorController, m.CheckRole(constant.ROLE_ADMIN))
 
 	// doctor route
@@ -71,6 +74,11 @@ func New() *echo.Echo {
 	doctor := e.Group("/doctors")
 	doctor.Use(middleware.JWT([]byte(config.JWT_KEY)))
 	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole(constant.ROLE_DOCTOR))
+	// specialist route
+	adm.GET("/specialists", controller.GetSpecialistsController, m.CheckRole(constant.ROLE_ADMIN))
+	adm.POST("/specialists", controller.CreateSpecialistController, m.CheckRole(constant.ROLE_ADMIN))
+	adm.PUT("/specialists/:id", controller.UpdateSpecialistController, m.CheckRole(constant.ROLE_ADMIN))
+	adm.DELETE("/specialists/:id", controller.DeleteSpecialistController, m.CheckRole(constant.ROLE_ADMIN))
 	// doctor work history
 	doctor.GET("/profile/work-histories", controller.GetDoctorWorkHistoriesController, m.CheckRole(constant.ROLE_DOCTOR))
 	adm.POST("/profile/work-history", controller.CreateDoctorWorkHistoryController, m.CheckRole(constant.ROLE_ADMIN))
