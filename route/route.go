@@ -99,8 +99,13 @@ func New() *echo.Echo {
 
 	// DOCTOR ARTICLE ROUTE
 	doctor.GET("/articles", controller.GetAllArticleDoctorsController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/articles/:id", controller.GetDoctorArticleByIDController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.POST("/articles", controller.CreateDoctorArticleController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/articles/:id", controller.UpdateDoctorArticleController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.DELETE("/articles/:id", controller.DeleteDoctorArticleController, m.CheckRole(constant.ROLE_DOCTOR))
+
+	// Endpoint baru untuk mengupdate status Published
+	doctor.PUT("/articles/:id/publish", controller.UpdateArticlePublishedStatusController, m.CheckRole(constant.ROLE_DOCTOR))
 
 	// DOCTOR DASHBOARD
 	doctor.GET("/consultations-dashboard", controller.GetConsultationSchedulesForDoctorDashboardController, m.CheckRole(constant.ROLE_DOCTOR))
