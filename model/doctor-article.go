@@ -19,5 +19,6 @@ type Article struct {
 	ImageDesc string    `gorm:"size:255"`
 	Date      time.Time `gorm:"type:datetime"`
 	Published bool      `gorm:"default:false"`
-	// Comment    []Comment `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	View      int       `gorm:"type:int;default:0"`
+	Comment   []Comment `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
