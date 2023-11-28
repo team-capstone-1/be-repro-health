@@ -15,7 +15,7 @@ func GetAllArticleDoctorsController(c echo.Context) error {
 	if doctor == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
-			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
+			"response": "Permission Denied: Doctor is not valid.",
 		})
 	}
 	responseData, err := repository.GetAllArticles(doctor)
@@ -37,12 +37,52 @@ func GetAllArticleDoctorsController(c echo.Context) error {
 	})
 }
 
+func GetDoctorArticleByIDController(c echo.Context) error {
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Doctor is not valid.",
+		})
+	}
+
+	articleID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "invalid article ID",
+			"response": "Article ID must be a valid UUID.",
+		})
+	}
+
+	article, err := repository.GetArticleByID(articleID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "failed get article",
+			"response": err.Error(),
+		})
+	}
+
+	if article.DoctorID != doctor {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"message":  "unauthorized",
+			"response": "Permission Denied: You are not allowed to access other user's article.",
+		})
+	}
+
+	articleResponse := dto.ConvertToDoctorArticleResponse(article)
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":  "success get article",
+		"response": articleResponse,
+	})
+}
+
 func CreateDoctorArticleController(c echo.Context) error {
 	doctor := m.ExtractTokenUserId(c)
 	if doctor == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
-			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
+			"response": "Permission Denied: Doctor is not valid.",
 		})
 	}
 
@@ -50,13 +90,29 @@ func CreateDoctorArticleController(c echo.Context) error {
 	errBind := c.Bind(&article)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error bind data",
+			"message":  "invalid body",
 			"response": errBind.Error(),
+		})
+	}
+
+	if len(article.Title) < 5 {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "invalid body",
+			"response": "Title must be at least 5 characters long.",
+		})
+	}
+
+	if article.Title == "" || len(article.Tags) == 0 || article.Reference == "" ||
+		article.Image == "" || article.ImageDesc == "" || article.Content == "" {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "invalid body",
+			"response": "All fields must be filled in.",
 		})
 	}
 
 	articleData := dto.ConvertToDoctorArticleModel(article)
 	articleData.DoctorID = doctor
+	articleData.Published = false
 
 	responseData, err := repository.InsertArticle(articleData)
 	if err != nil {
@@ -68,9 +124,109 @@ func CreateDoctorArticleController(c echo.Context) error {
 
 	articleResponse := dto.ConvertToDoctorArticleResponse(responseData)
 
-	return c.JSON(http.StatusOK, map[string]any{
+	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create new article",
 		"response": articleResponse,
+	})
+}
+
+func UpdateDoctorArticleController(c echo.Context) error {
+	articleID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "invalid article ID",
+			"response": "Article ID must be a valid UUID.",
+		})
+	}
+
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Doctor is not valid.",
+		})
+	}
+
+	article := dto.DoctorArticleRequest{}
+	errBind := c.Bind(&article)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "invalid body",
+			"response": errBind.Error(),
+		})
+	}
+
+	if len(article.Title) < 5 {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "invalid body",
+			"response": "Title must be at least 5 characters long.",
+		})
+	}
+
+	articleData, err := repository.GetArticleByID(articleID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "failed to get article",
+			"response": err.Error(),
+		})
+	}
+
+	if articleData.DoctorID != doctor {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"message":  "unauthorized",
+			"response": "Permission Denied: You are not allowed to update other user's article.",
+		})
+	}
+
+	articleData.Title = article.Title
+	articleData.Tags = article.Tags
+	articleData.Reference = article.Reference
+	articleData.Image = article.Image
+	articleData.ImageDesc = article.ImageDesc
+	articleData.Content = article.Content
+
+	err = repository.UpdateArticle(articleData)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "failed to update article",
+			"response": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":  "success update article",
+		"response": dto.ConvertToDoctorArticleResponse(articleData),
+	})
+}
+
+func UpdateArticlePublishedStatusController(c echo.Context) error {
+	articleID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "invalid article ID",
+			"response": "Article ID must be a valid UUID.",
+		})
+	}
+
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Doctor is not valid.",
+		})
+	}
+
+	err = repository.UpdateArticlePublishedStatus(articleID, doctor)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "failed to update article status",
+			"response": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":  "success update article status",
+		"response": articleID,
 	})
 }
 
@@ -83,15 +239,15 @@ func DeleteDoctorArticleController(c echo.Context) error {
 		})
 	}
 
-	uuid, err := uuid.Parse(c.Param("id"))
+	articleID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error parse id",
+			"message":  "invalid body",
 			"response": err.Error(),
 		})
 	}
 
-	checkArticle, err := repository.GetArticleByID(uuid)
+	article, err := repository.GetArticleByID(articleID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed delete article",
@@ -99,30 +255,23 @@ func DeleteDoctorArticleController(c echo.Context) error {
 		})
 	}
 
-	checkDoctor, err := repository.GetDoctorByID(checkArticle.DoctorID)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed delete article",
-			"response": err.Error(),
-		})
-	}
-	if checkDoctor.ID != doctor {
-		return c.JSON(http.StatusBadRequest, map[string]any{
+	if article.DoctorID != doctor {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
-			"response": "Permission Denied: You are not allowed to access other user doctor data.",
+			"response": "Permission Denied: You are not allowed to delete other user's article.",
 		})
 	}
 
-	err = repository.DeleteArticleByID(uuid)
+	err = repository.DeleteArticleByID(articleID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
-			"message":  "failed delete doctor",
+			"message":  "failed delete article",
 			"response": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success delete doctor",
-		"response": "success delete doctor with id " + uuid.String(),
+		"message":  "success delete article",
+		"response": "success delete article with id " + articleID.String(),
 	})
 }
