@@ -41,6 +41,18 @@ func GetArticleByID(id uuid.UUID) (model.Article, error) {
 	return dataarticle, nil
 }
 
+func UserGetArticleByID(id uuid.UUID) (model.Article, error) {
+	var dataarticle model.Article
+
+	tx := database.DB.Preload("Comment").First(&dataarticle, id)
+	if tx.Error != nil {
+		return model.Article{}, tx.Error
+	}
+	database.DB.Model(&dataarticle).Where("id = ?", id).Updates(map[string]interface{}{"View": dataarticle.View+1})
+
+	return dataarticle, nil
+}
+
 func InsertArticle(article model.Article) (model.Article, error) {
 	tx := database.DB.Save(&article)
 	if tx.Error != nil {

@@ -49,6 +49,11 @@ func New() *echo.Echo {
 	e.GET("/forums/:id", controller.GetForumController)
 	r.POST("/forums", controller.CreateForumController)
 	r.DELETE("/forums/:id", controller.DeleteForumController)
+	
+	// user article
+	e.GET("/articles", controller.GetArticlesController)
+	e.GET("/articles/:id", controller.GetArticleController)
+	r.POST("/articles/:id/comments", controller.CreateCommentController)
 
 	// transaction
 	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole(constant.ROLE_USER))
