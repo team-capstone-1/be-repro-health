@@ -20,6 +20,16 @@ type DoctorForumResponse struct {
 	ForumReply []DoctorForumReplyResponse `json:"forum_replies"`
 }
 
+type ForumDoctorResponse struct {
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	Price        float64   `json:"price"`
+	Address      string    `json:"address"`
+	Phone        string    `json:"phone"`
+	ProfileImage string    `json:"profile_image"`
+}
+
 type DoctorForumReplyRequest struct {
 	ForumsID uuid.UUID `json:"forum_id" form:"forum_id"`
 	DoctorID uuid.UUID `json:"doctor_id" form:"doctor_id"`
@@ -28,12 +38,12 @@ type DoctorForumReplyRequest struct {
 }
 
 type DoctorForumReplyResponse struct {
-	ID       uuid.UUID      `json:"id"`
-	ForumsID uuid.UUID      `json:"forums_id"`
-	DoctorID uuid.UUID      `json:"doctor_id"`
-	Doctor   DoctorResponse `json:"doctor"`
-	Content  string         `json:"content"`
-	Date     time.Time      `json:"date"`
+	ID       uuid.UUID           `json:"id"`
+	ForumsID uuid.UUID           `json:"forums_id"`
+	DoctorID uuid.UUID           `json:"doctor_id"`
+	Doctor   ForumDoctorResponse `json:"doctor"`
+	Content  string              `json:"content"`
+	Date     time.Time           `json:"date"`
 }
 
 type DoctorUpdateForumReplyRequest struct {
@@ -56,12 +66,24 @@ func ConvertToDoctorForumReplyModel(forum DoctorForumReplyRequest) model.ForumRe
 	}
 }
 
+func ConvertToForumDoctorResponse(doctor model.Doctor) ForumDoctorResponse {
+	return ForumDoctorResponse{
+		ID:           doctor.ID,
+		Name:         doctor.Name,
+		Email:        doctor.Email,
+		Price:        doctor.Price,
+		Address:      doctor.Address,
+		Phone:        doctor.Phone,
+		ProfileImage: doctor.ProfileImage,
+	}
+}
+
 func ConvertToDoctorForumReplyResponse(forumReply model.ForumReply) DoctorForumReplyResponse {
 	return DoctorForumReplyResponse{
 		ID:       forumReply.ID,
 		ForumsID: forumReply.ForumsID,
 		DoctorID: forumReply.DoctorID,
-		Doctor:   ConvertToDoctorResponse(forumReply.Doctor),
+		Doctor:   ConvertToForumDoctorResponse(forumReply.Doctor),
 		Content:  forumReply.Content,
 		Date:     forumReply.Date,
 	}
