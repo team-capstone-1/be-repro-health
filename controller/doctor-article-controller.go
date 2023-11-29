@@ -32,7 +32,7 @@ func GetAllArticleDoctorsController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success get transaction data",
+		"message":  "success get article data",
 		"response": articleResponse,
 	})
 }
@@ -40,7 +40,7 @@ func GetAllArticleDoctorsController(c echo.Context) error {
 func GetDoctorArticleByIDController(c echo.Context) error {
 	doctor := m.ExtractTokenUserId(c)
 	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Doctor is not valid.",
 		})
@@ -48,7 +48,7 @@ func GetDoctorArticleByIDController(c echo.Context) error {
 
 	articleID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "invalid article ID",
 			"response": "Article ID must be a valid UUID.",
 		})
@@ -56,14 +56,14 @@ func GetDoctorArticleByIDController(c echo.Context) error {
 
 	article, err := repository.GetArticleByID(articleID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get article",
 			"response": err.Error(),
 		})
 	}
 
 	if article.DoctorID != doctor {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: You are not allowed to access other user's article.",
 		})
@@ -71,7 +71,7 @@ func GetDoctorArticleByIDController(c echo.Context) error {
 
 	articleResponse := dto.ConvertToDoctorArticleResponse(article)
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get article",
 		"response": articleResponse,
 	})
@@ -96,7 +96,7 @@ func CreateDoctorArticleController(c echo.Context) error {
 	}
 
 	if len(article.Title) < 5 {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "invalid body",
 			"response": "Title must be at least 5 characters long.",
 		})
@@ -104,7 +104,7 @@ func CreateDoctorArticleController(c echo.Context) error {
 
 	if article.Title == "" || len(article.Tags) == 0 || article.Reference == "" ||
 		article.Image == "" || article.ImageDesc == "" || article.Content == "" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "invalid body",
 			"response": "All fields must be filled in.",
 		})
@@ -133,7 +133,7 @@ func CreateDoctorArticleController(c echo.Context) error {
 func UpdateDoctorArticleController(c echo.Context) error {
 	articleID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "invalid article ID",
 			"response": "Article ID must be a valid UUID.",
 		})
@@ -141,7 +141,7 @@ func UpdateDoctorArticleController(c echo.Context) error {
 
 	doctor := m.ExtractTokenUserId(c)
 	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Doctor is not valid.",
 		})
@@ -150,14 +150,14 @@ func UpdateDoctorArticleController(c echo.Context) error {
 	article := dto.DoctorArticleRequest{}
 	errBind := c.Bind(&article)
 	if errBind != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "invalid body",
 			"response": errBind.Error(),
 		})
 	}
 
 	if len(article.Title) < 5 {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "invalid body",
 			"response": "Title must be at least 5 characters long.",
 		})
@@ -165,14 +165,14 @@ func UpdateDoctorArticleController(c echo.Context) error {
 
 	articleData, err := repository.GetArticleByID(articleID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed to get article",
 			"response": err.Error(),
 		})
 	}
 
 	if articleData.DoctorID != doctor {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: You are not allowed to update other user's article.",
 		})
@@ -187,13 +187,13 @@ func UpdateDoctorArticleController(c echo.Context) error {
 
 	err = repository.UpdateArticle(articleData)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed to update article",
 			"response": err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success update article",
 		"response": dto.ConvertToDoctorArticleResponse(articleData),
 	})
@@ -202,7 +202,7 @@ func UpdateDoctorArticleController(c echo.Context) error {
 func UpdateArticlePublishedStatusController(c echo.Context) error {
 	articleID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "invalid article ID",
 			"response": "Article ID must be a valid UUID.",
 		})
@@ -210,7 +210,7 @@ func UpdateArticlePublishedStatusController(c echo.Context) error {
 
 	doctor := m.ExtractTokenUserId(c)
 	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Doctor is not valid.",
 		})
@@ -218,13 +218,13 @@ func UpdateArticlePublishedStatusController(c echo.Context) error {
 
 	err = repository.UpdateArticlePublishedStatus(articleID, doctor)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed to update article status",
 			"response": err.Error(),
 		})
 	}
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success update article status",
 		"response": articleID,
 	})

@@ -10,7 +10,7 @@ import (
 type DoctorEducation struct {
 	gorm.Model
 	ID               uuid.UUID `json:"id" form:"id"`
-	DoctorProfileID  uuid.UUID `gorm:"index" json:"doctor_profile_id"`
+	DoctorID         uuid.UUID `gorm:"index" json:"doctor_id"`
 	StartingDate     time.Time `gorm:"type:date"`
 	EndingDate       time.Time `gorm:"type:date"`
 	EducationProgram string    `gorm:"size:255"`
