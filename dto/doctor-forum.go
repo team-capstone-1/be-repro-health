@@ -10,9 +10,11 @@ import (
 type DoctorForumResponse struct {
 	ID         uuid.UUID                  `json:"id"`
 	PatientID  uuid.UUID                  `json:"patient_id"`
+	Patient    PatientResponse            `json:"patient"`
 	Title      string                     `json:"title"`
 	Content    string                     `json:"content"`
 	Anonymous  bool                       `json:"anonymous"`
+	View       int                        `json:"view"`
 	Date       time.Time                  `json:"date"`
 	Status     bool                       `json:"status"`
 	ForumReply []DoctorForumReplyResponse `json:"forum_replies"`
@@ -26,11 +28,12 @@ type DoctorForumReplyRequest struct {
 }
 
 type DoctorForumReplyResponse struct {
-	ID       uuid.UUID `json:"id"`
-	ForumsID uuid.UUID `json:"forums_id"`
-	DoctorID uuid.UUID `json:"doctor_id"`
-	Content  string    `json:"content"`
-	Date     time.Time `json:"date"`
+	ID       uuid.UUID      `json:"id"`
+	ForumsID uuid.UUID      `json:"forums_id"`
+	DoctorID uuid.UUID      `json:"doctor_id"`
+	Doctor   DoctorResponse `json:"doctor"`
+	Content  string         `json:"content"`
+	Date     time.Time      `json:"date"`
 }
 
 type DoctorUpdateForumReplyRequest struct {
@@ -53,13 +56,14 @@ func ConvertToDoctorForumReplyModel(forum DoctorForumReplyRequest) model.ForumRe
 	}
 }
 
-func ConvertToDoctorForumReplyResponse(forum model.ForumReply) DoctorForumReplyResponse {
+func ConvertToDoctorForumReplyResponse(forumReply model.ForumReply) DoctorForumReplyResponse {
 	return DoctorForumReplyResponse{
-		ID:       forum.ID,
-		ForumsID: forum.ForumsID,
-		DoctorID: forum.DoctorID,
-		Content:  forum.Content,
-		Date:     forum.Date,
+		ID:       forumReply.ID,
+		ForumsID: forumReply.ForumsID,
+		DoctorID: forumReply.DoctorID,
+		Doctor:   ConvertToDoctorResponse(forumReply.Doctor),
+		Content:  forumReply.Content,
+		Date:     forumReply.Date,
 	}
 }
 
@@ -73,9 +77,11 @@ func ConvertToDoctorForumResponse(forum model.Forum) DoctorForumResponse {
 	return DoctorForumResponse{
 		ID:         forum.ID,
 		PatientID:  forum.PatientID,
+		Patient:    ConvertToPatientResponse(forum.Patient),
 		Title:      forum.Title,
 		Content:    forum.Content,
 		Anonymous:  forum.Anonymous,
+		View:       forum.View,
 		Date:       forum.Date,
 		Status:     forum.Status,
 		ForumReply: forumReplyResponses,

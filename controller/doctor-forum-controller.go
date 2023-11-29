@@ -11,10 +11,44 @@ import (
 )
 
 func GetDoctorAllForumsController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
 	title := c.FormValue("title")
-	patientID := c.FormValue("patient_id")
 
-	responseData, err := repository.DoctorGetAllForums(title, patientID, uuid.Nil)
+	responseData, err := repository.DoctorGetAllForums(title, uuid.Nil)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get forums",
+			"response": err.Error(),
+		})
+	}
+
+	var forumResponse []dto.DoctorForumResponse
+	for _, forum := range responseData {
+		forumResponse = append(forumResponse, dto.ConvertToDoctorForumResponse(forum))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get all forums",
+		"response": forumResponse,
+	})
+}
+
+func GetDoctorForumDetails(c echo.Context) error {
+	uid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err := repository.GetDoctorForumDetails(uid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get forums",

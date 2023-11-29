@@ -42,6 +42,7 @@ type DoctorResponse struct {
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
 	Price        float64   `json:"price"`
+	ProfileImage string    `json:"profile_image"`
 	Address      string    `json:"address"`
 	Phone        string    `json:"phone"`
 	ProfileImage string    `json:"profile_image"`
@@ -100,6 +101,7 @@ func ConvertToDoctorResponse(doctor model.Doctor) DoctorResponse {
 		Name:         doctor.Name,
 		Email:        doctor.Email,
 		Price:        doctor.Price,
+		ProfileImage: doctor.ProfileImage,
 		Address:      doctor.Address,
 		Phone:        doctor.Phone,
 		ProfileImage: doctor.ProfileImage,

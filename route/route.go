@@ -50,7 +50,7 @@ func New() *echo.Echo {
 	e.GET("/forums/:id", controller.GetForumController)
 	r.POST("/forums", controller.CreateForumController)
 	r.DELETE("/forums/:id", controller.DeleteForumController)
-	
+
 	// user article
 	e.GET("/articles", controller.GetArticlesController)
 	e.GET("/articles/:id", controller.GetArticleController)
@@ -98,6 +98,7 @@ func New() *echo.Echo {
 	doctor.GET("/profile/certifications", controller.GetDoctorCertificationController, m.CheckRole(constant.ROLE_DOCTOR))
 	// DOCTOR FORUM
 	doctor.GET("/forums", controller.GetDoctorAllForumsController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/forums/details/:id", controller.GetDoctorForumDetails, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.POST("/forum-replies", controller.CreateDoctorReplyForum, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.PUT("/forum-replies/:id", controller.UpdateDoctorReplyForum, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/forum-replies/:id", controller.GetDoctorForumReplyID, m.CheckRole(constant.ROLE_ADMIN))
