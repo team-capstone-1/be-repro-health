@@ -12,9 +12,8 @@ import (
 
 func GetDoctorAllForumsController(c echo.Context) error {
 	title := c.FormValue("title")
-	patientID := c.FormValue("patient_id")
 
-	responseData, err := repository.DoctorGetAllForums(title, patientID, uuid.Nil)
+	responseData, err := repository.DoctorGetAllForums(title, uuid.Nil)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get forums",
