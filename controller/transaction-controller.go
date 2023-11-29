@@ -129,7 +129,7 @@ func CreatePaymentController(c echo.Context) error {
 
 	paymentResponse := dto.ConvertToPaymentResponse(responseData)
 
-	return c.JSON(http.StatusOK, map[string]any{
+	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create new payment",
 		"response": paymentResponse,
 	})
@@ -281,7 +281,7 @@ func CancelTransactionController(c echo.Context) error {
 
 		refundResponse := dto.ConvertToRefundResponse(responseData)
 
-		return c.JSON(http.StatusOK, map[string]any{
+		return c.JSON(http.StatusCreated, map[string]any{
 			"message":  "success create new refund",
 			"response": refundResponse,
 		})

@@ -106,22 +106,6 @@ func CreatePatientController(c echo.Context) error {
 		})
 	}
 
-	ktpImage, err := c.FormFile("ktp_image")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error upload ktp image",
-			"response": err.Error(),
-		})
-	}
-
-	kartuKeluargaImage, err := c.FormFile("kartu_keluarga_image")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error upload ktp image",
-			"response": err.Error(),
-		})
-	}
-
 	profileURL, err := util.UploadToCloudinary(profileImage)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -130,26 +114,8 @@ func CreatePatientController(c echo.Context) error {
 		})
 	}
 
-	ktpURL, err := util.UploadToCloudinary(ktpImage)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error upload ktp image to Cloudinary",
-			"response": err.Error(),
-		})
-	}
-
-	kartuKeluargaURL, err := util.UploadToCloudinary(kartuKeluargaImage)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error upload kartu keluarga image to Cloudinary",
-			"response": err.Error(),
-		})
-	}
-
 	patientData := dto.ConvertToPatientModel(patient)
 	patientData.ProfileImage = profileURL
-	patientData.KTPImage = ktpURL
-	patientData.KartuKeluargaImage = kartuKeluargaURL
 	patientData.UserID = user
 
 	responseData, err := repository.InsertPatient(patientData)
@@ -162,7 +128,7 @@ func CreatePatientController(c echo.Context) error {
 
 	patientResponse := dto.ConvertToPatientResponse(responseData)
 
-	return c.JSON(http.StatusOK, map[string]any{
+	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create new patient",
 		"response": patientResponse,
 	})

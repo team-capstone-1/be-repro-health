@@ -16,10 +16,7 @@ type PatientRequest struct {
 	Relation           string    `json:"relation" form:"relation"`
 	Weight             float64   `json:"weight" form:"weight"`
 	Height             float64   `json:"height" form:"height"`
-	KTPImage           string    `json:"ktp_image" form:"ktp_image"`
-	NIK                string    `json:"nik" form:"nik"`
-	NoKartuKeluarga    string    `json:"no_kartu_keluarga" form:"no_kartu_keluarga"`
-	KartuKeluargaImage string    `json:"kartu_keluarga_image" form:"kartu_keluarga_image"`
+	Gender             string    `json:"gender" form:"gender"`
 }
 
 type PatientResponse struct {
@@ -32,10 +29,7 @@ type PatientResponse struct {
 	Relation           string    `json:"relation"`
 	Weight             float64   `json:"weight"`
 	Height             float64   `json:"height"`
-	KTPImage           string    `json:"ktp_image"`
-	NIK                string    `json:"nik"`
-	NoKartuKeluarga    string    `json:"no_kartu_keluarga"`
-	KartuKeluargaImage string    `json:"kartu_keluarga_image"`
+	Gender             string    `json:"gender"`
 }
 
 type PatientDashboardResponse struct {
@@ -55,10 +49,7 @@ func ConvertToPatientModel(patient PatientRequest) model.Patient {
 		Relation:           patient.Relation,
 		Weight:             patient.Weight,
 		Height:             patient.Height,
-		KTPImage:           patient.KTPImage,
-		NIK:                patient.NIK,
-		NoKartuKeluarga:    patient.NoKartuKeluarga,
-		KartuKeluargaImage: patient.KartuKeluargaImage,
+		Gender:             patient.Gender,
 	}
 }
 
@@ -73,10 +64,7 @@ func ConvertToPatientResponse(patient model.Patient) PatientResponse {
 		Relation:           patient.Relation,
 		Weight:             patient.Weight,
 		Height:             patient.Height,
-		KTPImage:           patient.KTPImage,
-		NIK:                patient.NIK,
-		NoKartuKeluarga:    patient.NoKartuKeluarga,
-		KartuKeluargaImage: patient.KartuKeluargaImage,
+		Gender:             patient.Gender,
 	}
 }
 

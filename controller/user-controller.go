@@ -67,7 +67,7 @@ func SignUpUserController(c echo.Context) error {
 
 	response := dto.ConvertToUserResponse(data)
 
-	return c.JSON(http.StatusOK, map[string]any{
+	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success receive user data",
 		"response": response,
 	})
