@@ -20,7 +20,7 @@ var (
 func Init() {
 	InitDB()
 	InitialMigration()
-	Seeders()
+	// Seeders()
 }
 
 type DbSetup struct {
@@ -196,7 +196,7 @@ func Seeders() {
 	workHistory := []model.DoctorWorkHistory{
 		{
 			ID:              uuid.New(),
-			DoctorProfileID: doctorID,
+			DoctorID: doctorID,
 			StartingDate:    time.Date(2020, 07, 27, 0, 0, 0, 0, time.UTC),
 			EndingDate:      time.Date(2025, 07, 27, 0, 0, 0, 0, time.UTC),
 			Job:             "Konsultan Kesehatan Reproduksi",
@@ -205,7 +205,7 @@ func Seeders() {
 		},
 		{
 			ID:              uuid.New(),
-			DoctorProfileID: doctorID,
+			DoctorID: doctorID,
 			StartingDate:    time.Date(2016, 07, 27, 0, 0, 0, 0, time.UTC),
 			EndingDate:      time.Date(2019, 07, 27, 0, 0, 0, 0, time.UTC),
 			Job:             "Spesialis Obstetri dan Ginekologi",
@@ -228,7 +228,7 @@ func Seeders() {
 	educations := []model.DoctorEducation{
 		{
 			ID:               uuid.New(),
-			DoctorProfileID:  doctorID,
+			DoctorID:  doctorID,
 			StartingDate:     time.Date(2013, 07, 27, 0, 0, 0, 0, time.UTC),
 			EndingDate:       time.Date(2015, 07, 27, 0, 0, 0, 0, time.UTC),
 			EducationProgram: "Program Magister Kedokteran",
@@ -236,7 +236,7 @@ func Seeders() {
 		},
 		{
 			ID:               uuid.New(),
-			DoctorProfileID:  doctorID,
+			DoctorID:  doctorID,
 			StartingDate:     time.Date(2009, 07, 27, 0, 0, 0, 0, time.UTC),
 			EndingDate:       time.Date(2013, 07, 27, 0, 0, 0, 0, time.UTC),
 			EducationProgram: "Program Residen Dokter Spesialis",
@@ -257,7 +257,7 @@ func Seeders() {
 	certifications := []model.DoctorCertification{
 		{
 			ID:              uuid.New(),
-			DoctorProfileID: doctorID,
+			DoctorID: doctorID,
 			CertificateType: "Sertifikasi Lisensi",
 			Description:     "Praktik Medis",
 			StartingDate:    time.Date(2022, 07, 27, 0, 0, 0, 0, time.UTC),
@@ -267,7 +267,7 @@ func Seeders() {
 		},
 		{
 			ID:              uuid.New(),
-			DoctorProfileID: doctorID,
+			DoctorID: doctorID,
 			CertificateType: "Sertifikasi Lisensi",
 			Description:     "Praktik Medis",
 			StartingDate:    time.Date(2022, 07, 27, 0, 0, 0, 0, time.UTC),

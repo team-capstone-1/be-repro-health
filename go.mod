@@ -8,6 +8,7 @@ require (
 	github.com/google/uuid v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.11.1
+	github.com/sashabaranov/go-openai v1.17.9
 	golang.org/x/crypto v0.13.0
 	gorm.io/driver/mysql v1.5.1
 	gorm.io/gorm v1.25.4
