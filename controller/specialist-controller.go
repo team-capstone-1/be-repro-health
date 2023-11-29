@@ -12,15 +12,7 @@ import (
 )
 
 func GetSpecialistsController(c echo.Context) error {
-	admin := m.ExtractTokenUserId(c)
-	if admin == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]any{
-			"message":  "unauthorized",
-			"response": "Permission Denied: Permission Denied: User is not valid.",
-		})
-	}
-
-	responseData, err := repository.GetSpecialists(admin)
+	responseData, err := repository.GetSpecialists()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get specialists",
@@ -65,7 +57,6 @@ func CreateSpecialistController(c echo.Context) error {
 	}
 	
 	specialistData := dto.ConvertToSpecialistModel(specialistRequest)
-	specialistData.ID = admin
 
 	responseData, err := repository.InsertSpecialist(admin, specialistData)
 	if err != nil {

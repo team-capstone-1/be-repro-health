@@ -30,6 +30,7 @@ func New() *echo.Echo {
 	e.POST("/users/change-password", controller.ChangeUserPasswordController)
 
 	// user appointment route
+	e.GET("/specialists", controller.GetSpecialistsController)
 	e.GET("/clinics", controller.GetClinicsController)
 	e.GET("/specialists/:id/doctors", controller.GetDoctorsBySpecialistController)
 	e.GET("/clinics/:id/doctors", controller.GetDoctorsByClinicController)
