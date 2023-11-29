@@ -134,7 +134,7 @@ func Seeders() {
 	for _, v := range clinic {
 		var exist model.Clinic
 
-		errCheck := DB.Where("name = ?", v.Name).First(&exist).Error
+		errCheck := DB.Where("id = ?", v.ID).First(&exist).Error
 
 		if errCheck != nil {
 			DB.Create(&v)
@@ -153,7 +153,7 @@ func Seeders() {
 	for _, v := range specialist {
 		var exist model.Specialist
 
-		errCheck := DB.Where("name = ?", v.Name).First(&exist).Error
+		errCheck := DB.Where("id = ?", v.ID).First(&exist).Error
 
 		if errCheck != nil {
 			DB.Create(&v)
@@ -193,24 +193,32 @@ func Seeders() {
 	}
 
 	// DOCTOR WORK HISTORIES SEEDERS
+	whID1, err := uuid.Parse("cb310bc8-613c-42d5-bacd-3a3a7eb8fdda")
+	if err != nil {
+		return
+	}
+	whID2, err := uuid.Parse("3961254c-54b7-46f6-a544-3cfde53eaaed")
+	if err != nil {
+		return
+	}
 	workHistory := []model.DoctorWorkHistory{
 		{
-			ID:              uuid.New(),
-			DoctorID: doctorID,
-			StartingDate:    time.Date(2020, 07, 27, 0, 0, 0, 0, time.UTC),
-			EndingDate:      time.Date(2025, 07, 27, 0, 0, 0, 0, time.UTC),
-			Job:             "Konsultan Kesehatan Reproduksi",
-			Workplace:       "Klinik Sehat Hati",
-			Position:        "Memberikan konsultasi kepada pasien tentang kesehatan reproduksi.",
+			ID:           whID1,
+			DoctorID:     doctorID,
+			StartingDate: time.Date(2020, 07, 27, 0, 0, 0, 0, time.UTC),
+			EndingDate:   time.Date(2025, 07, 27, 0, 0, 0, 0, time.UTC),
+			Job:          "Konsultan Kesehatan Reproduksi",
+			Workplace:    "Klinik Sehat Hati",
+			Position:     "Memberikan konsultasi kepada pasien tentang kesehatan reproduksi.",
 		},
 		{
-			ID:              uuid.New(),
-			DoctorID: doctorID,
-			StartingDate:    time.Date(2016, 07, 27, 0, 0, 0, 0, time.UTC),
-			EndingDate:      time.Date(2019, 07, 27, 0, 0, 0, 0, time.UTC),
-			Job:             "Spesialis Obstetri dan Ginekologi",
-			Workplace:       "Rumah Sakit Kharisma",
-			Position:        "Memperoleh gelar spesialis dalam Obstetri dan Ginekologi (Sp.OG)",
+			ID:           whID2,
+			DoctorID:     doctorID,
+			StartingDate: time.Date(2016, 07, 27, 0, 0, 0, 0, time.UTC),
+			EndingDate:   time.Date(2019, 07, 27, 0, 0, 0, 0, time.UTC),
+			Job:          "Spesialis Obstetri dan Ginekologi",
+			Workplace:    "Rumah Sakit Kharisma",
+			Position:     "Memperoleh gelar spesialis dalam Obstetri dan Ginekologi (Sp.OG)",
 		},
 	}
 
@@ -225,18 +233,26 @@ func Seeders() {
 	}
 
 	// DOCTOR EDUCATIONS SEEDERS
+	eduID1, err := uuid.Parse("5d93e114-89a9-4c29-be1e-137d4347e2f6")
+	if err != nil {
+		return
+	}
+	eduID2, err := uuid.Parse("b9ae846d-67b4-4eb2-81f7-821bdd761e3f")
+	if err != nil {
+		return
+	}
 	educations := []model.DoctorEducation{
 		{
-			ID:               uuid.New(),
-			DoctorID:  doctorID,
+			ID:               eduID1,
+			DoctorID:         doctorID,
 			StartingDate:     time.Date(2013, 07, 27, 0, 0, 0, 0, time.UTC),
 			EndingDate:       time.Date(2015, 07, 27, 0, 0, 0, 0, time.UTC),
 			EducationProgram: "Program Magister Kedokteran",
 			University:       "Universitas Gadjah Mada",
 		},
 		{
-			ID:               uuid.New(),
-			DoctorID:  doctorID,
+			ID:               eduID2,
+			DoctorID:         doctorID,
 			StartingDate:     time.Date(2009, 07, 27, 0, 0, 0, 0, time.UTC),
 			EndingDate:       time.Date(2013, 07, 27, 0, 0, 0, 0, time.UTC),
 			EducationProgram: "Program Residen Dokter Spesialis",
@@ -254,10 +270,19 @@ func Seeders() {
 		}
 	}
 
+	// DOCTOR CERTIFICATION SEEDERS
+	certifID1, err := uuid.Parse("f189b1a2-9ecc-499f-ad6c-78c08b676309")
+	if err != nil {
+		return
+	}
+	certifID2, err := uuid.Parse("72f4863b-334d-4547-93c1-00a97b4b7078")
+	if err != nil {
+		return
+	}
 	certifications := []model.DoctorCertification{
 		{
-			ID:              uuid.New(),
-			DoctorID: doctorID,
+			ID:              certifID1,
+			DoctorID:        doctorID,
 			CertificateType: "Sertifikasi Lisensi",
 			Description:     "Praktik Medis",
 			StartingDate:    time.Date(2022, 07, 27, 0, 0, 0, 0, time.UTC),
@@ -266,8 +291,8 @@ func Seeders() {
 			Details:         "https://res.cloudinary.com/dw3n2ondc/image/upload/v1700466108/Reproduction-Health/ickckqmok4hbajzdkhpx.png",
 		},
 		{
-			ID:              uuid.New(),
-			DoctorID: doctorID,
+			ID:              certifID2,
+			DoctorID:        doctorID,
 			CertificateType: "Sertifikasi Lisensi",
 			Description:     "Praktik Medis",
 			StartingDate:    time.Date(2022, 07, 27, 0, 0, 0, 0, time.UTC),
