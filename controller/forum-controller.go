@@ -103,7 +103,7 @@ func CreateForumController(c echo.Context) error {
 
 	forumResponse := dto.ConvertToForumResponse(responseData)
 
-	return c.JSON(http.StatusOK, map[string]any{
+	return c.JSON(http.StatusCreated, map[string]any{
 		"message": "success create new forum",
 		"response":    forumResponse,
 	})

@@ -24,10 +24,11 @@ type ConsultationResponse struct {
 	DoctorID    uuid.UUID `json:"doctor_id"`
 	PatientID   uuid.UUID `json:"patient_id"`
 	ClinicID    uuid.UUID `json:"clinic_id"`
+	TransactionID uuid.UUID `json:"transaction_id"`
 	Date        time.Time `json:"date"`
 	Session     string    `json:"session"`
 	Clinic      ClinicResponse    `json:"clinic"`
-	Doctor      DoctorResponse    `json:"doctor"`
+	Doctor      ForumDoctorResponse    `json:"doctor"`
 }
 
 func ConvertToConsultationModel(consultation ConsultationRequest) model.Consultation {
@@ -57,6 +58,6 @@ func ConvertToConsultationResponse(consultation model.Consultation) Consultation
 		Date: consultation.Date,
 		Session: consultation.Session,
 		Clinic: ConvertToClinicResponse(consultation.Clinic),
-		Doctor: ConvertToDoctorResponse(consultation.Doctor),
+		Doctor: ConvertToForumDoctorResponse(consultation.Doctor),
 	}
 }

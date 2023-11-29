@@ -128,7 +128,7 @@ func CreatePatientController(c echo.Context) error {
 
 	patientResponse := dto.ConvertToPatientResponse(responseData)
 
-	return c.JSON(http.StatusOK, map[string]any{
+	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create new patient",
 		"response": patientResponse,
 	})

@@ -69,24 +69,25 @@ func CreateConsultationController(c echo.Context) error {
 
 	consultationResponse := dto.ConvertToConsultationResponse(responseData)
 
-	err = generateTransaction(consultationResponse)
+	transaction,err := generateTransaction(consultationResponse)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message":  "failed create transaction",
 			"response": err.Error(),
 		})
 	}
+	consultationResponse.TransactionID = transaction.ID
 
-	return c.JSON(http.StatusOK, map[string]any{
+	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create new consultation",
 		"response": consultationResponse,
 	})
 }
 
-func generateTransaction(consultation dto.ConsultationResponse) error {
+func generateTransaction(consultation dto.ConsultationResponse) (model.Transaction, error) {
 	invoice, date, err := repository.GenerateNextInvoice()
 	if err != nil {
-		return err
+		return model.Transaction{},err
 	}
 
 	transaction := model.Transaction{
@@ -101,9 +102,9 @@ func generateTransaction(consultation dto.ConsultationResponse) error {
 		PaymentStatus: "pending",
 	}
 
-	_, err = repository.InsertTransaction(transaction)
+	transaction, err = repository.InsertTransaction(transaction)
 	if err != nil {
-		return err
+		return model.Transaction{},err
 	}
-	return nil
+	return transaction, nil
 }
