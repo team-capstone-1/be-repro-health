@@ -10,6 +10,7 @@ import (
 type DoctorForumResponse struct {
 	ID         uuid.UUID                  `json:"id"`
 	PatientID  uuid.UUID                  `json:"patient_id"`
+	Patient    PatientResponse            `json:"patient"`
 	Title      string                     `json:"title"`
 	Content    string                     `json:"content"`
 	Anonymous  bool                       `json:"anonymous"`
@@ -26,11 +27,12 @@ type DoctorForumReplyRequest struct {
 }
 
 type DoctorForumReplyResponse struct {
-	ID       uuid.UUID `json:"id"`
-	ForumsID uuid.UUID `json:"forums_id"`
-	DoctorID uuid.UUID `json:"doctor_id"`
-	Content  string    `json:"content"`
-	Date     time.Time `json:"date"`
+	ID       uuid.UUID      `json:"id"`
+	ForumsID uuid.UUID      `json:"forums_id"`
+	DoctorID uuid.UUID      `json:"doctor_id"`
+	Doctor   DoctorResponse `json:"doctor"`
+	Content  string         `json:"content"`
+	Date     time.Time      `json:"date"`
 }
 
 type DoctorUpdateForumReplyRequest struct {
@@ -54,10 +56,12 @@ func ConvertToDoctorForumReplyModel(forum DoctorForumReplyRequest) model.ForumRe
 }
 
 func ConvertToDoctorForumReplyResponse(forum model.ForumReply) DoctorForumReplyResponse {
+	var doctor model.Doctor
 	return DoctorForumReplyResponse{
 		ID:       forum.ID,
 		ForumsID: forum.ForumsID,
 		DoctorID: forum.DoctorID,
+		Doctor:   ConvertToDoctorResponse(doctor),
 		Content:  forum.Content,
 		Date:     forum.Date,
 	}
@@ -73,6 +77,7 @@ func ConvertToDoctorForumResponse(forum model.Forum) DoctorForumResponse {
 	return DoctorForumResponse{
 		ID:         forum.ID,
 		PatientID:  forum.PatientID,
+		Patient:    ConvertToPatientResponse(forum.Patient),
 		Title:      forum.Title,
 		Content:    forum.Content,
 		Anonymous:  forum.Anonymous,

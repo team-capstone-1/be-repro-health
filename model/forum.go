@@ -11,6 +11,7 @@ type Forum struct {
 	gorm.Model
 	ID         uuid.UUID    `json:"id" form:"id"`
 	PatientID  uuid.UUID    `gorm:"index" json:"patient_id"`
+	Patient    Patient      `gorm:"foreignKey:PatientID" json:"patient"`
 	Title      string       `gorm:"size:255"`
 	Content    string       `gorm:"size:255"`
 	Anonymous  bool         `gorm:"default:false"`

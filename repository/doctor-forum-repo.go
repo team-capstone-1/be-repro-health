@@ -10,7 +10,7 @@ import (
 func DoctorGetAllForums(title string, forumID uuid.UUID) ([]model.Forum, error) {
 	var dataForums []model.Forum
 
-	tx := database.DB.Model(model.Forum{}).Preload("ForumReply")
+	tx := database.DB.Model(model.Forum{}).Preload("ForumReply").Preload("Patient")
 
 	if title != "" {
 		tx = tx.Where("title LIKE ?", "%"+title+"%")
@@ -23,7 +23,7 @@ func DoctorGetAllForums(title string, forumID uuid.UUID) ([]model.Forum, error) 
 	if forumID != uuid.Nil {
 		for i := range dataForums {
 			var forumReplies []model.ForumReply
-			if err := database.DB.Where("forums_id = ?", dataForums[i].ID).First(&forumReplies).Error; err != nil {
+			if err := database.DB.Where("forums_id = ?", dataForums[i].ID).Preload("Doctor").First(&forumReplies).Error; err != nil {
 				return nil, err
 			}
 
