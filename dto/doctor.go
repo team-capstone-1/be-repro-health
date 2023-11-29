@@ -38,18 +38,17 @@ type DoctorSignUpResponse struct {
 }
 
 type DoctorResponse struct {
-	ID           uuid.UUID `json:"id"`
-	Name         string    `json:"name"`
-	Email        string    `json:"email"`
-	Price        float64   `json:"price"`
-	ProfileImage string    `json:"profile_image"`
-	Address      string    `json:"address"`
-	Phone        string    `json:"phone"`
-	ProfileImage string    `json:"profile_image"`
-	Specialist   SpecialistResponse `json:"specialist"`
-	Clinic       ClinicResponse     `json:"clinic"`
-	DoctorWorkHistories  []DoctorWorkHistoryResponse `json:"work_histories"`
-	DoctorEducations 	 []DoctorEducationResponse   `json:"educations"`
+	ID                  uuid.UUID                   `json:"id"`
+	Name                string                      `json:"name"`
+	Email               string                      `json:"email"`
+	Price               float64                     `json:"price"`
+	Address             string                      `json:"address"`
+	Phone               string                      `json:"phone"`
+	ProfileImage        string                      `json:"profile_image"`
+	Specialist          SpecialistResponse          `json:"specialist"`
+	Clinic              ClinicResponse              `json:"clinic"`
+	DoctorWorkHistories []DoctorWorkHistoryResponse `json:"work_histories"`
+	DoctorEducations    []DoctorEducationResponse   `json:"educations"`
 }
 
 func ConvertToDoctorSignUpResponse(doctor model.Doctor) DoctorSignUpResponse {
@@ -88,26 +87,25 @@ func ConvertToDoctorResponse(doctor model.Doctor) DoctorResponse {
 	var workHistories []DoctorWorkHistoryResponse
 	var educations []DoctorEducationResponse
 
-	for _, history := range doctor.DoctorWorkHistories{
+	for _, history := range doctor.DoctorWorkHistories {
 		workHistories = append(workHistories, ConvertToDoctorWorkHistoriesResponse(history))
 	}
 
-	for _, education := range doctor.DoctorEducations{
+	for _, education := range doctor.DoctorEducations {
 		educations = append(educations, ConvertToDoctorEducationResponse(education))
 	}
 
 	return DoctorResponse{
-		ID:           doctor.ID,
-		Name:         doctor.Name,
-		Email:        doctor.Email,
-		Price:        doctor.Price,
-		ProfileImage: doctor.ProfileImage,
-		Address:      doctor.Address,
-		Phone:        doctor.Phone,
-		ProfileImage: doctor.ProfileImage,
-		Specialist:   ConvertToSpecialistResponse(doctor.Specialist),
-		Clinic:       ConvertToClinicResponse(doctor.Clinic),
+		ID:                  doctor.ID,
+		Name:                doctor.Name,
+		Email:               doctor.Email,
+		Price:               doctor.Price,
+		Address:             doctor.Address,
+		Phone:               doctor.Phone,
+		ProfileImage:        doctor.ProfileImage,
+		Specialist:          ConvertToSpecialistResponse(doctor.Specialist),
+		Clinic:              ConvertToClinicResponse(doctor.Clinic),
 		DoctorWorkHistories: workHistories,
-		DoctorEducations: educations,
+		DoctorEducations:    educations,
 	}
 }
