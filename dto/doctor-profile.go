@@ -8,6 +8,7 @@ import (
 )
 
 type DoctorWorkHistoryRequest struct {
+	DoctorID     uuid.UUID `json:"doctor_id"`
 	StartingDate time.Time `json:"start_date"`
 	EndingDate   time.Time `json:"end_date"`
 	Job          string    `json:"job"`
@@ -16,6 +17,7 @@ type DoctorWorkHistoryRequest struct {
 }
 
 type DoctorEducationRequest struct {
+	DoctorID         uuid.UUID `json:"doctor_id"`
 	StartingDate     time.Time `json:"start_date"`
 	EndingDate       time.Time `json:"end_date"`
 	EducationProgram string    `json:"education_program"`
@@ -23,6 +25,7 @@ type DoctorEducationRequest struct {
 }
 
 type DoctorCertificationRequest struct {
+	DoctorID        uuid.UUID `json:"doctor_id"`
 	StartingDate    time.Time `json:"start_date"`
 	EndingDate      time.Time `json:"end_date"`
 	Description     string    `json:"description"`
@@ -58,7 +61,7 @@ type DoctorProfileSpecialistResponse struct {
 
 type DoctorWorkHistoryResponse struct {
 	ID              uuid.UUID `json:"id"`
-	DoctorProfileID uuid.UUID `json:"doctor_profile_id"`
+	DoctorID        uuid.UUID `json:"doctor_id"`
 	StartingDate    time.Time `json:"start_date"`
 	EndingDate      time.Time `json:"end_date"`
 	Job             string    `json:"job"`
@@ -68,7 +71,7 @@ type DoctorWorkHistoryResponse struct {
 
 type DoctorEducationResponse struct {
 	ID               uuid.UUID `json:"id"`
-	DoctorProfileID  uuid.UUID `json:"doctor_profile_id"`
+	DoctorID         uuid.UUID `json:"doctor_id"`
 	StartingDate     time.Time `json:"start_date"`
 	EndingDate       time.Time `json:"end_date"`
 	EducationProgram string    `json:"education_program"`
@@ -77,7 +80,7 @@ type DoctorEducationResponse struct {
 
 type DoctorCertificationResponse struct {
 	ID              uuid.UUID `json:"id"`
-	DoctorProfileID uuid.UUID `json:"doctor_profile_id"`
+	DoctorID        uuid.UUID `json:"doctor_id"`
 	StartingDate    time.Time `json:"start_date"`
 	EndingDate      time.Time `json:"end_date"`
 	Description     string    `json:"description"`
@@ -104,6 +107,7 @@ func ConvertToDoctorProfileResponse(doctor model.Doctor) DoctorProfileResponse {
 func ConvertToDoctorWorkHistoryModel(workHistory DoctorWorkHistoryRequest) model.DoctorWorkHistory {
 	return model.DoctorWorkHistory{
 		ID:              uuid.New(),
+		DoctorID:        workHistory.DoctorID,
 		StartingDate:    workHistory.StartingDate,
 		EndingDate:      workHistory.EndingDate,
 		Job:             workHistory.Job,
@@ -115,6 +119,7 @@ func ConvertToDoctorWorkHistoryModel(workHistory DoctorWorkHistoryRequest) model
 func ConvertToDoctorEducationModel(education DoctorEducationRequest) model.DoctorEducation {
 	return model.DoctorEducation{
 		ID:               uuid.New(),
+		DoctorID:         education.DoctorID,
 		StartingDate:     education.StartingDate,
 		EndingDate:       education.EndingDate,
 		EducationProgram: education.EducationProgram,
@@ -125,6 +130,7 @@ func ConvertToDoctorEducationModel(education DoctorEducationRequest) model.Docto
 func ConvertToDoctorCertificationModel(certification DoctorCertificationRequest) model.DoctorCertification {
 	return model.DoctorCertification{
 		ID:              uuid.New(),
+		DoctorID:        certification.DoctorID,
 		StartingDate:    certification.StartingDate,
 		EndingDate:      certification.EndingDate,
 		Description:     certification.Description,
@@ -137,7 +143,7 @@ func ConvertToDoctorCertificationModel(certification DoctorCertificationRequest)
 func ConvertToDoctorWorkHistoriesResponse(workHistory model.DoctorWorkHistory) DoctorWorkHistoryResponse {
 	return DoctorWorkHistoryResponse{
 		ID:              workHistory.ID,
-		DoctorProfileID: workHistory.DoctorProfileID,
+		DoctorID:        workHistory.DoctorID,
 		StartingDate:    workHistory.StartingDate,
 		EndingDate:      workHistory.EndingDate,
 		Job:             workHistory.Job,
@@ -149,7 +155,7 @@ func ConvertToDoctorWorkHistoriesResponse(workHistory model.DoctorWorkHistory) D
 func ConvertToDoctorEducationResponse(doctorEducation model.DoctorEducation) DoctorEducationResponse {
 	return DoctorEducationResponse{
 		ID:               doctorEducation.ID,
-		DoctorProfileID:  doctorEducation.ID,
+		DoctorID:         doctorEducation.DoctorID,
 		StartingDate:     doctorEducation.StartingDate,
 		EndingDate:       doctorEducation.EndingDate,
 		EducationProgram: doctorEducation.EducationProgram,
@@ -160,7 +166,7 @@ func ConvertToDoctorEducationResponse(doctorEducation model.DoctorEducation) Doc
 func ConvertToDoctorCertificationResponse(certification model.DoctorCertification) DoctorCertificationResponse {
 	return DoctorCertificationResponse{
 		ID:              certification.ID,
-		DoctorProfileID: certification.DoctorProfileID,
+		DoctorID:        certification.DoctorID,
 		StartingDate:    certification.StartingDate,
 		EndingDate:      certification.EndingDate,
 		Description:     certification.Description,

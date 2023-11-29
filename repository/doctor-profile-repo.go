@@ -21,10 +21,10 @@ func GetDoctorProfile(id uuid.UUID) (model.Doctor, error) {
 
 // Work History
 
-func GetDoctorWorkHistory(id uuid.UUID) ([]model.DoctorWorkHistory, error) {
+func GetDoctorWorkHistories(id uuid.UUID) ([]model.DoctorWorkHistory, error) {
 	var workHistory []model.DoctorWorkHistory
 
-	tx := database.DB.Where("doctor_profile_id = ?", id).Find(&workHistory)
+	tx := database.DB.Where("doctor_id = ?", id).Find(&workHistory)
 
 	if tx.Error != nil {
 		return workHistory, tx.Error
@@ -44,14 +44,12 @@ func GetDoctorWorkHistoryByID(id uuid.UUID) (model.DoctorWorkHistory, error) {
 	return workHistory, nil
 }
 
-func InsertDoctorWorkHistory(doctorID uuid.UUID, data model.DoctorWorkHistory) (model.DoctorWorkHistory, error) {
-    data.DoctorProfileID = doctorID
-    
-    tx := database.DB.Save(&data)
-    if tx.Error != nil {
-        return model.DoctorWorkHistory{}, tx.Error
-    }
-    return data, nil
+func InsertDoctorWorkHistory(workHistory model.DoctorWorkHistory) (model.DoctorWorkHistory, error) {
+	tx := database.DB.Create(&workHistory)
+	if tx.Error != nil {
+		return model.DoctorWorkHistory{}, tx.Error
+	}
+	return workHistory, nil
 }
 
 func DeleteDoctorWorkHistoryByID(id uuid.UUID) error {
@@ -63,7 +61,7 @@ func DeleteDoctorWorkHistoryByID(id uuid.UUID) error {
 }
 
 func UpdateDoctorWorkHistoryByID(id uuid.UUID, updateData model.DoctorWorkHistory) (model.DoctorWorkHistory, error) {
-	tx := database.DB.Model(&updateData).Where("id = ?", id).Updates(updateData)
+	tx := database.DB.Save(&updateData).Where("id = ?", id).Updates(updateData)
 	if tx.Error != nil {
 		return model.DoctorWorkHistory{}, tx.Error
 	}
@@ -73,45 +71,34 @@ func UpdateDoctorWorkHistoryByID(id uuid.UUID, updateData model.DoctorWorkHistor
 // Education
 
 func GetDoctorEducation(id uuid.UUID) ([]model.DoctorEducation, error) {
-	var education []model.DoctorEducation
+	var educationHistory []model.DoctorEducation
 
-	tx := database.DB.Where("doctor_profile_id = ?", id).Find(&education)
+	tx := database.DB.Where("doctor_id = ?", id).Find(&educationHistory)
 
 	if tx.Error != nil {
-		return education, tx.Error
+		return educationHistory, tx.Error
 	}
 
-	return education, nil
+	return educationHistory, nil
 }
 
 func GetDoctorEducationByID(id uuid.UUID) (model.DoctorEducation, error) {
-	var education model.DoctorEducation
+	var educationHistory model.DoctorEducation
 
-	tx := database.DB.First(&education, id)
+	tx := database.DB.First(&educationHistory, id)
 	if tx.Error != nil {
-		return education, tx.Error
+		return educationHistory, tx.Error
 	}
 
-	return education, nil
+	return educationHistory, nil
 }
 
-func InsertDoctorEducation(doctorID uuid.UUID, data model.DoctorEducation) (model.DoctorEducation, error) {
-    data.DoctorProfileID = doctorID
-    
-    tx := database.DB.Save(&data)
-    if tx.Error != nil {
-        return model.DoctorEducation{}, tx.Error
-    }
-    return data, nil
-}
-
-
-func UpdateDoctorEducationByID(id uuid.UUID, updateData model.DoctorEducation) (model.DoctorEducation, error) {
-	tx := database.DB.Model(&updateData).Where("id = ?", id).Updates(updateData)
+func InsertDoctorEducation(education model.DoctorEducation) (model.DoctorEducation, error) {
+	tx := database.DB.Create(&education)
 	if tx.Error != nil {
 		return model.DoctorEducation{}, tx.Error
 	}
-	return updateData, nil
+	return education, nil
 }
 
 func DeleteDoctorEducationByID(id uuid.UUID) error {
@@ -122,48 +109,45 @@ func DeleteDoctorEducationByID(id uuid.UUID) error {
 	return nil
 }
 
+func UpdateDoctorEducationByID(id uuid.UUID, updateData model.DoctorEducation) (model.DoctorEducation, error) {
+	tx := database.DB.Save(&updateData).Where("id = ?", id).Updates(updateData)
+	if tx.Error != nil {
+		return model.DoctorEducation{}, tx.Error
+	}
+	return updateData, nil
+}
+
 // Certification
 
 func GetDoctorCertification(id uuid.UUID) ([]model.DoctorCertification, error) {
-	var certification []model.DoctorCertification
+	var certificationHistory []model.DoctorCertification
 
-	tx := database.DB.Where("doctor_profile_id = ?", id).Find(&certification)
+	tx := database.DB.Where("doctor_id = ?", id).Find(&certificationHistory)
 
 	if tx.Error != nil {
-		return certification, tx.Error
+		return certificationHistory, tx.Error
 	}
 
-	return certification, nil
+	return certificationHistory, nil
 }
 
 func GetDoctorCertificationByID(id uuid.UUID) (model.DoctorCertification, error) {
-	var certification model.DoctorCertification
+	var certificationHistory model.DoctorCertification
 
-	tx := database.DB.First(&certification, id)
+	tx := database.DB.First(&certificationHistory, id)
 	if tx.Error != nil {
-		return certification, tx.Error
+		return certificationHistory, tx.Error
 	}
 
-	return certification, nil
+	return certificationHistory, nil
 }
 
-func InsertDoctorCertification(doctorID uuid.UUID, data model.DoctorCertification) (model.DoctorCertification, error) {
-    data.DoctorProfileID = doctorID
-    
-    tx := database.DB.Save(&data)
-    if tx.Error != nil {
-        return model.DoctorCertification{}, tx.Error
-    }
-    return data, nil
-}
-
-
-func UpdateDoctorCertificationByID(id uuid.UUID, updateData model.DoctorCertification) (model.DoctorCertification, error) {
-	tx := database.DB.Model(&updateData).Where("id = ?", id).Updates(updateData)
+func InsertDoctorCertification(certification model.DoctorCertification) (model.DoctorCertification, error) {
+	tx := database.DB.Create(&certification)
 	if tx.Error != nil {
 		return model.DoctorCertification{}, tx.Error
 	}
-	return updateData, nil
+	return certification, nil
 }
 
 func DeleteDoctorCertificationByID(id uuid.UUID) error {
@@ -172,4 +156,12 @@ func DeleteDoctorCertificationByID(id uuid.UUID) error {
 		return tx.Error
 	}
 	return nil
+}
+
+func UpdateDoctorCertificationByID(id uuid.UUID, updateData model.DoctorCertification) (model.DoctorCertification, error) {
+	tx := database.DB.Save(&updateData).Where("id = ?", id).Updates(updateData)
+	if tx.Error != nil {
+		return model.DoctorCertification{}, tx.Error
+	}
+	return updateData, nil
 }
