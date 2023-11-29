@@ -8,14 +8,12 @@ import (
 	"github.com/sashabaranov/go-openai"
 )
 
-// AIRepository handles interactions with the AI model.
 type AIRepository interface {
 	GetHealthRecommendation(ctx context.Context, message, language string) (string, error)
 }
 
 type aiRepository struct{}
 
-// NewAIRepository creates a new instance of AIRepository.
 func NewAIRepository() AIRepository {
 	return &aiRepository{}
 }

@@ -13,19 +13,16 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// AIController handles AI-related requests.
 type AIController struct {
 	AIRepo repository.AIRepository
 }
 
-// NewAIController creates a new instance of AIController.
 func NewAIController(aiRepo repository.AIRepository) *AIController {
 	return &AIController{
 		AIRepo: aiRepo,
 	}
 }
 
-// GetHealthRecommendation provides health recommendations based on user input.
 func (ac *AIController) GetHealthRecommendation(c echo.Context) error {
 	req := new(dto.HealthRecommendationRequest)
 	if err := c.Bind(req); err != nil {
@@ -35,15 +32,12 @@ func (ac *AIController) GetHealthRecommendation(c echo.Context) error {
 		})
 	}
 
-	// Set default language to Bahasa Indonesia
 	language := "id"
 
-	// Jika kondisi tertentu (misalnya if false) untuk mengganti bahasa ke Inggris
 	if false {
 		language = "en"
 	}
 
-	// Menangani pertanyaan diluar kesehatan reproduksi
 	if isNonReproductiveHealthQuestion(req.Message) {
 		response := "Saya Emilia tidak bisa menjawab seputar hal diluar kesehatan reproduksi. Apakah ada pertanyaan lain yang berkaitan dengan kesehatan reproduksi?"
 		resp := dto.HealthRecommendationResponse{
