@@ -7,10 +7,10 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetSpecialists(id uuid.UUID) ([]model.Specialist, error) {
+func GetSpecialists() ([]model.Specialist, error) {
 	var specialists []model.Specialist
 
-	tx := database.DB.Where("id = ?", id).Find(&specialists)
+	tx := database.DB.Find(&specialists)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
