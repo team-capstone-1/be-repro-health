@@ -64,7 +64,7 @@ func GetClinicByDoctorID(id uuid.UUID) (model.Clinic, error) {
 	var datadoctor model.Doctor
 	var dataclinic model.Clinic
 
-	tx := database.DB.First(&datadoctor, id)
+	tx := database.DB.Preload("Clinic").Preload("Specialist").Preload("DoctorWorkHistories").Preload("DoctorEducations").First(&datadoctor, id)
 	if tx.Error != nil {
 		return model.Clinic{}, tx.Error
 	}
@@ -79,7 +79,7 @@ func GetClinicByDoctorID(id uuid.UUID) (model.Clinic, error) {
 func GetAllDoctors(name string) ([]model.Doctor, error) {
 	var datadoctors []model.Doctor
 
-	tx := database.DB
+	tx := database.DB.Preload("Clinic").Preload("Specialist").Preload("DoctorWorkHistories").Preload("DoctorEducations")
 
 	if name != "" {
 		tx = tx.Where("name LIKE ?", "%"+name+"%")
@@ -95,7 +95,7 @@ func GetAllDoctors(name string) ([]model.Doctor, error) {
 func GetDoctorByID(id uuid.UUID) (model.Doctor, error) {
 	var datadoctor model.Doctor
 
-	tx := database.DB.First(&datadoctor, id)
+	tx := database.DB.Preload("Clinic").Preload("Specialist").Preload("DoctorWorkHistories").Preload("DoctorEducations").First(&datadoctor, id)
 	if tx.Error != nil {
 		return model.Doctor{}, tx.Error
 	}
@@ -105,7 +105,7 @@ func GetDoctorByID(id uuid.UUID) (model.Doctor, error) {
 func GetDoctorsBySpecialist(id uuid.UUID) ([]model.Doctor, error) {
 	var datadoctors []model.Doctor
 
-	tx := database.DB.Where("specialist_id = ?", id).Find(&datadoctors)
+	tx := database.DB.Preload("Clinic").Preload("Specialist").Preload("DoctorWorkHistories").Preload("DoctorEducations").Where("specialist_id = ?", id).Find(&datadoctors)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -115,7 +115,7 @@ func GetDoctorsBySpecialist(id uuid.UUID) ([]model.Doctor, error) {
 func GetDoctorsByClinic(id uuid.UUID) ([]model.Doctor, error) {
 	var datadoctors []model.Doctor
 
-	tx := database.DB.Where("clinic_id = ?", id).Find(&datadoctors)
+	tx := database.DB.Preload("Clinic").Preload("Specialist").Preload("DoctorWorkHistories").Preload("DoctorEducations").Where("clinic_id = ?", id).Find(&datadoctors)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}

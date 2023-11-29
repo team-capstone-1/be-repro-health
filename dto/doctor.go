@@ -44,8 +44,11 @@ type DoctorResponse struct {
 	Price        float64   `json:"price"`
 	Address      string    `json:"address"`
 	Phone        string    `json:"phone"`
-	SpecialistID uuid.UUID `json:"specialist_id"`
-	ClinicID     uuid.UUID `json:"clinic_id"`
+	ProfileImage string    `json:"profile_image"`
+	Specialist   SpecialistResponse `json:"specialist"`
+	Clinic       ClinicResponse     `json:"clinic"`
+	DoctorWorkHistories  []DoctorWorkHistoryResponse `json:"work_histories"`
+	DoctorEducations 	 []DoctorEducationResponse   `json:"educations"`
 }
 
 func ConvertToDoctorSignUpResponse(doctor model.Doctor) DoctorSignUpResponse {
@@ -81,6 +84,17 @@ func ConvertToDoctorModel(doctor DoctorSignUpRequest) model.Doctor {
 }
 
 func ConvertToDoctorResponse(doctor model.Doctor) DoctorResponse {
+	var workHistories []DoctorWorkHistoryResponse
+	var educations []DoctorEducationResponse
+
+	for _, history := range doctor.DoctorWorkHistories{
+		workHistories = append(workHistories, ConvertToDoctorWorkHistoriesResponse(history))
+	}
+
+	for _, education := range doctor.DoctorEducations{
+		educations = append(educations, ConvertToDoctorEducationResponse(education))
+	}
+
 	return DoctorResponse{
 		ID:           doctor.ID,
 		Name:         doctor.Name,
@@ -88,7 +102,10 @@ func ConvertToDoctorResponse(doctor model.Doctor) DoctorResponse {
 		Price:        doctor.Price,
 		Address:      doctor.Address,
 		Phone:        doctor.Phone,
-		SpecialistID: doctor.SpecialistID,
-		ClinicID:     doctor.ClinicID,
+		ProfileImage: doctor.ProfileImage,
+		Specialist:   ConvertToSpecialistResponse(doctor.Specialist),
+		Clinic:       ConvertToClinicResponse(doctor.Clinic),
+		DoctorWorkHistories: workHistories,
+		DoctorEducations: educations,
 	}
 }
