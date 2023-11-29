@@ -11,6 +11,13 @@ import (
 )
 
 func GetDoctorAllForumsController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
 	title := c.FormValue("title")
 
 	responseData, err := repository.DoctorGetAllForums(title, uuid.Nil)

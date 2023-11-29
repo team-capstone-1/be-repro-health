@@ -14,6 +14,7 @@ type DoctorForumResponse struct {
 	Title      string                     `json:"title"`
 	Content    string                     `json:"content"`
 	Anonymous  bool                       `json:"anonymous"`
+	View       int                        `json:"view"`
 	Date       time.Time                  `json:"date"`
 	Status     bool                       `json:"status"`
 	ForumReply []DoctorForumReplyResponse `json:"forum_replies"`
@@ -55,15 +56,14 @@ func ConvertToDoctorForumReplyModel(forum DoctorForumReplyRequest) model.ForumRe
 	}
 }
 
-func ConvertToDoctorForumReplyResponse(forum model.ForumReply) DoctorForumReplyResponse {
-	var doctor model.Doctor
+func ConvertToDoctorForumReplyResponse(forumReply model.ForumReply) DoctorForumReplyResponse {
 	return DoctorForumReplyResponse{
-		ID:       forum.ID,
-		ForumsID: forum.ForumsID,
-		DoctorID: forum.DoctorID,
-		Doctor:   ConvertToDoctorResponse(doctor),
-		Content:  forum.Content,
-		Date:     forum.Date,
+		ID:       forumReply.ID,
+		ForumsID: forumReply.ForumsID,
+		DoctorID: forumReply.DoctorID,
+		Doctor:   ConvertToDoctorResponse(forumReply.Doctor),
+		Content:  forumReply.Content,
+		Date:     forumReply.Date,
 	}
 }
 
@@ -81,6 +81,7 @@ func ConvertToDoctorForumResponse(forum model.Forum) DoctorForumResponse {
 		Title:      forum.Title,
 		Content:    forum.Content,
 		Anonymous:  forum.Anonymous,
+		View:       forum.View,
 		Date:       forum.Date,
 		Status:     forum.Status,
 		ForumReply: forumReplyResponses,
