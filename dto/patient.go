@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"time"
+	
 	"capstone-project/model"
 
 	"github.com/google/uuid"
@@ -10,7 +12,7 @@ type PatientRequest struct {
 	Name               string    `json:"name" form:"name"`
 	TelephoneNumber    string    `json:"telephone_number" form:"telephone_number"`
 	ProfileImage       string    `json:"profile_image" form:"profile_image"`
-	DateOfBirth        model.DateOnly `json:"date_of_birth" form:"date_of_birth"`
+	DateOfBirth        time.Time `json:"date_of_birth" form:"date_of_birth"`
 	Relation           string    `json:"relation" form:"relation"`
 	Weight             float64   `json:"weight" form:"weight"`
 	Height             float64   `json:"height" form:"height"`
@@ -23,7 +25,7 @@ type PatientResponse struct {
 	Name               string    `json:"name"`
 	TelephoneNumber    string    `json:"telephone_number"`
 	ProfileImage       string    `json:"profile_image"`
-	DateOfBirth        model.DateOnly `json:"date_of_birth"`
+	DateOfBirth        time.Time `json:"date_of_birth"`
 	Relation           string    `json:"relation"`
 	Weight             float64   `json:"weight"`
 	Height             float64   `json:"height"`
