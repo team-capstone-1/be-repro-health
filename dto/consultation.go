@@ -19,12 +19,23 @@ type ConsultationRescheduleRequest struct {
 	Session   string    `json:"session" form:"session"`
 }
 
-type ConsultationResponse struct {
+type UserConsultationResponse struct {
 	ID          uuid.UUID `json:"id"`
 	DoctorID    uuid.UUID `json:"doctor_id"`
 	PatientID   uuid.UUID `json:"patient_id"`
 	ClinicID    uuid.UUID `json:"clinic_id"`
 	TransactionID uuid.UUID `json:"transaction_id"`
+	Date        time.Time `json:"date"`
+	Session     string    `json:"session"`
+	Clinic      ClinicResponse    `json:"clinic"`
+	Doctor      ForumDoctorResponse    `json:"doctor"`
+}
+
+type ConsultationResponse struct {
+	ID          uuid.UUID `json:"id"`
+	DoctorID    uuid.UUID `json:"doctor_id"`
+	PatientID   uuid.UUID `json:"patient_id"`
+	ClinicID    uuid.UUID `json:"clinic_id"`
 	Date        time.Time `json:"date"`
 	Session     string    `json:"session"`
 	Clinic      ClinicResponse    `json:"clinic"`
@@ -46,6 +57,19 @@ func ConvertToConsultationRescheduleModel(consultation ConsultationRescheduleReq
 		ID:        id,
 		Date:      consultation.Date,
 		Session:   consultation.Session,
+	}
+}
+
+func ConvertToUserConsultationResponse(consultation model.Consultation) UserConsultationResponse {
+	return UserConsultationResponse{
+		ID:        consultation.ID,
+		DoctorID:  consultation.DoctorID,
+		PatientID: consultation.PatientID,
+		ClinicID: consultation.ClinicID,
+		Date: consultation.Date,
+		Session: consultation.Session,
+		Clinic: ConvertToClinicResponse(consultation.Clinic),
+		Doctor: ConvertToForumDoctorResponse(consultation.Doctor),
 	}
 }
 

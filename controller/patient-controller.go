@@ -97,25 +97,27 @@ func CreatePatientController(c echo.Context) error {
 			"response": "Permission Denied: Permission Denied: User is not valid.",
 		})
 	}
+	patientData := dto.ConvertToPatientModel(patient)
 
 	profileImage, err := c.FormFile("profile_image")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error upload profile image",
-			"response": err.Error(),
-		})
+	if err != http.ErrMissingFile{
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload profile image",
+				"response": err.Error(),
+			})
+		}
+	
+		profileURL, err := util.UploadToCloudinary(profileImage)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload profile image to Cloudinary",
+				"response": err.Error(),
+			})
+		}
+		patientData.ProfileImage = profileURL
 	}
-
-	profileURL, err := util.UploadToCloudinary(profileImage)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error upload profile image to Cloudinary",
-			"response": err.Error(),
-		})
-	}
-
-	patientData := dto.ConvertToPatientModel(patient)
-	patientData.ProfileImage = profileURL
+	
 	patientData.UserID = user
 
 	responseData, err := repository.InsertPatient(patientData)
@@ -175,6 +177,26 @@ func UpdatePatientController(c echo.Context) error {
 	}
 
 	patientData := dto.ConvertToPatientModel(updateData)
+
+	profileImage, err := c.FormFile("profile_image")
+	if err != http.ErrMissingFile{
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload profile image",
+				"response": err.Error(),
+			})
+		}
+	
+		profileURL, err := util.UploadToCloudinary(profileImage)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload profile image to Cloudinary",
+				"response": err.Error(),
+			})
+		}
+		patientData.ProfileImage = profileURL
+	}
+	
 	patientData.ID = uuid
 
 	responseData, err := repository.UpdatePatientByID(uuid, patientData)

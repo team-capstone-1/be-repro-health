@@ -24,6 +24,7 @@ type ForumResponse struct {
 	Anonymous bool      `json:"anonymous"`
 	Date      time.Time `json:"date"`
 	Status    bool      `json:"status"`
+	ForumReply []DoctorForumReplyResponse `json:"forum_replies"`
 }
 
 func ConvertToForumModel(forum ForumRequest) model.Forum {
@@ -38,6 +39,12 @@ func ConvertToForumModel(forum ForumRequest) model.Forum {
 }
 
 func ConvertToForumResponse(forum model.Forum) ForumResponse {
+	var forumReplyResponses []DoctorForumReplyResponse
+
+	for _, reply := range forum.ForumReply {
+		forumReplyResponses = append(forumReplyResponses, ConvertToDoctorForumReplyResponse(reply))
+	}
+
 	return ForumResponse{
 		ID:        forum.ID,
 		PatientID: forum.PatientID,
@@ -47,5 +54,6 @@ func ConvertToForumResponse(forum model.Forum) ForumResponse {
 		Anonymous: forum.Anonymous,
 		Date:      forum.Date,
 		Status:    forum.Status,
+		ForumReply:forumReplyResponses,
 	}
 }
