@@ -28,14 +28,12 @@ func GetSpecialistByID(id uuid.UUID) (model.Specialist, error) {
 	return specialist, nil
 }
 
-func InsertSpecialist(ID uuid.UUID, data model.Specialist) (model.Specialist, error) {
-	data.ID = ID
-
-	tx := database.DB.Save(&data)
+func InsertSpecialist(specialist model.Specialist) (model.Specialist, error) {
+tx := database.DB.Create(&specialist)
 	if tx.Error != nil {
 		return model.Specialist{}, tx.Error
 	}
-	return data, nil
+	return specialist, nil
 }
 
 func DeleteSpecialistByID(id uuid.UUID) error {
