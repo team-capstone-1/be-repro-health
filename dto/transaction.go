@@ -28,8 +28,8 @@ type TransactionResponse struct {
 	Total          float64              `json:"total"`
 	Status         string               `json:"status"`
 	PaymentStatus  string               `json:"payment_status"`
-	Refund         RefundResponse       `json:"refund"`
-	Payment        PaymentResponse      `json:"payment"`
+	Refund         []RefundResponse       `json:"refund"`
+	Payment        []PaymentResponse      `json:"payment"`
 }
 
 func ConvertToTransactionModel(transaction TransactionRequest) model.Transaction {
@@ -46,6 +46,16 @@ func ConvertToTransactionModel(transaction TransactionRequest) model.Transaction
 }
 
 func ConvertToTransactionResponse(transaction model.Transaction) TransactionResponse {
+	var articleRefundResponses []RefundResponse
+	var articlePaymentResponses []PaymentResponse
+
+	if transaction.Refund.ID != uuid.Nil {
+		articleRefundResponses = append(articleRefundResponses, ConvertToRefundResponse(transaction.Refund))
+	}
+	if transaction.Payment.ID != uuid.Nil {
+		articlePaymentResponses = append(articlePaymentResponses, ConvertToPaymentResponse(transaction.Payment))
+	}
+
 	return TransactionResponse{
 		ID:             transaction.ID,
 		ConsultationID: transaction.ConsultationID,
@@ -56,8 +66,8 @@ func ConvertToTransactionResponse(transaction model.Transaction) TransactionResp
 		Total:          transaction.Total,
 		Status:         string(transaction.Status),
 		PaymentStatus:  string(transaction.PaymentStatus),
-		Refund:        	ConvertToRefundResponse(transaction.Refund),
-		Payment:        ConvertToPaymentResponse(transaction.Payment),
+		Refund:        	articleRefundResponses,
+		Payment:        articlePaymentResponses,
 	}
 }
 

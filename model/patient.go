@@ -1,11 +1,20 @@
 package model
 
 import (
-	"time"
-
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
+
+type DateOnly string
+
+func (d *DateOnly) Scan(value interface{}) error {
+	*d = DateOnly(value.(string))
+	return nil
+}
+
+func (d DateOnly) Value() (string, error) {
+	return string(d), nil
+}
 
 type Patient struct {
 	gorm.Model
@@ -15,7 +24,7 @@ type Patient struct {
 	Name     		   string    `gorm:"size:255"`
 	TelephoneNumber    string    `gorm:"size:255"`
 	ProfileImage       string    `gorm:"size:255"`
-	DateOfBirth 	   time.Time `gorm:"type:date"`
+	DateOfBirth 	   DateOnly  `gorm:"type:date"`
 	Relation		   string    `gorm:"size:255"`
 	Weight			   float64   `gorm:"type:decimal(5,2)"`
 	Height			   float64   `gorm:"type:decimal(5,2)"`

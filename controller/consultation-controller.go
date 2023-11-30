@@ -67,7 +67,7 @@ func CreateConsultationController(c echo.Context) error {
 
 	responseData, _ = repository.GetConsultationByID(responseData.ID)
 
-	consultationResponse := dto.ConvertToConsultationResponse(responseData)
+	consultationResponse := dto.ConvertToUserConsultationResponse(responseData)
 
 	transaction,err := generateTransaction(consultationResponse)
 	if err != nil {
@@ -84,7 +84,7 @@ func CreateConsultationController(c echo.Context) error {
 	})
 }
 
-func generateTransaction(consultation dto.ConsultationResponse) (model.Transaction, error) {
+func generateTransaction(consultation dto.UserConsultationResponse) (model.Transaction, error) {
 	invoice, date, err := repository.GenerateNextInvoice()
 	if err != nil {
 		return model.Transaction{},err
