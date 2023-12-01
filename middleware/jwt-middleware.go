@@ -2,6 +2,8 @@ package middleware
 
 import (
 	"net/http"
+	"time"
+	"fmt"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
@@ -10,14 +12,17 @@ import (
 	"capstone-project/config"
 )
 
-func CreateToken(userId uuid.UUID, role, name string) (string, error) {
+func CreateToken(userId uuid.UUID, role, name string, is_web bool) (string, error) {
 	claims := jwt.MapClaims{}
 	// token kedua (payload)
 	claims["authorized"] = true
 	claims["user_id"] = userId
 	claims["name"] = name
 	claims["role"] = role
-	// claims["exp"] = time.Now().Add(time.Hour * 1).Unix() //Token expires after 1 hour
+	if is_web{
+		claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
+	}
+	fmt.Println("claims", claims)
 	// token pertama (header)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// return bersama token ketiga (dengan secret key)
