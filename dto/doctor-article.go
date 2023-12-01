@@ -17,28 +17,31 @@ type DoctorArticleRequest struct {
 }
 
 type DoctorArticleResponse struct {
-	ID        uuid.UUID `json:"id"`
-	DoctorID  uuid.UUID `json:"doctor_id"`
-	Title     string    `json:"title"`
-	Tags      string    `json:"tags"`
-	Reference string    `json:"reference"`
-	Date      time.Time `json:"date"`
-	Image     string    `json:"image"`
-	ImageDesc string    `json:"image_desc"`
-	Content   string    `json:"content"`
+	ID        uuid.UUID         `json:"id"`
+	DoctorID  uuid.UUID         `json:"doctor_id"`
+	Title     string            `json:"title"`
+	Tags      string            `json:"tags"`
+	Reference string            `json:"reference"`
+	Date      time.Time         `json:"date"`
+	Image     string            `json:"image"`
+	ImageDesc string            `json:"image_desc"`
+	Content   string            `json:"content"`
+	Published bool              `json:"published"`
+	View      int               `json:"views"`
+	Comment   []CommentResponse `json:"comments"`
 }
 
 type UserArticleResponse struct {
-	ID        uuid.UUID `json:"id"`
-	DoctorID  uuid.UUID `json:"doctor_id"`
-	Title     string    `json:"title"`
-	Tags      string    `json:"tags"`
-	Reference string    `json:"reference"`
-	Date      time.Time `json:"date"`
-	Image     string    `json:"image"`
-	ImageDesc string    `json:"image_desc"`
-	Content   string    `json:"content"`
-	View      int    	`json:"views"`
+	ID        uuid.UUID         `json:"id"`
+	DoctorID  uuid.UUID         `json:"doctor_id"`
+	Title     string            `json:"title"`
+	Tags      string            `json:"tags"`
+	Reference string            `json:"reference"`
+	Date      time.Time         `json:"date"`
+	Image     string            `json:"image"`
+	ImageDesc string            `json:"image_desc"`
+	Content   string            `json:"content"`
+	View      int               `json:"views"`
 	Comment   []CommentResponse `json:"comments"`
 }
 
@@ -52,6 +55,9 @@ func ConvertToDoctorArticleModel(doctor DoctorArticleRequest) model.Article {
 		ImageDesc: doctor.ImageDesc,
 		Content:   doctor.Content,
 		Date:      time.Now(),
+		Published: false,
+		View:      0,
+		Comment:   []model.Comment{},
 	}
 }
 
@@ -66,6 +72,9 @@ func ConvertToDoctorArticleResponse(article model.Article) DoctorArticleResponse
 		Image:     article.Image,
 		ImageDesc: article.ImageDesc,
 		Content:   article.Content,
+		Published: article.Published,
+		View:      article.View,
+		Comment:   []CommentResponse{},
 	}
 }
 
