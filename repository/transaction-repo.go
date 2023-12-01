@@ -11,14 +11,37 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAllTransactions() ([]model.Transaction, error) {
+func GetAllTransactionsByDoctorID(doctorID uuid.UUID) ([]model.Transaction, error) {
 	var datatransactions []model.Transaction
 
-	tx := database.DB.Preload("Consultation").Find(&datatransactions)
+	tx := database.DB.Preload("Consultation").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ?", doctorID).
+		Find(&datatransactions)
+
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
+
 	return datatransactions, nil
+}
+
+func GetAllTransactionsByDoctorAndMonth(doctorID uuid.UUID, month time.Time) ([]model.Transaction, error) {
+	var transactions []model.Transaction
+	startOfMonth := month.AddDate(0, 0, 1)
+	endOfMonth := startOfMonth.AddDate(0, 1, -1)
+
+	tx := database.DB.
+		Preload("Consultation").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ? AND transactions.date BETWEEN ? AND ?", doctorID, startOfMonth, endOfMonth).
+		Find(&transactions)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return transactions, nil
 }
 
 func GetPatientTransactions(id uuid.UUID) ([]model.Transaction, error) {

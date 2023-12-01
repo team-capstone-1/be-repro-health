@@ -21,15 +21,20 @@ func GetAllArticles(doctorID uuid.UUID) ([]model.Article, error) {
 	return dataarticles, nil
 }
 
-func GetAllArticleDashboard() ([]model.Article, error) {
+func GetAllArticleDashboard(doctorID uuid.UUID) ([]model.Article, error) {
 	var dataarticlesdashboard []model.Article
 
-	tx := database.DB.Find(&dataarticlesdashboard)
+	tx := database.DB.
+		Where("doctor_id = ?", doctorID).
+		Find(&dataarticlesdashboard)
+
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
+
 	return dataarticlesdashboard, nil
 }
+
 
 func GetArticleByID(id uuid.UUID) (model.Article, error) {
 	var dataarticle model.Article

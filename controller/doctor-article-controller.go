@@ -18,7 +18,7 @@ func GetAllArticleDoctorsController(c echo.Context) error {
 			"response": "Permission Denied: Doctor is not valid.",
 		})
 	}
-	responseData, err := repository.GetAllArticles(doctor)
+	responseData, err := repository.GetAllArticlesByDoctorID(doctor)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get article data",

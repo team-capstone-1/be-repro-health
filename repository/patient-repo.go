@@ -19,14 +19,18 @@ func GetAllPatients(user uuid.UUID) ([]model.Patient, error) {
 	return datapatients, nil
 }
 
-func GetAllPatientsDashboard() ([]model.Patient, error) {
-	var datapatiens []model.Patient
+func GetPatientByDoctorID(doctorID uuid.UUID) ([]model.Patient, error) {
+	var datapatients []model.Patient
 
-	tx := database.DB.Find(&datapatiens)
+	tx := database.DB.Joins("JOIN consultations ON patients.id = consultations.patient_id").
+		Where("consultations.doctor_id = ?", doctorID).
+		Find(&datapatients)
+
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	return datapatiens, nil
+
+	return datapatients, nil
 }
 
 func GetPatientByID(id uuid.UUID) (model.Patient, error) {
