@@ -9,6 +9,7 @@ type Clinic struct {
 	gorm.Model
 	ID           uuid.UUID      `json:"id" form:"id"`
 	Name         string         `gorm:"size:255"`
+	Image   	 string    		`gorm:"size:255"`
 	City         string         `gorm:"size:255"`
 	Location     string         `gorm:"size:255"`
 	Profile      string         `gorm:"size:255"`

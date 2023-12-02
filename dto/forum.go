@@ -21,6 +21,7 @@ type ForumResponse struct {
 	Title     string    `json:"title"`
 	View      int       `json:"view"`
 	Content   string    `json:"content"`
+	Profile   string    `json:"profile"`
 	Anonymous bool      `json:"anonymous"`
 	Date      time.Time `json:"date"`
 	Status    bool      `json:"status"`

@@ -86,3 +86,10 @@ func UpdatePatientByID(id uuid.UUID, updateData model.Patient) (model.Patient, e
 	}
 	return updateData, nil
 }
+
+func GetProfileByPatientID(id uuid.UUID) string {
+	var data model.Patient
+	database.DB.Where("id = ?", id).First(&data)
+
+	return data.ProfileImage
+}

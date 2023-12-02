@@ -8,6 +8,7 @@ import (
 type ClinicResponse struct {
 	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
+	Image     string    `json:"image"`
 	City      string    `json:"city"`
 	Location  string    `json:"location"`
 	Profile   string    `json:"profile"`
@@ -19,6 +20,7 @@ func ConvertToClinicResponse(clinic model.Clinic) ClinicResponse {
 	return ClinicResponse{
 		ID:        clinic.ID,
 		Name:      clinic.Name,
+		Image:     clinic.Image,
 		City:      clinic.City,
 		Location:  clinic.Location,
 		Profile:   clinic.Profile,
