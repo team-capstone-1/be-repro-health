@@ -111,7 +111,7 @@ func ChangeUserPasswordController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success change password",
-		"response": "success change password for " + responseData.Email,
+		"response": "success change password " + responseData.Email,
 	})
 }
 

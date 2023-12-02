@@ -83,6 +83,12 @@ func UpdateUserPassword(data model.User) (model.User, error) {
 	if tx.Error != nil {
 		return model.User{}, tx.Error
 	}
+
+	tx = database.DB.Where("id = ?", data.ID).First(&data)
+	if tx.Error != nil {
+		return model.User{}, tx.Error
+	}
+
 	return data, nil
 }
 
