@@ -4,6 +4,7 @@ import (
 	"capstone-project/config"
 	"capstone-project/constant"
 	"capstone-project/controller"
+	"capstone-project/repository"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -57,6 +58,10 @@ func New() *echo.Echo {
 	e.GET("/articles", controller.GetArticlesController)
 	e.GET("/articles/:id", controller.GetArticleController)
 	r.POST("/articles/:id/comments", controller.CreateCommentController)
+
+	// user ai
+	aiController := controller.NewAIController(repository.NewAIRepository())
+	e.POST("/chatbot/health-recommendation", aiController.GetHealthRecommendation)
 
 	// transaction
 	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole(constant.ROLE_USER))
