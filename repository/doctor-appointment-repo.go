@@ -55,3 +55,35 @@ func DoctorGetDetailsTransaction(transactionID uuid.UUID) (model.Transaction, er
 
 	return transaction, nil
 }
+
+func DoctorGetDetailsConsultation(consultationID uuid.UUID) (model.Consultation, error) {
+	var consultation model.Consultation
+
+	tx := database.DB.
+		Where("id = ?", consultationID).
+		Preload("Patient").
+		Preload("Patient.User").
+		Preload("Clinic").
+		First(&consultation)
+
+	if tx.Error != nil {
+		return consultation, tx.Error
+	}
+
+	return consultation, nil
+}
+
+func DoctorGetTransactionsForConsultation(consultationID uuid.UUID) ([]model.Transaction, error) {
+	var transactions []model.Transaction
+
+	tx := database.DB.
+		Where("consultation_id = ?", consultationID).
+		Preload("Payment").
+		Find(&transactions)
+
+	if tx.Error != nil {
+		return transactions, tx.Error
+	}
+
+	return transactions, nil
+}

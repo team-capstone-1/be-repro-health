@@ -124,6 +124,7 @@ func New() *echo.Echo {
 
 	// DOCTOR APPOINTMENT
 	doctor.GET("/appointment/details-transaction/:id", controller.DoctorGetDetailsTransactionController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/appointment/details-consultation/:id", controller.DoctorGetDetailsPatientController, m.CheckRole(constant.ROLE_DOCTOR))
 
 	return e
 }

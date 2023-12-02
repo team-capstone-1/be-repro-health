@@ -40,3 +40,38 @@ func DoctorGetDetailsTransactionController(c echo.Context) error {
 		"response": detailsTransaction,
 	})
 }
+
+func DoctorGetDetailsPatientController(c echo.Context) error {
+	uid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	consultation, err := repository.DoctorGetDetailsConsultation(uid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "failed get details consultation",
+			"response": err.Error(),
+		})
+	}
+
+	transactions, err := repository.DoctorGetTransactionsForConsultation(uid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "failed get transactions for consultation",
+			"response": err.Error(),
+		})
+	}
+
+	consultation.Transaction = transactions
+
+	consultationResponse := dto.ConvertToDoctorGetDetailsPatientResponse(consultation)
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":  "success get details consultation",
+		"response": consultationResponse,
+	})
+}
