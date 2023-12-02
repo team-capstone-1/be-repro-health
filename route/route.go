@@ -27,7 +27,9 @@ func New() *echo.Echo {
 	// user auth route
 	e.POST("/users/signup", controller.SignUpUserController)
 	e.POST("/users/login", controller.LoginUserController)
-	e.POST("/users/change-password", controller.ChangeUserPasswordController)
+	e.PUT("/users/send-otp", controller.SendOTP)
+	e.PUT("/users/validate-otp", controller.ValidateOTP)
+	r.PUT("/users/change-password", controller.ChangeUserPasswordController)
 
 	// user appointment route
 	e.GET("/specialists", controller.GetSpecialistsController)
