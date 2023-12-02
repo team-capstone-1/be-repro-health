@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"capstone-project/dto"
 	m "capstone-project/middleware"
 	"capstone-project/model"
 	"capstone-project/repository"
@@ -12,122 +11,99 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func GetConsultationSchedulesForDoctorDashboardController(c echo.Context) error {
+func GetDataCountForDoctorControllerOneMonth(c echo.Context) error {
 	doctor := m.ExtractTokenUserId(c)
 	if doctor == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
-			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
+			"response": "Permission Denied: Doctor is not valid.",
 		})
 	}
 
-	responseData, err := repository.GetConsultationsByDoctorID(doctor)
+	// Consultation
+	consultationResponseData, err := repository.GetConsultationsByDoctorID(doctor)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed get consultations",
+			"message":  "failed get consultation data",
 			"response": err.Error(),
 		})
 	}
 
-	var consultationResponse []dto.ConsultationResponse
-	for _, doctor := range responseData {
-		consultationResponse = append(consultationResponse, dto.ConvertToConsultationResponse(doctor))
-	}
+	// lastMonthConsultation := time.Now().AddDate(0, -2, 0)
+	// lastMonthConsultationData, err := repository.GetConsultationByDoctorAndMonth(doctor, lastMonthConsultation)
+	// if err != nil {
+	// 	return c.JSON(http.StatusBadRequest, map[string]any{
+	// 		"message":  "failed get last month consultation data",
+	// 		"response": err.Error(),
+	// 	})
+	// }
 
-	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success get consultations",
-		"response": consultationResponse,
-	})
-}
+	// thisMonthConsultation := time.Now().AddDate(0, -1, 0)
+	// thisMonthConsultationData, err := repository.GetConsultationByDoctorAndMonth(doctor, thisMonthConsultation)
+	// if err != nil {
+	// 	return c.JSON(http.StatusBadRequest, map[string]any{
+	// 		"message":  "failed get this month consultation data",
+	// 		"response": err.Error(),
+	// 	})
+	// }
 
-func GetConsultationCountDoctor(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]any{
-			"message":  "unauthorized",
-			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
-		})
-	}
+	// allConsultations := append(lastMonthConsultationData, thisMonthConsultationData...)
 
-	responseData, err := repository.GetConsultationsByDoctorID(doctor)
+	// totalConsultationLastMonth := float64(len(lastMonthConsultationData))
+	// totalConsultationThisMonth := float64(len(thisMonthConsultationData))
+
+	// var consultationPercentage float64
+	// if totalConsultationLastMonth > 0 {
+	// 	consultationPercentage = ((totalConsultationThisMonth - totalConsultationLastMonth) / totalConsultationLastMonth) * 100
+	// } else if totalConsultationLastMonth == 0 && totalConsultationThisMonth > 0 {
+	// 	consultationPercentage = 100.0
+	// } else {
+	// 	consultationPercentage = 0.0
+	// }
+
+	// Patient
+	patientResponseData, err := repository.GetPatientByDoctorID(doctor)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed get consultations",
+			"message":  "failed get patient data",
 			"response": err.Error(),
 		})
 	}
 
-	totalConsultation := len(responseData)
-
-	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get consultations",
-		"total":   totalConsultation,
-	})
-}
-
-func GetPatientsForDoctorDashboardController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]any{
-			"message":  "unauthorized",
-			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
-		})
-	}
-
-	responseData, err := repository.GetPatientByDoctorID(doctor)
+	lastMonthPatient := time.Now().AddDate(0, -2, 0)
+	lastMonthPatientData, err := repository.GetPatientByDoctorAndMonth(doctor, lastMonthPatient)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed get patients data",
+			"message":  "failed get last month patient data",
 			"response": err.Error(),
 		})
 	}
 
-	var patientResponse []dto.PatientResponse
-	for _, doctor := range responseData {
-		patientResponse = append(patientResponse, dto.ConvertToPatientDashboardResponse(doctor))
-	}
-
-	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success get patients data",
-		"response": patientResponse,
-	})
-}
-
-func GetPatientsForDoctorCountController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]any{
-			"message":  "unauthorized",
-			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
-		})
-	}
-
-	responseData, err := repository.GetPatientByDoctorID(doctor)
+	thisMonthPatient := time.Now().AddDate(0, -1, 0)
+	thisMonthPatientData, err := repository.GetPatientByDoctorAndMonth(doctor, thisMonthPatient)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed get patients data",
+			"message":  "failed get this month patient data",
 			"response": err.Error(),
 		})
 	}
 
-	totalPatient := len(responseData)
+	allPatients := append(lastMonthPatientData, thisMonthPatientData...)
 
-	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get patients data",
-		"total":   totalPatient,
-	})
-}
+	totalPatientLastMonth := float64(len(lastMonthPatientData))
+	totalPatientThisMonth := float64(len(thisMonthPatientData))
 
-func GetTransactionsForDoctorDashboardController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]any{
-			"message":  "unauthorized",
-			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
-		})
+	var patientPercentage float64
+	if totalPatientLastMonth > 0 {
+		patientPercentage = ((totalPatientThisMonth - totalPatientLastMonth) / totalPatientLastMonth) * 100
+	} else if totalPatientLastMonth == 0 && totalPatientThisMonth > 0 {
+		patientPercentage = 100.0
+	} else {
+		patientPercentage = 0.0
 	}
 
-	responseData, err := repository.GetAllTransactionsByDoctorID(doctor)
+	// Transaction
+	transactionResponseData, err := repository.GetAllTransactionsByDoctorID(doctor)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get transaction data",
@@ -135,87 +111,40 @@ func GetTransactionsForDoctorDashboardController(c echo.Context) error {
 		})
 	}
 
-	var transactionResponse []dto.TransactionResponse
-	for _, transaction := range responseData {
-		transactionResponse = append(transactionResponse, dto.ConvertToTransactionDashboardResponse(transaction))
-	}
-
-	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success get transaction data",
-		"response": transactionResponse,
-	})
-}
-
-func GetTransactionsForDoctorCountController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
-			"message":  "unauthorized",
-			"response": "Permission Denied: Doctor is not valid.",
-		})
-	}
-
-	lastMonth := time.Now().AddDate(0, -2, 0)
-	lastMonthData, err := repository.GetDoneTransactionsByDoctorAndMonth(doctor, lastMonth)
+	lastMonthTrasaction := time.Now().AddDate(0, -2, 0)
+	lastMonthTrasactionData, err := repository.GetDoneTransactionsByDoctorAndMonth(doctor, lastMonthTrasaction)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get last month transaction data",
 			"response": err.Error(),
 		})
 	}
 
-	thisMonth := time.Now().AddDate(0, -1, 0)
-	thisMonthData, err := repository.GetDoneTransactionsByDoctorAndMonth(doctor, thisMonth)
+	thisMonthTrasaction := time.Now().AddDate(0, -1, 0)
+	thisMonthTrasactionData, err := repository.GetDoneTransactionsByDoctorAndMonth(doctor, thisMonthTrasaction)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get this month transaction data",
 			"response": err.Error(),
 		})
 	}
 
-	allTransactions := append(lastMonthData, thisMonthData...)
+	allTransactions := append(lastMonthTrasactionData, thisMonthTrasactionData...)
 
-	totalPriceLastMonth := calculateTotalPrice(lastMonthData)
-	totalPriceThisMonth := calculateTotalPrice(thisMonthData)
+	totalPriceLastMonthTransaction := calculateTotalTransaction(lastMonthTrasactionData)
+	totalPriceThisMonthTransaction := calculateTotalTransaction(thisMonthTrasactionData)
 
-	var changePercentage float64
-	if totalPriceLastMonth > 0 {
-		changePercentage = ((totalPriceThisMonth - totalPriceLastMonth) / totalPriceLastMonth) * 100
-	} else if totalPriceThisMonth > 0 {
-		changePercentage = 100.0
+	var transactionPercentage float64
+	if totalPriceLastMonthTransaction > 0 {
+		transactionPercentage = ((totalPriceThisMonthTransaction - totalPriceLastMonthTransaction) / totalPriceLastMonthTransaction) * 100
+	} else if totalPriceLastMonthTransaction > 0 {
+		transactionPercentage = 100.0
 	} else {
-		changePercentage = 0.0
+		transactionPercentage = 0.0
 	}
 
-	totalEarnings := calculateTotalPrice(allTransactions)
-
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":             "success get data",
-		"changePercentage":    changePercentage,
-		"totalPriceThisMonth": totalPriceThisMonth,
-		"totalPriceLastMonth": totalPriceLastMonth,
-		"totalEarnings":       totalEarnings,
-	})
-}
-
-func calculateTotalPrice(transactions []model.Transaction) float64 {
-	totalPrice := 0.0
-	for _, transaction := range transactions {
-		totalPrice += transaction.Total
-	}
-	return totalPrice
-}
-
-func GetArticleForDoctorDashboardController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]any{
-			"message":  "unauthorized",
-			"response": "Permission Denied: Permission Denied: Doctor is not valid.",
-		})
-	}
-
-	responseData, err := repository.GetAllArticlesByDoctorID(doctor)
+	// Article
+	articleResponseData, err := repository.DoctorGetAllArticles(doctor)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get article data",
@@ -223,58 +152,59 @@ func GetArticleForDoctorDashboardController(c echo.Context) error {
 		})
 	}
 
-	var articleDashboardResponse []dto.DoctorArticleResponse
-	for _, article := range responseData {
-		articleDashboardResponse = append(articleDashboardResponse, dto.ConvertToDoctorArticleDashboardResponse(article))
-	}
+	totalConsultation := len(consultationResponseData)
+	totalArticle := len(articleResponseData)
+	totalTransaction := len(transactionResponseData)
+	totalPatient := len(patientResponseData)
+	// totalConsultations := calculateTotalConsultation(allConsultations)
+	totalTransactions := calculateTotalTransaction(allTransactions)
+	totalPatients := calculateTotalPatient(allPatients)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success get transaction data",
-		"response": articleDashboardResponse,
+		"message": "success get dashboard data for one month",
+		// Consultation
+		"totalConsultation":          totalConsultation,
+		// "totalConsultations":         totalConsultations,
+		// "totalConsultationLastMonth": totalConsultationLastMonth,
+		// "totalConsultationThisMonth": totalConsultationThisMonth,
+		// "consultationPercentage":     consultationPercentage,
+		// Patients
+		"totalPatient":          totalPatient,
+		"totalPatients":         totalPatients,
+		"totalPatientLastMonth": totalPatientLastMonth,
+		"totalPatientThisMonth": totalPatientThisMonth,
+		"patientPercentage":     patientPercentage,
+		// Transaction
+		"totalTransaction":      totalTransaction,
+		"totalTransactions":     totalTransactions,
+		"totalPriceLastMonth":   totalPriceLastMonthTransaction,
+		"totalPriceThisMonth":   totalPriceThisMonthTransaction,
+		"transactionPercentage": transactionPercentage,
+		// Article
+		"totalArticle": totalArticle,
 	})
 }
 
-func GetArticleForDoctorCountController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]any{
-			"message":  "unauthorized",
-			"response": "Permission Denied: Doctor is not valid.",
-		})
+func calculateTotalTransaction(transactions []model.Transaction) float64 {
+	totalTransaction := 0.0
+	for _, transaction := range transactions {
+		totalTransaction += transaction.Total
 	}
+	return totalTransaction
+}
 
-	allArticles, err := repository.GetAllArticlesByDoctorID(doctor)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed get all article data",
-			"response": err.Error(),
-		})
+func calculateTotalPatient(patients []model.Patient) float64 {
+	totalPatient := 0.0
+	for range patients {
+		totalPatient += 1
 	}
+	return totalPatient
+}
 
-	publishedArticles, err := repository.GetPublishedArticles(doctor)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed get published article data",
-			"response": err.Error(),
-		})
+func calculateTotalConsultation(consultations []model.Consultation) float64 {
+	totalConsultation := 0.0
+	for range consultations {
+		totalConsultation += 1
 	}
-
-	unpublishedArticles, err := repository.GetUnpublishedArticles(doctor)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed get unpublished article data",
-			"response": err.Error(),
-		})
-	}
-
-	totalAllArticles := len(allArticles)
-	totalPublishedArticles := len(publishedArticles)
-	totalUnpublishedArticles := len(unpublishedArticles)
-
-	return c.JSON(http.StatusOK, map[string]any{
-		"message":                  "success get article data",
-		"totalAllArticles":         totalAllArticles,
-		"totalPublishedArticles":   totalPublishedArticles,
-		"totalUnpublishedArticles": totalUnpublishedArticles,
-	})
+	return totalConsultation
 }

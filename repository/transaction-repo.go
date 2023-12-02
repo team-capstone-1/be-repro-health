@@ -26,7 +26,7 @@ func GetAllTransactionsByDoctorID(doctorID uuid.UUID) ([]model.Transaction, erro
 	return datatransactions, nil
 }
 
-func GetAllTransactionsByDoctorAndMonth(doctorID uuid.UUID, month time.Time) ([]model.Transaction, error) {
+func GetDoneTransactionsByDoctorAndMonth(doctorID uuid.UUID, month time.Time) ([]model.Transaction, error) {
 	var transactions []model.Transaction
 	startOfMonth := month.AddDate(0, 0, 1)
 	endOfMonth := startOfMonth.AddDate(0, 1, -1)
@@ -34,7 +34,23 @@ func GetAllTransactionsByDoctorAndMonth(doctorID uuid.UUID, month time.Time) ([]
 	tx := database.DB.
 		Preload("Consultation").
 		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
-		Where("consultations.doctor_id = ? AND transactions.date BETWEEN ? AND ?", doctorID, startOfMonth, endOfMonth).
+		Where("consultations.doctor_id = ? AND transactions.date BETWEEN ? AND ? AND transactions.payment_status = 'done'", doctorID, startOfMonth, endOfMonth).
+		Find(&transactions)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return transactions, nil
+}
+
+func GetDoneTransactionsByDoctorAndTimeRange(doctorID uuid.UUID, start, end time.Time) ([]model.Transaction, error) {
+	var transactions []model.Transaction
+
+	tx := database.DB.
+		Preload("Consultation").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ? AND transactions.date BETWEEN ? AND ? AND transactions.payment_status = 'done'", doctorID, start, end).
 		Find(&transactions)
 
 	if tx.Error != nil {

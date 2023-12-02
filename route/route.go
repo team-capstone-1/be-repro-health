@@ -115,6 +115,7 @@ func New() *echo.Echo {
 	doctor.PUT("/articles/:id/publish", controller.UpdateArticlePublishedStatusController, m.CheckRole(constant.ROLE_DOCTOR))
 
 	// DOCTOR DASHBOARD
+	doctor.GET("/dashboard/data-count-one-month", controller.GetDataCountForDoctorControllerOneMonth, m.CheckRole(constant.ROLE_DOCTOR))
 
 	return e
 }

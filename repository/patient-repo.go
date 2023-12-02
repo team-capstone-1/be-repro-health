@@ -1,9 +1,9 @@
 package repository
 
 import (
-
 	"capstone-project/database"
 	"capstone-project/model"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -15,7 +15,7 @@ func GetAllPatients(user uuid.UUID) ([]model.Patient, error) {
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	
+
 	return datapatients, nil
 }
 
@@ -31,6 +31,26 @@ func GetPatientByDoctorID(doctorID uuid.UUID) ([]model.Patient, error) {
 	}
 
 	return datapatients, nil
+}
+
+func GetPatientByDoctorAndMonth(doctorID uuid.UUID, month time.Time) ([]model.Patient, error) {
+	var patients []model.Patient
+
+	startOfMonth := month.AddDate(0, 0, 1)
+	endOfMonth := startOfMonth.AddDate(0, 1, -1)
+
+	tx := database.DB.
+		Preload("User").
+		Joins("JOIN consultations ON consultations.patient_id = patients.id").
+		Joins("JOIN transactions ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ? AND consultations.date BETWEEN ? AND ? AND transactions.payment_status = 'done'", doctorID, startOfMonth, endOfMonth).
+		Find(&patients)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return patients, nil
 }
 
 func GetPatientByID(id uuid.UUID) (model.Patient, error) {
