@@ -11,6 +11,20 @@ type LoginRequest struct {
 	Password string `json:"password" form:"password"`
 }
 
+type OTPRequest struct {
+	Email    string `json:"email" form:"email"`
+}
+
+type ValidateOTPRequest struct {
+	Email    string `json:"email" form:"email"`
+	OTP      string `json:"otp" form:"otp"`
+}
+
+type ChangeUserPasswordRequest struct {
+	ID	     uuid.UUID `json:"id" form:"id"`
+	Password string `json:"password" form:"password"`
+}
+
 type UserRequest struct {
 	Name     string `json:"name" form:"name"`
 	Email    string `json:"email" form:"email"`
@@ -28,6 +42,13 @@ func ConvertToUserModel(user UserRequest) model.User {
 		ID:       uuid.New(),
 		Name:     user.Name,
 		Email:    user.Email,
+		Password: user.Password,
+	}
+}
+
+func ConvertToChangeUserPasswordModel(user ChangeUserPasswordRequest) model.User {
+	return model.User{
+		ID:       user.ID,
 		Password: user.Password,
 	}
 }
