@@ -98,7 +98,7 @@ func generateTransaction(consultation dto.UserConsultationResponse) (model.Trans
 		Price: consultation.Doctor.Price,
 		AdminPrice: constant.ADMIN_FEE,
 		Total: consultation.Doctor.Price + constant.ADMIN_FEE,
-		Status: model.Processed,
+		Status: model.Waiting,
 		PaymentStatus: "pending",
 	}
 

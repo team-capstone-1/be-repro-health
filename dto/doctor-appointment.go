@@ -43,6 +43,8 @@ type DoctorGetDetailsTransactionResponse struct {
 type DoctorGetDetailsPatientResponse struct {
 	ID              uuid.UUID `json:"id"`
 	PatientID       uuid.UUID `json:"patient_id"`
+	PatientName     string    `json:"patient_name"`
+	ProfileImage    string    `json:"profile_image"`
 	TransactionID   uuid.UUID `json:"transaction_id"`
 	DateOfBirth     time.Time `json:"date_of_birth"`
 	Gender          string    `json:"gender"`
@@ -80,6 +82,8 @@ func ConvertToDoctorGetDetailsPatientResponse(consultation model.Consultation) D
 	return DoctorGetDetailsPatientResponse{
 		ID:              consultation.ID,
 		PatientID:       consultation.PatientID,
+		PatientName:     consultation.Patient.Name,
+		ProfileImage:    consultation.Patient.ProfileImage,
 		TransactionID:   transactionID,
 		DateOfBirth:     consultation.Patient.DateOfBirth,
 		Gender:          consultation.Patient.Gender,
