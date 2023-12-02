@@ -28,6 +28,10 @@ func GetForumsController(c echo.Context) error {
 		forumResponse = append(forumResponse, dto.ConvertToForumResponse(forum))
 	}
 
+	for _, forumRes := range forumResponse{
+		forumRes.Profile = repository.GetProfileByPatientID(forumRes.PatientID)
+	}
+
 	return c.JSON(http.StatusOK, map[string]any{
 		"message": "success get forums",
 		"response":   forumResponse,
@@ -52,6 +56,7 @@ func GetForumController(c echo.Context) error {
 	}
 
 	forumResponse := dto.ConvertToForumResponse(responseData)
+	forumResponse.Profile = repository.GetProfileByPatientID(forumResponse.PatientID)
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get forum",
@@ -102,6 +107,7 @@ func CreateForumController(c echo.Context) error {
 	}
 
 	forumResponse := dto.ConvertToForumResponse(responseData)
+	forumResponse.Profile = repository.GetProfileByPatientID(forumResponse.PatientID)
 
 	return c.JSON(http.StatusCreated, map[string]any{
 		"message": "success create new forum",
