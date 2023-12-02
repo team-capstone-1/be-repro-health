@@ -43,9 +43,9 @@ type DoctorGetDetailsTransactionResponse struct {
 type DoctorGetDetailsPatientResponse struct {
 	ID              uuid.UUID `json:"id"`
 	PatientID       uuid.UUID `json:"patient_id"`
+	TransactionID   uuid.UUID `json:"transaction_id"`
 	PatientName     string    `json:"patient_name"`
 	ProfileImage    string    `json:"profile_image"`
-	TransactionID   uuid.UUID `json:"transaction_id"`
 	DateOfBirth     time.Time `json:"date_of_birth"`
 	Gender          string    `json:"gender"`
 	Height          float64   `json:"height"`
@@ -59,6 +59,47 @@ type DoctorGetDetailsPatientResponse struct {
 	PaymentMethod   string    `json:"payment_method"`
 	Total           float64   `json:"total"`
 	Status          string    `json:"status"`
+}
+
+type DoctorGetAllConsultations struct {
+	ID             uuid.UUID `json:"id"`
+	PatientID      uuid.UUID `json:"patient_id"`
+	PatientName    string    `json:"patient_name"`
+	SequenceNumber string    `json:"sequence_number"`
+	Date           time.Time `json:"date"`
+	Session        string    `json:"session"`
+	Total          float64   `json:"total"`
+	PaymentMethod  string    `json:"payment_method"`
+	Status         string    `json:"status"`
+}
+
+func ConvertToDoctorGetAllConsultations(consultation model.Consultation) DoctorGetAllConsultations {
+	var invoice string
+	var total float64
+	var paymentMethod string
+	var status string
+
+	for i := range consultation.Transaction {
+		invoice = consultation.Transaction[i].Invoice
+
+		total = consultation.Transaction[i].Total
+		paymentMethod = consultation.Transaction[i].Payment.Method
+		status = string(consultation.Transaction[i].Status)
+	}
+	parts := strings.Split(invoice, "/")
+	sequenceNumber := parts[len(parts)-1]
+
+	return DoctorGetAllConsultations{
+		ID:             consultation.ID,
+		PatientID:      consultation.PatientID,
+		PatientName:    consultation.Patient.Name,
+		SequenceNumber: sequenceNumber,
+		Date:           consultation.Date,
+		Session:        consultation.Session,
+		Total:          total,
+		PaymentMethod:  paymentMethod,
+		Status:         status,
+	}
 }
 
 func ConvertToDoctorGetDetailsPatientResponse(consultation model.Consultation) DoctorGetDetailsPatientResponse {
@@ -82,9 +123,9 @@ func ConvertToDoctorGetDetailsPatientResponse(consultation model.Consultation) D
 	return DoctorGetDetailsPatientResponse{
 		ID:              consultation.ID,
 		PatientID:       consultation.PatientID,
+		TransactionID:   transactionID,
 		PatientName:     consultation.Patient.Name,
 		ProfileImage:    consultation.Patient.ProfileImage,
-		TransactionID:   transactionID,
 		DateOfBirth:     consultation.Patient.DateOfBirth,
 		Gender:          consultation.Patient.Gender,
 		Height:          consultation.Patient.Height,

@@ -87,3 +87,19 @@ func DoctorGetTransactionsForConsultation(consultationID uuid.UUID) ([]model.Tra
 
 	return transactions, nil
 }
+
+func DoctorGetAllConsultations(doctorID uuid.UUID) ([]model.Consultation, error) {
+	var consultation []model.Consultation
+
+	tx := database.DB.
+		Preload("Patient").
+		Preload("Transaction.Payment").
+		Where("doctor_id = ?", doctorID).
+		Find(&consultation)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return consultation, nil
+}
