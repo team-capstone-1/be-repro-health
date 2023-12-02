@@ -122,5 +122,8 @@ func New() *echo.Echo {
 	doctor.GET("/transactions-dashboard", controller.GetTransactionsForDoctorDashboardController)
 	doctor.GET("/articles-dashboard", controller.GetArticleForDoctorDashboardController)
 
+	// DOCTOR APPOINTMENT
+	doctor.GET("/appointment/details-transaction/:id", controller.DoctorGetDetailsTransactionController, m.CheckRole(constant.ROLE_DOCTOR))
+
 	return e
 }

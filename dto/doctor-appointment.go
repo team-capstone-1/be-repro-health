@@ -27,6 +27,30 @@ type DoctorPaymentResponse struct {
 	Method PaymentResponse `json:"payment_method"`
 }
 
+type DoctorGetDetailsTransactionResponse struct {
+	ID            uuid.UUID `json:"id"`
+	Invoice       string    `json:"invoice"`
+	Date          time.Time `json:"date"`
+	PaymentMethod string    `json:"payment_method"`
+	Name          string    `json:"name"`
+	Price         float64   `json:"price"`
+	AdminFee      float64   `json:"admin_fee"`
+	Total         float64   `json:"total"`
+}
+
+func ConvertToDoctorGetDetailsTransactionResponse(transaction model.Transaction) DoctorGetDetailsTransactionResponse {
+	return DoctorGetDetailsTransactionResponse{
+		ID:            transaction.ID,
+		Invoice:       transaction.Invoice,
+		Date:          transaction.Date,
+		PaymentMethod: transaction.Payment.Method,
+		Name:          transaction.Payment.Name,
+		Price:         transaction.Price,
+		AdminFee:      transaction.AdminPrice,
+		Total:         transaction.Total,
+	}
+}
+
 func ConvertToDoctorPatientConsultationResponse(consultation model.Consultation) DoctorPatientConsulationResponse {
 
 	return DoctorPatientConsulationResponse{
