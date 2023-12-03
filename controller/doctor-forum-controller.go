@@ -120,6 +120,15 @@ func CreateDoctorReplyForum(c echo.Context) error {
 
 	forumResponse := dto.ConvertToDoctorForumReplyResponse(responseData)
 
+	// user notif
+	patientForum, _ := repository.GetForumByID(forumReply.ForumsID)
+	CreateNotification(
+		patientForum.PatientID,
+		"Pertanyaan Anda Sudah Dijawab!",
+		"Dokter telah menjawab pertanyaan Anda! Cek untuk melihat jawabannya.",
+		"forum",
+	)
+
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success create forum reply",
 		"response": forumResponse,

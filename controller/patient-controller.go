@@ -129,6 +129,12 @@ func CreatePatientController(c echo.Context) error {
 	}
 
 	patientResponse := dto.ConvertToPatientResponse(responseData)
+	CreateNotification(
+		patientResponse.ID,
+		"Profil Baru Dibuat!",
+		"Profil baru Anda telah berhasil dibuat. Sesuaikan profil Anda dan nikmati pengalaman kesehatan reproduksi yang lebih personal",
+		"info",
+	)
 
 	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create new patient",
@@ -217,6 +223,12 @@ func UpdatePatientController(c echo.Context) error {
 	}
 
 	patientResponse := dto.ConvertToPatientResponse(responseData)
+	CreateNotification(
+		patientResponse.ID,
+		"Perubahan Profil",
+		"Profil Anda telah diperbarui. Pastikan semua informasi terkini dan sesuai dengan kebutuhan Anda",
+		"info",
+	)
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success update patient",
