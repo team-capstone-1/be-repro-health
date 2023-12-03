@@ -177,6 +177,13 @@ func RescheduleController(c echo.Context) error {
 	}
 
 	rescheduleData := dto.ConvertToConsultationRescheduleModel(updateData, consultation.ID)
+	rescheduleData.QueueNumber, err = repository.GenerateQueueNumber(rescheduleData.Date, rescheduleData.Session)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed generate queue number",
+			"response": err.Error(),
+		})
+	}
 
 	_, err = repository.RescheduleConsultation(consultation.ID, rescheduleData)
 	if err != nil {

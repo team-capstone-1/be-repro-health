@@ -46,6 +46,13 @@ func CreateConsultationController(c echo.Context) error {
 	}
 
 	consultationData := dto.ConvertToConsultationModel(consultation)
+	consultationData.QueueNumber, err = repository.GenerateQueueNumber(consultationData.Date, consultationData.Session)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed generate queue number",
+			"response": err.Error(),
+		})
+	}
 
 	clinicData, err := repository.GetClinicByDoctorID(consultationData.DoctorID)
 	if err != nil {
