@@ -28,6 +28,30 @@ func GetSpecialistByID(id uuid.UUID) (model.Specialist, error) {
 	return specialist, nil
 }
 
+func GetSpecialistsByClinic(id uuid.UUID) ([]model.Specialist, error) {
+	var clinic model.Clinic
+
+	tx := database.DB.Preload("Doctors.Specialist").Find(&clinic, id)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	// Use a map to store unique specialists
+	uniqueSpecialists := make(map[uuid.UUID]model.Specialist)
+	for _, doctor := range clinic.Doctors {
+		uniqueSpecialists[doctor.Specialist.ID] = doctor.Specialist
+	}
+
+	// Convert the map values to a slice
+	var specialists []model.Specialist
+	for _, specialist := range uniqueSpecialists {
+		specialists = append(specialists, specialist)
+	}
+
+	return specialists, nil
+}
+
+
 func InsertSpecialist(specialist model.Specialist) (model.Specialist, error) {
 tx := database.DB.Create(&specialist)
 	if tx.Error != nil {

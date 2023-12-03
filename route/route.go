@@ -35,6 +35,8 @@ func New() *echo.Echo {
 	// user appointment route
 	e.GET("/specialists", controller.GetSpecialistsController)
 	e.GET("/clinics", controller.GetClinicsController)
+	e.GET("/clinics/:id/specialists", controller.GetSpecialistsByClinicController)
+	e.GET("/clinics/:clinic_id/specialists/:specialist_id/doctors", controller.GetDoctorsBySpecialistAndClinicController)
 	e.GET("/specialists/:id/doctors", controller.GetDoctorsBySpecialistController)
 	e.GET("/clinics/:id/doctors", controller.GetDoctorsByClinicController)
 	e.GET("/doctors", controller.GetDoctorsController)

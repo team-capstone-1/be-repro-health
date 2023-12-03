@@ -121,3 +121,13 @@ func GetDoctorsByClinic(id uuid.UUID) ([]model.Doctor, error) {
 	}
 	return datadoctors, nil
 }
+
+func GetDoctorsBySpecialistAndClinic(specialist_id, clinic_id uuid.UUID) ([]model.Doctor, error) {
+	var datadoctors []model.Doctor
+
+	tx := database.DB.Preload("Clinic").Preload("Specialist").Preload("DoctorWorkHistories").Preload("DoctorEducations").Where("specialist_id = ? AND clinic_id = ?", specialist_id, clinic_id).Find(&datadoctors)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return datadoctors, nil
+}
