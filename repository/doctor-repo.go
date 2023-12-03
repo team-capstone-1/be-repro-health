@@ -1,10 +1,10 @@
 package repository
 
 import (
+	"capstone-project/constant"
 	"capstone-project/database"
 	"capstone-project/middleware"
 	"capstone-project/model"
-	"capstone-project/constant"
 	"errors"
 
 	"github.com/google/uuid"
@@ -122,6 +122,58 @@ func GetDoctorsByClinic(id uuid.UUID) ([]model.Doctor, error) {
 	return datadoctors, nil
 }
 
+func SetDoctorOTP(email, otp string) error {
+	if !CheckDoctorEmail(email) {
+		return errors.New("user email not found")
+	}
+
+	tx := database.DB.Model(&model.Doctor{}).Where("email = ?", email).Update("OTP", otp)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	return nil
+}
+
+func ValidateDoctorOTP(email, otp string) (model.Doctor, string, error) {
+	var data model.Doctor
+
+	tx := database.DB.Where("email = ? AND otp = ?", email, otp).First(&data)
+	if tx.Error != nil {
+		return model.Doctor{}, "", errors.New("Invalid Email or OTP")
+	}
+
+	database.DB.Model(&model.Doctor{}).Where("email = ?", email).Update("OTP", nil)
+	if tx.Error != nil {
+		return model.Doctor{}, "", tx.Error
+	}
+
+	token, err := middleware.CreateToken(data.ID, constant.ROLE_DOCTOR, data.Name, true)
+	if err != nil {
+		return model.Doctor{}, "", err
+	}
+
+	return data, token, nil
+}
+
+func UpdateDoctorPassword(data model.Doctor) (model.Doctor, error) {
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(data.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return model.Doctor{}, err
+	}
+
+	tx := database.DB.Model(&data).Where("id = ?", data.ID).Updates(map[string]any{"password": string(hashPassword)})
+	if tx.Error != nil {
+		return model.Doctor{}, tx.Error
+	}
+
+	tx = database.DB.Where("id = ?", data.ID).First(&data)
+	if tx.Error != nil {
+		return model.Doctor{}, tx.Error
+	}
+
+	return data, nil
+}
 func GetDoctorsBySpecialistAndClinic(specialist_id, clinic_id uuid.UUID) ([]model.Doctor, error) {
 	var datadoctors []model.Doctor
 
