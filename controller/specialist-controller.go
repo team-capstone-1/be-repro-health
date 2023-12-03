@@ -7,6 +7,7 @@ import (
 	"capstone-project/dto"
 	m "capstone-project/middleware"
 	"capstone-project/repository"
+	"capstone-project/util"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -73,6 +74,25 @@ func CreateSpecialistController(c echo.Context) error {
 
 	specialistData := dto.ConvertToSpecialistModel(specialistRequest)
 
+	specialistImage, err := c.FormFile("image")
+	if err != http.ErrMissingFile {
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload specialist image",
+				"response": err.Error(),
+			})
+		}
+
+		specialistURL, err := util.UploadToCloudinary(specialistImage)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]any{
+				"message":  "error upload specialist image to Cloudinary",
+				"response": err.Error(),
+			})
+		}
+		specialistData.Image = specialistURL
+	}
+
 	responseData, err := repository.InsertSpecialist(specialistData)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
@@ -107,19 +127,19 @@ func UpdateSpecialistController(c echo.Context) error {
 	}
 
 	specialistData, err := repository.GetSpecialistByID(specialistID)
-    if err != nil {
-        if err == errors.New("record not found") {
-            return c.JSON(http.StatusNotFound, map[string]any{
-                "message": "specialist not found",
-                "response": nil,
-            })
-        }
+	if err != nil {
+		if err == errors.New("record not found") {
+			return c.JSON(http.StatusNotFound, map[string]any{
+				"message":  "specialist not found",
+				"response": nil,
+			})
+		}
 
-        return c.JSON(http.StatusInternalServerError, map[string]any{
-            "message": "failed get specialist",
-            "response": err.Error(),
-        })
-    }
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "failed get specialist",
+			"response": err.Error(),
+		})
+	}
 
 	specialistRequest := dto.SpecialistRequest{}
 	errBind := c.Bind(&specialistRequest)
@@ -131,11 +151,11 @@ func UpdateSpecialistController(c echo.Context) error {
 	}
 
 	if err := validateDoctorSpecialistRequest(specialistRequest); err != nil {
-        return c.JSON(http.StatusBadRequest, map[string]any{
-            "message": "Invalid body",
-            "response": err.Error(),
-        })
-    }
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "Invalid body",
+			"response": err.Error(),
+		})
+	}
 
 	specialistData.Name = specialistRequest.Name
 	specialistData.Image = specialistRequest.Image
@@ -172,12 +192,12 @@ func DeleteSpecialistController(c echo.Context) error {
 	}
 
 	specialist, err := repository.GetSpecialistByID(specialistID)
-    if err != nil {
-        return c.JSON(http.StatusInternalServerError, map[string]any{
-            "message": "failed check specialist",
-            "response": err.Error(),
-        })
-    }
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "failed check specialist",
+			"response": err.Error(),
+		})
+	}
 
 	if specialist.ID != specialist.ID {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
@@ -202,7 +222,7 @@ func DeleteSpecialistController(c echo.Context) error {
 
 func validateDoctorSpecialistRequest(specialist dto.SpecialistRequest) error {
 
-	if specialist.Name == "" || specialist.Image == "" {
+	if specialist.Name == "" {
 		return errors.New("All fields must be filled in")
 	}
 
@@ -221,8 +241,8 @@ func GetSpecialistsByClinicController(c echo.Context) error {
 	responseData, err := repository.GetSpecialistsByClinic(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get specialists",
-			"response":   err.Error(),
+			"message":  "failed get specialists",
+			"response": err.Error(),
 		})
 	}
 
@@ -232,7 +252,7 @@ func GetSpecialistsByClinicController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get specialists",
-		"response":   specialistResponse,
+		"message":  "success get specialists",
+		"response": specialistResponse,
 	})
 }
