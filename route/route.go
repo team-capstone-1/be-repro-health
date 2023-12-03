@@ -97,6 +97,8 @@ func New() *echo.Echo {
 
 	// DOCTOR ROUTE
 	e.POST("/doctors/login", controller.DoctorLoginController)
+	e.PUT("/doctors/send-otp", controller.DoctorSendOTPController)
+	e.PUT("/doctors/validate-otp", controller.DoctorValidateOTPController)
 	doctor := e.Group("/doctors")
 	doctor.Use(middleware.JWT([]byte(config.JWT_KEY)))
 	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole(constant.ROLE_DOCTOR))
@@ -133,6 +135,9 @@ func New() *echo.Echo {
 	doctor.GET("/appointments/details-consultation", controller.DoctorGetAllConsultations, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.PUT("/appointments/confirm-consultation", controller.DoctorConfirmConsultationController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.PUT("/appointments/finish-consultation", controller.DoctorFinishedConsultationController, m.CheckRole(constant.ROLE_DOCTOR))
+
+	// DOCTOR CHANGE PASSWORD
+	doctor.PUT("/change-password", controller.ChangeDoctorPasswordController)
 
 	return e
 }

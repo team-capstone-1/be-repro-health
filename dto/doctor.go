@@ -51,6 +51,27 @@ type DoctorResponse struct {
 	DoctorEducations    []DoctorEducationResponse   `json:"educations"`
 }
 
+type DoctorOTPRequest struct {
+	Email string `json:"email" form:"email"`
+}
+
+type DoctorValidateOTPRequest struct {
+	Email string `json:"email" form:"email"`
+	OTP   string `json:"otp" form:"otp"`
+}
+
+type ChangeDoctorPasswordRequest struct {
+	ID       uuid.UUID `json:"id" form:"id"`
+	Password string    `json:"password" form:"password"`
+}
+
+func ConvertToChangeDoctorPasswordModel(doctor ChangeDoctorPasswordRequest) model.Doctor {
+	return model.Doctor{
+		ID:       doctor.ID,
+		Password: doctor.Password,
+	}
+}
+
 func ConvertToDoctorSignUpResponse(doctor model.Doctor) DoctorSignUpResponse {
 	return DoctorSignUpResponse{
 		ID:           doctor.ID,

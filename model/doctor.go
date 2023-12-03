@@ -17,6 +17,7 @@ type Doctor struct {
 	ProfileImage         string                `json:"profile_image" gorm:"size:255"`
 	SpecialistID         uuid.UUID             `gorm:"column:specialist_id;index" json:"specialist_id"`
 	ClinicID             uuid.UUID             `gorm:"column:clinic_id;index" json:"clinic_id"`
+	OTP                  string                `json:"otp" form:"otp"`
 	Specialist           Specialist            `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Clinic               Clinic                `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Consultations        []Consultation        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
