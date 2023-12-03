@@ -208,3 +208,31 @@ func validateDoctorSpecialistRequest(specialist dto.SpecialistRequest) error {
 
 	return nil
 }
+
+func GetSpecialistsByClinicController(c echo.Context) error {
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err := repository.GetSpecialistsByClinic(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get specialists",
+			"response":   err.Error(),
+		})
+	}
+
+	var specialistResponse []dto.SpecialistResponse
+	for _, specialist := range responseData {
+		specialistResponse = append(specialistResponse, dto.ConvertToSpecialistResponse(specialist))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message": "success get specialists",
+		"response":   specialistResponse,
+	})
+}

@@ -30,6 +30,7 @@ type PatientResponse struct {
 	Weight             float64   `json:"weight"`
 	Height             float64   `json:"height"`
 	Gender             string    `json:"gender"`
+	CreatedAt          time.Time `json:"created_at"`
 }
 
 type PatientDashboardResponse struct {
@@ -65,6 +66,7 @@ func ConvertToPatientResponse(patient model.Patient) PatientResponse {
 		Weight:             patient.Weight,
 		Height:             patient.Height,
 		Gender:             patient.Gender,
+		CreatedAt:          patient.CreatedAt,
 	}
 }
 

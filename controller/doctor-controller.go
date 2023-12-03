@@ -289,3 +289,37 @@ func DoctorValidateOTPController(c echo.Context) error {
 		"response": response,
 	})
 }
+func GetDoctorsBySpecialistAndClinicController(c echo.Context) error {
+	SpecialistID, err := uuid.Parse(c.Param("specialist_id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse specialist id",
+			"response": err.Error(),
+		})
+	}
+	ClinicID, err := uuid.Parse(c.Param("clinic_id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse specialist id",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err := repository.GetDoctorsBySpecialistAndClinic(SpecialistID, ClinicID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get doctors",
+			"response": err.Error(),
+		})
+	}
+
+	var doctorResponse []dto.DoctorResponse
+	for _, doctor := range responseData {
+		doctorResponse = append(doctorResponse, dto.ConvertToDoctorResponse(doctor))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get doctors",
+		"response": doctorResponse,
+	})
+}

@@ -65,6 +65,17 @@ type ChangeDoctorPasswordRequest struct {
 	Password string    `json:"password" form:"password"`
 }
 
+type TransactionDoctorResponse struct {
+	ID           uuid.UUID `json:"id"`
+	Name         string    `json:"name"`
+	Email        string    `json:"email"`
+	Price        float64   `json:"price"`
+	Address      string    `json:"address"`
+	Specialist   string    `json:"specialist"`
+	Phone        string    `json:"phone"`
+	ProfileImage string    `json:"profile_image"`
+}
+
 func ConvertToChangeDoctorPasswordModel(doctor ChangeDoctorPasswordRequest) model.Doctor {
 	return model.Doctor{
 		ID:       doctor.ID,
@@ -128,5 +139,18 @@ func ConvertToDoctorResponse(doctor model.Doctor) DoctorResponse {
 		Clinic:              ConvertToClinicResponse(doctor.Clinic),
 		DoctorWorkHistories: workHistories,
 		DoctorEducations:    educations,
+	}
+}
+
+func ConvertToTransactionDoctorResponse(doctor model.Doctor) TransactionDoctorResponse {
+	return TransactionDoctorResponse{
+		ID:           doctor.ID,
+		Name:         doctor.Name,
+		Specialist:   doctor.Specialist.Name,
+		Email:        doctor.Email,
+		Price:        doctor.Price,
+		Address:      doctor.Address,
+		Phone:        doctor.Phone,
+		ProfileImage: doctor.ProfileImage,
 	}
 }

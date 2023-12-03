@@ -35,6 +35,8 @@ func New() *echo.Echo {
 	// user appointment route
 	e.GET("/specialists", controller.GetSpecialistsController)
 	e.GET("/clinics", controller.GetClinicsController)
+	e.GET("/clinics/:id/specialists", controller.GetSpecialistsByClinicController)
+	e.GET("/clinics/:clinic_id/specialists/:specialist_id/doctors", controller.GetDoctorsBySpecialistAndClinicController)
 	e.GET("/specialists/:id/doctors", controller.GetDoctorsBySpecialistController)
 	e.GET("/clinics/:id/doctors", controller.GetDoctorsByClinicController)
 	e.GET("/doctors", controller.GetDoctorsController)
@@ -61,7 +63,8 @@ func New() *echo.Echo {
 
 	// user ai
 	aiController := controller.NewAIController(repository.NewAIRepository())
-	e.POST("/chatbot/health-recommendation", aiController.GetHealthRecommendation)
+	r.POST("/chatbot/health-recommendation", aiController.GetHealthRecommendation, m.CheckRole(constant.ROLE_USER))
+	r.GET("/chatbot/health-recommendation/patients/:id", aiController.GetHealthRecommendationHistory, m.CheckRole(constant.ROLE_USER))
 
 	// transaction
 	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole(constant.ROLE_USER))
@@ -70,6 +73,8 @@ func New() *echo.Echo {
 	r.PUT("/transactions/:id/reschedule", controller.RescheduleController, m.CheckRole(constant.ROLE_USER))
 	r.POST("/transactions/:id/cancel", controller.CancelTransactionController, m.CheckRole(constant.ROLE_USER))
 	r.PUT("/refund/:id", controller.ValidateRefund, m.CheckRole(constant.ROLE_ADMIN))
+	
+	r.GET("/notifications/patients/:id", controller.GetNotificationsController, m.CheckRole(constant.ROLE_USER))
 	// davin
 
 	// ADMIN ROUTE

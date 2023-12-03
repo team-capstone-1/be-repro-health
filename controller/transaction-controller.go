@@ -91,7 +91,7 @@ func CreatePaymentController(c echo.Context) error {
 		})
 	}
 
-	_, err = repository.GetTransactionByID(uuid)
+	transaction, err := repository.GetTransactionByID(uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed create payment",
@@ -128,6 +128,13 @@ func CreatePaymentController(c echo.Context) error {
 	}
 
 	paymentResponse := dto.ConvertToPaymentResponse(responseData)
+
+	CreateNotification(
+		transaction.Consultation.PatientID,
+		"Pembayaran Sedang Diproses",
+		"Pembayaran untuk janji temu Anda sedang dalam proses. Kami akan memberi tahu Anda begitu proses selesai.",
+		"janji_temu",
+	)
 
 	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create new payment",
@@ -170,6 +177,13 @@ func RescheduleController(c echo.Context) error {
 	}
 
 	rescheduleData := dto.ConvertToConsultationRescheduleModel(updateData, consultation.ID)
+	rescheduleData.QueueNumber, err = repository.GenerateQueueNumber(rescheduleData.Date, rescheduleData.Session)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed generate queue number",
+			"response": err.Error(),
+		})
+	}
 
 	_, err = repository.RescheduleConsultation(consultation.ID, rescheduleData)
 	if err != nil {
