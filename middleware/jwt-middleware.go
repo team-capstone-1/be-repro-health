@@ -1,9 +1,9 @@
 package middleware
 
 import (
+	"fmt"
 	"net/http"
 	"time"
-	"fmt"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
@@ -19,7 +19,7 @@ func CreateToken(userId uuid.UUID, role, name string, is_web bool) (string, erro
 	claims["user_id"] = userId
 	claims["name"] = name
 	claims["role"] = role
-	if is_web{
+	if is_web {
 		claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 	}
 	fmt.Println("claims", claims)
