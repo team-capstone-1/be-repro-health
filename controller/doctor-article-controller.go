@@ -4,6 +4,7 @@ import (
 	"capstone-project/dto"
 	m "capstone-project/middleware"
 	"capstone-project/repository"
+	"capstone-project/util"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -102,7 +103,7 @@ func CreateDoctorArticleController(c echo.Context) error {
 		})
 	}
 
-	if article.Title == "" || len(article.Tags) == 0 || article.Reference == "" ||
+	if article.Title == "" || article.Tags == "" || article.Reference == "" ||
 		article.Image == "" || article.ImageDesc == "" || article.Content == "" {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "invalid body",
@@ -113,6 +114,25 @@ func CreateDoctorArticleController(c echo.Context) error {
 	articleData := dto.ConvertToDoctorArticleModel(article)
 	articleData.DoctorID = doctor
 	articleData.Published = false
+
+	articleImage, err := c.FormFile("image")
+	if err != http.ErrMissingFile {
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload article image",
+				"response": err.Error(),
+			})
+		}
+
+		articleURL, err := util.UploadToCloudinary(articleImage)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]any{
+				"message":  "error upload article image to Cloudinary",
+				"response": err.Error(),
+			})
+		}
+		articleData.Image = articleURL
+	}
 
 	responseData, err := repository.InsertArticle(articleData)
 	if err != nil {

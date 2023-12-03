@@ -25,13 +25,13 @@ type DoctorEducationRequest struct {
 }
 
 type DoctorCertificationRequest struct {
-	DoctorID        uuid.UUID `json:"doctor_id"`
-	StartingDate    time.Time `json:"start_date"`
-	EndingDate      time.Time `json:"end_date"`
-	Description     string    `json:"description"`
-	CertificateType string    `json:"certificate_type"`
-	FileSize        string    `json:"file_size"`
-	Details         string    `json:"details"`
+	DoctorID        uuid.UUID `json:"doctor_id" form:"doctor_id"`
+	StartingDate    time.Time `json:"start_date" form:"start_date"`
+	EndingDate      time.Time `json:"end_date" form:"end_date"`
+	Description     string    `json:"description" form:"description"`
+	CertificateType string    `json:"certificate_type" form:"certificate_type"`
+	// FileSize        int64     `json:"file_size" form:"file_size"`
+	Details string `json:"details" form:"details"`
 }
 
 type DoctorProfileResponse struct {
@@ -60,13 +60,13 @@ type DoctorProfileSpecialistResponse struct {
 }
 
 type DoctorWorkHistoryResponse struct {
-	ID              uuid.UUID `json:"id"`
-	DoctorID        uuid.UUID `json:"doctor_id"`
-	StartingDate    time.Time `json:"start_date"`
-	EndingDate      time.Time `json:"end_date"`
-	Job             string    `json:"job"`
-	Workplace       string    `json:"workplace"`
-	Position        string    `json:"position"`
+	ID           uuid.UUID `json:"id"`
+	DoctorID     uuid.UUID `json:"doctor_id"`
+	StartingDate time.Time `json:"start_date"`
+	EndingDate   time.Time `json:"end_date"`
+	Job          string    `json:"job"`
+	Workplace    string    `json:"workplace"`
+	Position     string    `json:"position"`
 }
 
 type DoctorEducationResponse struct {
@@ -85,7 +85,7 @@ type DoctorCertificationResponse struct {
 	EndingDate      time.Time `json:"end_date"`
 	Description     string    `json:"description"`
 	CertificateType string    `json:"certificate_type"`
-	FileSize        string    `json:"file_size"`
+	FileSize        int64     `json:"file_size"`
 	Details         string    `json:"details"`
 }
 
@@ -106,13 +106,13 @@ func ConvertToDoctorProfileResponse(doctor model.Doctor) DoctorProfileResponse {
 
 func ConvertToDoctorWorkHistoryModel(workHistory DoctorWorkHistoryRequest) model.DoctorWorkHistory {
 	return model.DoctorWorkHistory{
-		ID:              uuid.New(),
-		DoctorID:        workHistory.DoctorID,
-		StartingDate:    workHistory.StartingDate,
-		EndingDate:      workHistory.EndingDate,
-		Job:             workHistory.Job,
-		Workplace:       workHistory.Workplace,
-		Position:        workHistory.Position,
+		ID:           uuid.New(),
+		DoctorID:     workHistory.DoctorID,
+		StartingDate: workHistory.StartingDate,
+		EndingDate:   workHistory.EndingDate,
+		Job:          workHistory.Job,
+		Workplace:    workHistory.Workplace,
+		Position:     workHistory.Position,
 	}
 }
 
@@ -135,20 +135,20 @@ func ConvertToDoctorCertificationModel(certification DoctorCertificationRequest)
 		EndingDate:      certification.EndingDate,
 		Description:     certification.Description,
 		CertificateType: certification.CertificateType,
-		FileSize:        certification.FileSize,
-		Details:         certification.Details,
+		// FileSize:        certification.FileSize,
+		Details: certification.Details,
 	}
 }
 
 func ConvertToDoctorWorkHistoriesResponse(workHistory model.DoctorWorkHistory) DoctorWorkHistoryResponse {
 	return DoctorWorkHistoryResponse{
-		ID:              workHistory.ID,
-		DoctorID:        workHistory.DoctorID,
-		StartingDate:    workHistory.StartingDate,
-		EndingDate:      workHistory.EndingDate,
-		Job:             workHistory.Job,
-		Workplace:       workHistory.Workplace,
-		Position:        workHistory.Position,
+		ID:           workHistory.ID,
+		DoctorID:     workHistory.DoctorID,
+		StartingDate: workHistory.StartingDate,
+		EndingDate:   workHistory.EndingDate,
+		Job:          workHistory.Job,
+		Workplace:    workHistory.Workplace,
+		Position:     workHistory.Position,
 	}
 }
 
