@@ -1,25 +1,26 @@
 package dto
 
 import (
-	"github.com/google/uuid"
 	"capstone-project/model"
+
+	"github.com/google/uuid"
 )
 
 type SpecialistRequest struct {
-	Name string `json:"name"`
-	Image string `json:"image"`
+	Name  string `json:"name" form:"name"`
+	Image string `json:"image" form:"image"`
 }
 
 type SpecialistResponse struct {
-	ID 		 uuid.UUID `json:"id"`
-	Name    string `json:"name"`
-	Image    string `json:"image"`
+	ID    uuid.UUID `json:"id"`
+	Name  string    `json:"name"`
+	Image string    `json:"image"`
 }
 
 func ConvertToSpecialistModel(specialist SpecialistRequest) model.Specialist {
 	return model.Specialist{
-		ID: uuid.New(),
-		Name: specialist.Name,
+		ID:    uuid.New(),
+		Name:  specialist.Name,
 		Image: specialist.Image,
 	}
 }

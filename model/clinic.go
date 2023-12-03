@@ -12,6 +12,8 @@ type Clinic struct {
 	Image   	 string    		`gorm:"size:255"`
 	City         string         `gorm:"size:255"`
 	Location     string         `gorm:"size:255"`
+	Telephone    string         `gorm:"size:255"`
+	Email        string         `gorm:"size:255"`
 	Profile      string         `gorm:"size:255"`
 	Latitude     string         `gorm:"size:255"`
 	Longitude    string         `gorm:"size:255"`

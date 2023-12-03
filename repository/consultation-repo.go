@@ -1,12 +1,37 @@
 package repository
 
 import (
+	"time"
+	"fmt"
+
 	"capstone-project/database"
 	"capstone-project/model"
 	"time"
 
 	"github.com/google/uuid"
 )
+
+func GenerateQueueNumber(date time.Time, session string) (string, error) {
+    formattedDate := date.Format("2006-01-02")
+
+    var sequence int
+    result := database.DB.Table("consultations").
+        Where("date = ? AND session = ?", formattedDate, session).
+        Select("COALESCE(MAX(CAST(SUBSTRING(queue_number, 1, 3) AS SIGNED)), 0) AS max_sequence").
+        Scan(&sequence)
+
+    if result.Error != nil {
+        return "", result.Error
+    }
+
+    // Increment the sequence
+    sequence++
+
+    formattedQueueNumber := fmt.Sprintf("%03d", sequence)
+	fmt.Println(formattedQueueNumber)
+    return formattedQueueNumber, nil
+}
+
 
 func GetConsultationsByDoctorID(doctorID uuid.UUID) ([]model.Consultation, error) {
 	var dataConsultations []model.Consultation
@@ -21,7 +46,7 @@ func GetConsultationsByDoctorID(doctorID uuid.UUID) ([]model.Consultation, error
 func GetConsultationByID(id uuid.UUID) (model.Consultation, error) {
 	var dataconsultation model.Consultation
 
-	tx := database.DB.Preload("Clinic").Preload("Doctor").First(&dataconsultation, id)
+	tx := database.DB.Preload("Clinic").Preload("Doctor").Preload("Doctor.Specialist").First(&dataconsultation, id)
 	if tx.Error != nil {
 		return model.Consultation{}, tx.Error
 	}

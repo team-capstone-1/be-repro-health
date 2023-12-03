@@ -8,12 +8,12 @@ import (
 )
 
 type DoctorArticleRequest struct {
-	Title     string `json:"title"`
-	Tags      string `json:"tags"`
-	Reference string `json:"reference"`
-	Image     string `json:"image"`
-	ImageDesc string `json:"image_desc"`
-	Content   string `json:"content"`
+	Title     string `json:"title" form:"title"`
+	Tags      string `json:"tags" form:"tags"`
+	Reference string `json:"reference" form:"reference"`
+	Image     string `json:"image" form:"image"`
+	ImageDesc string `json:"image_desc" form:"image_desc"`
+	Content   string `json:"content" form:"content"`
 }
 
 type DoctorArticleResponse struct {

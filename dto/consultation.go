@@ -20,26 +20,27 @@ type ConsultationRescheduleRequest struct {
 }
 
 type UserConsultationResponse struct {
-	ID            uuid.UUID           `json:"id"`
-	DoctorID      uuid.UUID           `json:"doctor_id"`
-	PatientID     uuid.UUID           `json:"patient_id"`
-	ClinicID      uuid.UUID           `json:"clinic_id"`
-	TransactionID uuid.UUID           `json:"transaction_id"`
-	Date          time.Time           `json:"date"`
-	Session       string              `json:"session"`
-	Clinic        ClinicResponse      `json:"clinic"`
-	Doctor        ForumDoctorResponse `json:"doctor"`
+	ID          uuid.UUID `json:"id"`
+	DoctorID    uuid.UUID `json:"doctor_id"`
+	PatientID   uuid.UUID `json:"patient_id"`
+	ClinicID    uuid.UUID `json:"clinic_id"`
+	TransactionID uuid.UUID `json:"transaction_id"`
+	Date        time.Time `json:"date"`
+	Session     string    `json:"session"`
+	QueueNumber string    `json:"queue_number"`
+	Clinic      ClinicResponse    `json:"clinic"`
+	Doctor      TransactionDoctorResponse    `json:"doctor"`
 }
 
 type ConsultationResponse struct {
-	ID        uuid.UUID           `json:"id"`
-	DoctorID  uuid.UUID           `json:"doctor_id"`
-	PatientID uuid.UUID           `json:"patient_id"`
-	ClinicID  uuid.UUID           `json:"clinic_id"`
-	Date      time.Time           `json:"date"`
-	Session   string              `json:"session"`
-	Clinic    ClinicResponse      `json:"clinic"`
-	Doctor    ForumDoctorResponse `json:"doctor"`
+	ID          uuid.UUID `json:"id"`
+	DoctorID    uuid.UUID `json:"doctor_id"`
+	PatientID   uuid.UUID `json:"patient_id"`
+	ClinicID    uuid.UUID `json:"clinic_id"`
+	Date        time.Time `json:"date"`
+	Session     string    `json:"session"`
+	Clinic      ClinicResponse    `json:"clinic"`
+	Doctor      ForumDoctorResponse    `json:"doctor"`
 }
 
 func ConvertToConsultationModel(consultation ConsultationRequest) model.Consultation {
@@ -65,11 +66,11 @@ func ConvertToUserConsultationResponse(consultation model.Consultation) UserCons
 		ID:        consultation.ID,
 		DoctorID:  consultation.DoctorID,
 		PatientID: consultation.PatientID,
-		ClinicID:  consultation.ClinicID,
-		Date:      consultation.Date,
-		Session:   consultation.Session,
-		Clinic:    ConvertToClinicResponse(consultation.Clinic),
-		Doctor:    ConvertToForumDoctorResponse(consultation.Doctor),
+		ClinicID: consultation.ClinicID,
+		Date: consultation.Date,
+		Session: consultation.Session,
+		Clinic: ConvertToClinicResponse(consultation.Clinic),
+		Doctor: ConvertToForumDoctorResponse(consultation.Doctor),
 	}
 }
 
@@ -78,10 +79,10 @@ func ConvertToConsultationResponse(consultation model.Consultation) Consultation
 		ID:        consultation.ID,
 		DoctorID:  consultation.DoctorID,
 		PatientID: consultation.PatientID,
-		ClinicID:  consultation.ClinicID,
-		Date:      consultation.Date,
-		Session:   consultation.Session,
-		Clinic:    ConvertToClinicResponse(consultation.Clinic),
-		Doctor:    ConvertToForumDoctorResponse(consultation.Doctor),
+		ClinicID: consultation.ClinicID,
+		Date: consultation.Date,
+		Session: consultation.Session,
+		Clinic: ConvertToClinicResponse(consultation.Clinic),
+		Doctor: ConvertToForumDoctorResponse(consultation.Doctor),
 	}
 }

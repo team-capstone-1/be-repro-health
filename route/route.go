@@ -35,6 +35,8 @@ func New() *echo.Echo {
 	// user appointment route
 	e.GET("/specialists", controller.GetSpecialistsController)
 	e.GET("/clinics", controller.GetClinicsController)
+	e.GET("/clinics/:id/specialists", controller.GetSpecialistsByClinicController)
+	e.GET("/clinics/:clinic_id/specialists/:specialist_id/doctors", controller.GetDoctorsBySpecialistAndClinicController)
 	e.GET("/specialists/:id/doctors", controller.GetDoctorsBySpecialistController)
 	e.GET("/clinics/:id/doctors", controller.GetDoctorsByClinicController)
 	e.GET("/doctors", controller.GetDoctorsController)
@@ -61,7 +63,8 @@ func New() *echo.Echo {
 
 	// user ai
 	aiController := controller.NewAIController(repository.NewAIRepository())
-	e.POST("/chatbot/health-recommendation", aiController.GetHealthRecommendation)
+	r.POST("/chatbot/health-recommendation", aiController.GetHealthRecommendation, m.CheckRole(constant.ROLE_USER))
+	r.GET("/chatbot/health-recommendation/patients/:id", aiController.GetHealthRecommendationHistory, m.CheckRole(constant.ROLE_USER))
 
 	// transaction
 	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole(constant.ROLE_USER))
@@ -70,6 +73,8 @@ func New() *echo.Echo {
 	r.PUT("/transactions/:id/reschedule", controller.RescheduleController, m.CheckRole(constant.ROLE_USER))
 	r.POST("/transactions/:id/cancel", controller.CancelTransactionController, m.CheckRole(constant.ROLE_USER))
 	r.PUT("/refund/:id", controller.ValidateRefund, m.CheckRole(constant.ROLE_ADMIN))
+	
+	r.GET("/notifications/patients/:id", controller.GetNotificationsController, m.CheckRole(constant.ROLE_USER))
 	// davin
 
 	// ADMIN ROUTE
@@ -97,6 +102,8 @@ func New() *echo.Echo {
 
 	// DOCTOR ROUTE
 	e.POST("/doctors/login", controller.DoctorLoginController)
+	e.PUT("/doctors/send-otp", controller.DoctorSendOTPController)
+	e.PUT("/doctors/validate-otp", controller.DoctorValidateOTPController)
 	doctor := e.Group("/doctors")
 	doctor.Use(middleware.JWT([]byte(config.JWT_KEY)))
 	doctor.GET("/profile", controller.GetDoctorProfileController, m.CheckRole(constant.ROLE_DOCTOR))
@@ -124,6 +131,16 @@ func New() *echo.Echo {
 	// DOCTOR DASHBOARD
 	doctor.GET("/dashboard/data-count-one-month", controller.GetDataCountForDoctorControllerOneMonth, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/dashboard/data-count-one-week", controller.GetDataCountForDoctorControllerOneWeek, m.CheckRole(constant.ROLE_DOCTOR))
+
+	// DOCTOR APPOINTMENT
+	doctor.GET("/appointments/details-transaction/:id", controller.DoctorGetDetailsTransactionController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/appointments/details-consultation/:id", controller.DoctorGetDetailsPatientController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/appointments/details-consultation", controller.DoctorGetAllConsultations, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/appointments/confirm-consultation", controller.DoctorConfirmConsultationController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/appointments/finish-consultation", controller.DoctorFinishedConsultationController, m.CheckRole(constant.ROLE_DOCTOR))
+
+	// DOCTOR CHANGE PASSWORD
+	doctor.PUT("/change-password", controller.ChangeDoctorPasswordController)
 
 	return e
 }

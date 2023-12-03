@@ -1,15 +1,21 @@
 package repository
 
 import (
+	"capstone-project/model"
+	"capstone-project/database"
+
 	"context"
 	"fmt"
 	"os"
 
 	"github.com/sashabaranov/go-openai"
+	"github.com/google/uuid"
 )
 
 type AIRepository interface {
 	GetHealthRecommendation(ctx context.Context, message, language string) (string, error)
+	StoreChatToDB(data model.HealthRecommendation)
+	GetAllHealthRecommendations(patient_id uuid.UUID) ([]model.HealthRecommendation, error)
 }
 
 type aiRepository struct{}
@@ -57,4 +63,18 @@ func (ar *aiRepository) GetHealthRecommendation(ctx context.Context, message, la
 	}
 
 	return fmt.Sprintf("%s%s", tipsPrefix, resp.Choices[0].Message.Content), nil
+}
+
+func (ar *aiRepository) StoreChatToDB(data model.HealthRecommendation){
+	database.DB.Save(&data)
+}
+
+func (ar *aiRepository)GetAllHealthRecommendations(patient_id uuid.UUID) ([]model.HealthRecommendation, error) {
+	var datahealthRecommendations []model.HealthRecommendation
+
+	tx := database.DB.Where("patient_id = ?", patient_id).Find(&datahealthRecommendations)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return datahealthRecommendations, nil
 }

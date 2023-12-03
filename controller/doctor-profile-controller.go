@@ -4,8 +4,10 @@ import (
 	"capstone-project/dto"
 	m "capstone-project/middleware"
 	"capstone-project/repository"
+	"capstone-project/util"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -298,7 +300,7 @@ func CreateDoctorEducationController(c echo.Context) error {
 			"response": err.Error(),
 		})
 	}
-	
+
 	educationData := dto.ConvertToDoctorEducationModel(education)
 
 	responseData, err := repository.InsertDoctorEducation(educationData)
@@ -486,15 +488,42 @@ func CreateDoctorCertificationController(c echo.Context) error {
 		})
 	}
 
-	if err := validateDoctorCertificationRequest(certification); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "failed create doctor certification",
-			"response": err.Error(),
-		})
-	}
+	// if err := validateDoctorCertificationRequest(certification); err != nil {
+	// 	return c.JSON(http.StatusBadRequest, map[string]any{
+	// 		"message":  "failed create doctor certification",
+	// 		"response": err.Error(),
+	// 	})
+	// }
 
 	certificationData := dto.ConvertToDoctorCertificationModel(certification)
-	
+
+	certificationImage, err := c.FormFile("details")
+	if err != http.ErrMissingFile {
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload details image",
+				"response": err.Error(),
+			})
+		}
+
+		certificationURL, err := util.UploadToCloudinary(certificationImage)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]any{
+				"message":  "error upload details image to Cloudinary",
+				"response": err.Error(),
+			})
+		}
+		size, err := getCloudinaryFileInfo(certificationURL)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]any{
+				"message":  "error getting file size from Cloudinary",
+				"response": err.Error(),
+			})
+		}
+		certificationData.FileSize = strconv.FormatInt(size, 10)
+		certificationData.Details = certificationURL
+	}
+
 	responseData, err := repository.InsertDoctorCertification(certificationData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -505,10 +534,26 @@ func CreateDoctorCertificationController(c echo.Context) error {
 
 	certificationResponse := dto.ConvertToDoctorCertificationResponse(responseData)
 
-	return c.JSON(http.StatusOK, map[string]any{
+	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create doctor certification",
 		"response": certificationResponse,
 	})
+}
+
+func getCloudinaryFileInfo(url string) (int64, error) {
+	resp, err := http.Head(url)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	contentLength := resp.Header.Get("Content-Length")
+	size, err := strconv.ParseInt(contentLength, 10, 64)
+	if err != nil {
+		return 0, err
+	}
+
+	return size, nil
 }
 
 func UpdateDoctorCertificationController(c echo.Context) error {
@@ -556,7 +601,7 @@ func UpdateDoctorCertificationController(c echo.Context) error {
 	certificationData.EndingDate = certification.EndingDate
 	certificationData.Description = certification.Description
 	certificationData.CertificateType = certification.CertificateType
-	certificationData.FileSize = certification.FileSize
+	// certificationData.FileSize = certification.FileSize
 	certificationData.Details = certification.Details
 
 	updateCertificated, err := repository.UpdateDoctorCertificationByID(certificationID, certificationData)
@@ -651,18 +696,18 @@ func validateDoctorEducationRequest(education dto.DoctorEducationRequest) error 
 	return nil
 }
 
-func validateDoctorCertificationRequest(certification dto.DoctorCertificationRequest) error {
-	if certification.DoctorID == uuid.Nil {
-		return errors.New("Doctor ID must be a valid UUID")
-	}
+// func validateDoctorCertificationRequest(certification dto.DoctorCertificationRequest) error {
+// 	if certification.DoctorID == uuid.Nil {
+// 		return errors.New("Doctor ID must be a valid UUID")
+// 	}
 
-	if _, err := uuid.Parse(certification.DoctorID.String()); err != nil {
-		return errors.New("Doctor ID must be a valid UUID")
-	}
+// 	if _, err := uuid.Parse(certification.DoctorID.String()); err != nil {
+// 		return errors.New("Doctor ID must be a valid UUID")
+// 	}
 
-	if certification.DoctorID == uuid.Nil || certification.StartingDate.IsZero() || certification.EndingDate.IsZero() || certification.Description == "" || certification.CertificateType == "" || certification.FileSize == "" || certification.Details == "" {
-		return errors.New("All fields must be filled in")
-	}
+// 	if certification.DoctorID == uuid.Nil || certification.StartingDate.IsZero() || certification.EndingDate.IsZero() || certification.Description == "" || certification.CertificateType == "" || certification.Details == "" {
+// 		return errors.New("All fields must be filled in")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
