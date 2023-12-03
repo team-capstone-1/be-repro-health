@@ -85,7 +85,7 @@ type DoctorCertificationResponse struct {
 	EndingDate      time.Time `json:"end_date"`
 	Description     string    `json:"description"`
 	CertificateType string    `json:"certificate_type"`
-	FileSize        int64     `json:"file_size"`
+	FileSize        string    `json:"file_size"`
 	Details         string    `json:"details"`
 }
 
@@ -171,7 +171,7 @@ func ConvertToDoctorCertificationResponse(certification model.DoctorCertificatio
 		EndingDate:      certification.EndingDate,
 		Description:     certification.Description,
 		CertificateType: certification.CertificateType,
-		FileSize:        certification.FileSize,
+		FileSize:        string(certification.FileSize),
 		Details:         certification.Details,
 	}
 }

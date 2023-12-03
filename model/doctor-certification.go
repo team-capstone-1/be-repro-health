@@ -15,6 +15,6 @@ type DoctorCertification struct {
 	Description     string    `gorm:"size:255"`
 	StartingDate    time.Time
 	EndingDate      time.Time
-	FileSize        int64  `gorm:"size:255"`
+	FileSize        string `gorm:"size:255"`
 	Details         string `gorm:"size:255"`
 }
