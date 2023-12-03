@@ -4,6 +4,7 @@ import (
 	"capstone-project/database"
 	"capstone-project/model"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -15,6 +16,32 @@ func DoctorGetAllArticles(doctorID uuid.UUID) ([]model.Article, error) {
 	var dataarticles []model.Article
 
 	tx := database.DB.Where("doctor_id = ?", doctorID).Find(&dataarticles)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return dataarticles, nil
+}
+
+func DoctorGetAllArticlesByMonth(doctorID uuid.UUID, month time.Time) ([]model.Article, error) {
+	var dataarticles []model.Article
+
+	startOfMonth := month.AddDate(0, 0, 1)
+	endOfMonth := startOfMonth.AddDate(0, 1, -1)
+
+	tx := database.DB.Where("doctor_id = ? AND date BETWEEN ? AND ?", doctorID, startOfMonth, endOfMonth).Find(&dataarticles)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return dataarticles, nil
+}
+
+func DoctorGetAllArticlesByWeek(doctorID uuid.UUID, week time.Time) ([]model.Article, error) {
+	var dataarticles []model.Article
+
+	startOfWeek := week.AddDate(0, 0, -7)
+	endOfWeek := startOfWeek.AddDate(0, 0, -1)
+
+	tx := database.DB.Where("doctor_id = ? AND date BETWEEN ? AND ?", doctorID, startOfWeek, endOfWeek).Find(&dataarticles)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -48,7 +75,7 @@ func UserGetArticleByID(id uuid.UUID) (model.Article, error) {
 	if tx.Error != nil {
 		return model.Article{}, tx.Error
 	}
-	database.DB.Model(&dataarticle).Where("id = ?", id).Updates(map[string]interface{}{"View": dataarticle.View+1})
+	database.DB.Model(&dataarticle).Where("id = ?", id).Updates(map[string]interface{}{"View": dataarticle.View + 1})
 
 	return dataarticle, nil
 }
