@@ -55,7 +55,7 @@ func InsertConsultation(data model.Consultation) (model.Consultation, error) {
 func GetConsultationByID(id uuid.UUID) (model.Consultation, error) {
 	var dataconsultation model.Consultation
 
-	tx := database.DB.Preload("Clinic").Preload("Doctor").First(&dataconsultation, id)
+	tx := database.DB.Preload("Clinic").Preload("Doctor").Preload("Doctor.Specialist").First(&dataconsultation, id)
 	if tx.Error != nil {
 		return model.Consultation{}, tx.Error
 	}

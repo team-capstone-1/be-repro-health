@@ -29,7 +29,7 @@ type UserConsultationResponse struct {
 	Session     string    `json:"session"`
 	QueueNumber string    `json:"queue_number"`
 	Clinic      ClinicResponse    `json:"clinic"`
-	Doctor      ForumDoctorResponse    `json:"doctor"`
+	Doctor      TransactionDoctorResponse    `json:"doctor"`
 }
 
 type ConsultationResponse struct {
@@ -41,7 +41,7 @@ type ConsultationResponse struct {
 	Session     string    `json:"session"`
 	QueueNumber string    `json:"queue_number"`
 	Clinic      ClinicResponse    `json:"clinic"`
-	Doctor      ForumDoctorResponse    `json:"doctor"`
+	Doctor      TransactionDoctorResponse    `json:"doctor"`
 }
 
 func ConvertToConsultationModel(consultation ConsultationRequest) model.Consultation {
@@ -72,7 +72,7 @@ func ConvertToUserConsultationResponse(consultation model.Consultation) UserCons
 		QueueNumber: consultation.QueueNumber,
 		Session: consultation.Session,
 		Clinic: ConvertToClinicResponse(consultation.Clinic),
-		Doctor: ConvertToForumDoctorResponse(consultation.Doctor),
+		Doctor: ConvertToTransactionDoctorResponse(consultation.Doctor),
 	}
 }
 
@@ -86,6 +86,6 @@ func ConvertToConsultationResponse(consultation model.Consultation) Consultation
 		QueueNumber: consultation.QueueNumber,
 		Session: consultation.Session,
 		Clinic: ConvertToClinicResponse(consultation.Clinic),
-		Doctor: ConvertToForumDoctorResponse(consultation.Doctor),
+		Doctor: ConvertToTransactionDoctorResponse(consultation.Doctor),
 	}
 }
