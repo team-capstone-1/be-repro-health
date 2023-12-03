@@ -2,7 +2,6 @@ package dto
 
 import (
 	"capstone-project/model"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -52,7 +51,7 @@ type DoctorGetDetailsPatientResponse struct {
 	Weight          float64   `json:"weight"`
 	TelephoneNumber string    `json:"telephone_number"`
 	Email           string    `json:"email"`
-	SequenceNumber  string    `json:"sequence_number"`
+	QueueNumber     string    `json:"sequence_number"`
 	Date            time.Time `json:"date"`
 	Session         string    `json:"session"`
 	Location        string    `json:"location"`
@@ -89,26 +88,23 @@ func ConvertToDoctorFinishConsultationModel(consultation DoctorConfirmConsultati
 }
 
 func ConvertToDoctorGetAllConsultations(consultation model.Consultation) DoctorGetAllConsultations {
-	var invoice string
+
 	var total float64
 	var paymentMethod string
 	var status string
 
 	for i := range consultation.Transaction {
-		invoice = consultation.Transaction[i].Invoice
 
 		total = consultation.Transaction[i].Total
 		paymentMethod = consultation.Transaction[i].Payment.Method
 		status = string(consultation.Transaction[i].Status)
 	}
-	parts := strings.Split(invoice, "/")
-	sequenceNumber := parts[len(parts)-1]
 
 	return DoctorGetAllConsultations{
 		ID:             consultation.ID,
 		PatientID:      consultation.PatientID,
 		PatientName:    consultation.Patient.Name,
-		SequenceNumber: sequenceNumber,
+		SequenceNumber: consultation.QueueNumber,
 		Date:           consultation.Date,
 		Session:        consultation.Session,
 		Total:          total,
@@ -121,19 +117,14 @@ func ConvertToDoctorGetDetailsPatientResponse(consultation model.Consultation) D
 	var transactionID uuid.UUID
 	var paymentMethod string
 	var total float64
-	var invoice string
 	var status string
 
 	if len(consultation.Transaction) > 0 {
 		transactionID = consultation.Transaction[0].ID
 		paymentMethod = consultation.Transaction[0].Payment.Method
 		total = consultation.Transaction[0].Total
-		invoice = consultation.Transaction[0].Invoice
 		status = string(consultation.Transaction[0].Status)
 	}
-
-	parts := strings.Split(invoice, "/")
-	sequenceNumber := parts[len(parts)-1]
 
 	return DoctorGetDetailsPatientResponse{
 		ID:              consultation.ID,
@@ -151,7 +142,7 @@ func ConvertToDoctorGetDetailsPatientResponse(consultation model.Consultation) D
 		Session:         consultation.Session,
 		Location:        consultation.Clinic.Location,
 		PaymentMethod:   paymentMethod,
-		SequenceNumber:  sequenceNumber,
+		QueueNumber:     consultation.QueueNumber,
 		Total:           total,
 		Status:          status,
 	}
