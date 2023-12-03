@@ -4,6 +4,7 @@ package controller
 
 import (
 	"capstone-project/dto"
+	"capstone-project/model"
 	"capstone-project/repository"
 	"context"
 	"net/http"
@@ -11,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v4"
+	"github.com/google/uuid"
 )
 
 type AIController struct {
@@ -59,6 +61,14 @@ func (ac *AIController) GetHealthRecommendation(c echo.Context) error {
 		Status: "success",
 		Data:   result,
 	}
+
+	storeDB := model.HealthRecommendation{
+		ID: uuid.New(),
+		PatientID: req.PatientID,
+		Question: req.Message,
+		Answer: resp.Data,
+	}
+	ac.AIRepo.StoreChatToDB(storeDB)
 
 	return c.JSON(http.StatusOK, resp)
 }
@@ -166,4 +176,32 @@ func isNonReproductiveHealthQuestion(question string) bool {
 	}
 
 	return true
+}
+
+func (ac *AIController) GetHealthRecommendationHistory(c echo.Context) error{
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err := ac.AIRepo.GetAllHealthRecommendations(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get healthRecommendations",
+			"response":   err.Error(),
+		})
+	}
+
+	var healthRecommendationResponse []dto.HealthRecommendationHistoryResponse
+	for _, healthRecommendation := range responseData {
+		healthRecommendationResponse = append(healthRecommendationResponse, dto.ConvertToHealthRecommendationHistoryResponse(healthRecommendation))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message": "success get healthRecommendations",
+		"response":   healthRecommendationResponse,
+	})
 }
