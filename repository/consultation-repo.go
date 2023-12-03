@@ -1,37 +1,35 @@
 package repository
 
 import (
-	"time"
 	"fmt"
+	"time"
 
 	"capstone-project/database"
 	"capstone-project/model"
-	"time"
 
 	"github.com/google/uuid"
 )
 
 func GenerateQueueNumber(date time.Time, session string) (string, error) {
-    formattedDate := date.Format("2006-01-02")
+	formattedDate := date.Format("2006-01-02")
 
-    var sequence int
-    result := database.DB.Table("consultations").
-        Where("date = ? AND session = ?", formattedDate, session).
-        Select("COALESCE(MAX(CAST(SUBSTRING(queue_number, 1, 3) AS SIGNED)), 0) AS max_sequence").
-        Scan(&sequence)
+	var sequence int
+	result := database.DB.Table("consultations").
+		Where("date = ? AND session = ?", formattedDate, session).
+		Select("COALESCE(MAX(CAST(SUBSTRING(queue_number, 1, 3) AS SIGNED)), 0) AS max_sequence").
+		Scan(&sequence)
 
-    if result.Error != nil {
-        return "", result.Error
-    }
+	if result.Error != nil {
+		return "", result.Error
+	}
 
-    // Increment the sequence
-    sequence++
+	// Increment the sequence
+	sequence++
 
-    formattedQueueNumber := fmt.Sprintf("%03d", sequence)
+	formattedQueueNumber := fmt.Sprintf("%03d", sequence)
 	fmt.Println(formattedQueueNumber)
-    return formattedQueueNumber, nil
+	return formattedQueueNumber, nil
 }
-
 
 func GetConsultationsByDoctorID(doctorID uuid.UUID) ([]model.Consultation, error) {
 	var dataConsultations []model.Consultation
@@ -74,7 +72,7 @@ func GetConsultationByDoctorAndMonth(doctorID uuid.UUID, month time.Time) ([]mod
 
 func GetConsultationByDoctorAndWeek(doctorID uuid.UUID, week time.Time) ([]model.Consultation, error) {
 	var consultations []model.Consultation
-	
+
 	startOfWeek := week.AddDate(0, 0, -7)
 	endOfWeek := startOfWeek.AddDate(0, 0, -14)
 
@@ -90,7 +88,6 @@ func GetConsultationByDoctorAndWeek(doctorID uuid.UUID, week time.Time) ([]model
 
 	return consultations, nil
 }
-
 
 func InsertConsultation(data model.Consultation) (model.Consultation, error) {
 	tx := database.DB.Save(&data)
