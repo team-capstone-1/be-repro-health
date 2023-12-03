@@ -131,6 +131,8 @@ func New() *echo.Echo {
 	doctor.GET("/appointments/details-transaction/:id", controller.DoctorGetDetailsTransactionController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/appointments/details-consultation/:id", controller.DoctorGetDetailsPatientController, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/appointments/details-consultation", controller.DoctorGetAllConsultations, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/appointments/confirm-consultation", controller.DoctorConfirmConsultationController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/appointments/finish-consultation", controller.DoctorFinishedConsultationController, m.CheckRole(constant.ROLE_DOCTOR))
 
 	return e
 }

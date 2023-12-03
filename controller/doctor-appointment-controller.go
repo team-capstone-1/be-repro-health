@@ -86,7 +86,10 @@ func DoctorGetAllConsultations(c echo.Context) error {
 		})
 	}
 
-	consultations, err := repository.DoctorGetAllConsultations(user)
+	name := c.FormValue("name")
+	status := c.FormValue("status")
+
+	consultations, err := repository.DoctorGetAllConsultations(user, name, status)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get all consultations",
@@ -110,5 +113,96 @@ func DoctorGetAllConsultations(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get all consultations",
 		"response": consultationsResponse,
+	})
+}
+
+func DoctorConfirmConsultationController(c echo.Context) error {
+	updateData := dto.DoctorConfirmConsultationRequest{}
+	errBind := c.Bind(&updateData)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	confirmConsultation := dto.ConvertToDoctorConfirmConsultationModel(updateData, updateData.ConsultationID)
+
+	err := repository.DoctorConfirmConsultation(updateData.ConsultationID, confirmConsultation)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "failed confirm consultation",
+			"response": err.Error(),
+		})
+	}
+
+	consultation, err := repository.DoctorGetDetailsConsultation(updateData.ConsultationID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get consultation",
+			"response": err.Error(),
+		})
+	}
+
+	transactions, err := repository.DoctorGetTransactionsForConsultation(updateData.ConsultationID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get transactions for consultation",
+			"response": err.Error(),
+		})
+	}
+
+	consultation.Transaction = transactions
+
+	consultationResponse := dto.ConvertToDoctorGetDetailsPatientResponse(consultation)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success confirm consultation",
+		"response": consultationResponse,
+	})
+}
+func DoctorFinishedConsultationController(c echo.Context) error {
+	updateData := dto.DoctorConfirmConsultationRequest{}
+	errBind := c.Bind(&updateData)
+	if errBind != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error bind data",
+			"response": errBind.Error(),
+		})
+	}
+
+	confirmConsultation := dto.ConvertToDoctorFinishConsultationModel(updateData, updateData.ConsultationID)
+
+	err := repository.DoctorFinishConsultation(updateData.ConsultationID, confirmConsultation)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "failed finish consultation",
+			"response": err.Error(),
+		})
+	}
+
+	consultation, err := repository.DoctorGetDetailsConsultation(updateData.ConsultationID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get consultation",
+			"response": err.Error(),
+		})
+	}
+
+	transactions, err := repository.DoctorGetTransactionsForConsultation(updateData.ConsultationID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get transactions for consultation",
+			"response": err.Error(),
+		})
+	}
+
+	consultation.Transaction = transactions
+
+	consultationResponse := dto.ConvertToDoctorGetDetailsPatientResponse(consultation)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success finish consultation",
+		"response": consultationResponse,
 	})
 }

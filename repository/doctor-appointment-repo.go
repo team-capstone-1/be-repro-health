@@ -28,7 +28,7 @@ func DoctorGetAppointment(name string, status string) ([]model.Consultation, err
 }
 
 func DoctorConfirmConsultation(consultationID uuid.UUID, data model.Transaction) error {
-	tx := database.DB.Where("id = ?", consultationID).Update("status", "processed")
+	tx := database.DB.Model(&data).Where("consultation_id = ?", consultationID).Update("status", "processed")
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -37,7 +37,7 @@ func DoctorConfirmConsultation(consultationID uuid.UUID, data model.Transaction)
 }
 
 func DoctorFinishConsultation(consultationID uuid.UUID, data model.Transaction) error {
-	tx := database.DB.Where("id = ?", consultationID).Update("status", "done")
+	tx := database.DB.Model(&data).Where("consultation_id = ?", consultationID).Update("status", "done")
 	if tx.Error != nil {
 		return tx.Error
 	}
@@ -88,14 +88,25 @@ func DoctorGetTransactionsForConsultation(consultationID uuid.UUID) ([]model.Tra
 	return transactions, nil
 }
 
-func DoctorGetAllConsultations(doctorID uuid.UUID) ([]model.Consultation, error) {
+func DoctorGetAllConsultations(doctorID uuid.UUID, name string, status string) ([]model.Consultation, error) {
 	var consultation []model.Consultation
 
 	tx := database.DB.
+		Joins("JOIN patients ON patients.id = consultations.patient_id").
+		Joins("JOIN transactions ON transactions.consultation_id = consultations.id").
 		Preload("Patient").
 		Preload("Transaction.Payment").
-		Where("doctor_id = ?", doctorID).
-		Find(&consultation)
+		Where("consultations.doctor_id = ?", doctorID)
+
+	if name != "" {
+		tx = tx.Where("patients.name LIKE ?", "%"+name+"%")
+	}
+
+	if status != "" {
+		tx = tx.Where("transactions.status = ?", status)
+	}
+
+	tx = tx.Find(&consultation)
 
 	if tx.Error != nil {
 		return nil, tx.Error

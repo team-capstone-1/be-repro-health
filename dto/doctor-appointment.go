@@ -73,6 +73,21 @@ type DoctorGetAllConsultations struct {
 	Status         string    `json:"status"`
 }
 
+type DoctorConfirmConsultationRequest struct {
+	ConsultationID uuid.UUID `json:"consultation_id"`
+}
+
+func ConvertToDoctorConfirmConsultationModel(consultation DoctorConfirmConsultationRequest, consultationID uuid.UUID) model.Transaction {
+	return model.Transaction{
+		ConsultationID: consultationID,
+	}
+}
+func ConvertToDoctorFinishConsultationModel(consultation DoctorConfirmConsultationRequest, consultationID uuid.UUID) model.Transaction {
+	return model.Transaction{
+		ConsultationID: consultationID,
+	}
+}
+
 func ConvertToDoctorGetAllConsultations(consultation model.Consultation) DoctorGetAllConsultations {
 	var invoice string
 	var total float64
