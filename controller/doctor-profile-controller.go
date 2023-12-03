@@ -520,7 +520,7 @@ func CreateDoctorCertificationController(c echo.Context) error {
 				"response": err.Error(),
 			})
 		}
-		certificationData.FileSize = string(size)
+		certificationData.FileSize = strconv.FormatInt(size, 10)
 		certificationData.Details = certificationURL
 	}
 
