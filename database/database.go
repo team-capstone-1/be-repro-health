@@ -289,7 +289,7 @@ func Seeders() {
 			Description:     "Praktik Medis",
 			StartingDate:    time.Date(2022, 07, 27, 0, 0, 0, 0, time.UTC),
 			EndingDate:      time.Date(2027, 07, 27, 0, 0, 0, 0, time.UTC),
-			FileSize:        5,
+			FileSize:        string(5),
 			Details:         "https://res.cloudinary.com/dw3n2ondc/image/upload/v1700466108/Reproduction-Health/ickckqmok4hbajzdkhpx.png",
 		},
 		{
@@ -299,7 +299,7 @@ func Seeders() {
 			Description:     "Praktik Medis",
 			StartingDate:    time.Date(2022, 07, 27, 0, 0, 0, 0, time.UTC),
 			EndingDate:      time.Date(2027, 07, 27, 0, 0, 0, 0, time.UTC),
-			FileSize:        5,
+			FileSize:        string(5),
 			Details:         "https://res.cloudinary.com/dw3n2ondc/image/upload/v1700466108/Reproduction-Health/ickckqmok4hbajzdkhpx.png",
 		},
 	}
