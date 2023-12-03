@@ -103,13 +103,13 @@ func CreateDoctorArticleController(c echo.Context) error {
 		})
 	}
 
-	if article.Title == "" || article.Tags == "" || article.Reference == "" ||
-		article.Image == "" || article.ImageDesc == "" || article.Content == "" {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "invalid body",
-			"response": "All fields must be filled in.",
-		})
-	}
+	// if article.Title == "" || article.Tags == "" || article.Reference == "" ||
+	// 	article.Image == "" || article.ImageDesc == "" || article.Content == "" {
+	// 	return c.JSON(http.StatusBadRequest, map[string]any{
+	// 		"message":  "invalid body",
+	// 		"response": "All fields must be filled in.",
+	// 	})
+	// }
 
 	articleData := dto.ConvertToDoctorArticleModel(article)
 	articleData.DoctorID = doctor
