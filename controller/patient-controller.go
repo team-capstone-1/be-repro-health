@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"sort"
 
 	"capstone-project/dto"
 	m "capstone-project/middleware"
@@ -33,6 +34,10 @@ func GetPatientsController(c echo.Context) error {
 	for _, patient := range responseData {
 		patientResponse = append(patientResponse, dto.ConvertToPatientResponse(patient))
 	}
+
+	sort.Slice(patientResponse, func(i, j int) bool {
+		return patientResponse[i].CreatedAt.Before(patientResponse[j].CreatedAt)
+	})
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get patients",
