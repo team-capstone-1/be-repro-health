@@ -129,10 +129,8 @@ func New() *echo.Echo {
 	doctor.PUT("/articles/:id/publish", controller.UpdateArticlePublishedStatusController, m.CheckRole(constant.ROLE_DOCTOR))
 
 	// DOCTOR DASHBOARD
-	doctor.GET("/consultations-dashboard", controller.GetConsultationSchedulesForDoctorDashboardController, m.CheckRole(constant.ROLE_DOCTOR))
-	doctor.GET("/patients-dashboard", controller.GetPatientsForDoctorDashboardController)
-	doctor.GET("/transactions-dashboard", controller.GetTransactionsForDoctorDashboardController)
-	doctor.GET("/articles-dashboard", controller.GetArticleForDoctorDashboardController)
+	doctor.GET("/dashboard/data-count-one-month", controller.GetDataCountForDoctorControllerOneMonth, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/dashboard/data-count-one-week", controller.GetDataCountForDoctorControllerOneWeek, m.CheckRole(constant.ROLE_DOCTOR))
 
 	// DOCTOR APPOINTMENT
 	doctor.GET("/appointments/details-transaction/:id", controller.DoctorGetDetailsTransactionController, m.CheckRole(constant.ROLE_DOCTOR))

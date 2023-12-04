@@ -4,6 +4,7 @@ import (
 	"capstone-project/database"
 	"capstone-project/model"
 	"errors"
+	"time"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
@@ -11,7 +12,7 @@ import (
 
 // ...
 
-func GetAllArticles(doctorID uuid.UUID) ([]model.Article, error) {
+func DoctorGetAllArticles(doctorID uuid.UUID) ([]model.Article, error) {
 	var dataarticles []model.Article
 
 	tx := database.DB.Where("doctor_id = ?", doctorID).Find(&dataarticles)
@@ -21,14 +22,30 @@ func GetAllArticles(doctorID uuid.UUID) ([]model.Article, error) {
 	return dataarticles, nil
 }
 
-func GetAllArticleDashboard() ([]model.Article, error) {
-	var dataarticlesdashboard []model.Article
+func DoctorGetAllArticlesByMonth(doctorID uuid.UUID, month time.Time) ([]model.Article, error) {
+	var dataarticles []model.Article
 
-	tx := database.DB.Find(&dataarticlesdashboard)
+	startOfMonth := month.AddDate(0, 0, 1)
+	endOfMonth := startOfMonth.AddDate(0, 1, -1)
+
+	tx := database.DB.Where("doctor_id = ? AND date BETWEEN ? AND ?", doctorID, startOfMonth, endOfMonth).Find(&dataarticles)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	return dataarticlesdashboard, nil
+	return dataarticles, nil
+}
+
+func DoctorGetAllArticlesByWeek(doctorID uuid.UUID, week time.Time) ([]model.Article, error) {
+	var dataarticles []model.Article
+
+	startOfWeek := week.AddDate(0, 0, 0)
+	endOfWeek := startOfWeek.AddDate(0, 0, 7)
+
+	tx := database.DB.Where("doctor_id = ? AND date BETWEEN ? AND ?", doctorID, startOfWeek, endOfWeek).Find(&dataarticles)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return dataarticles, nil
 }
 
 func GetArticleByID(id uuid.UUID) (model.Article, error) {
@@ -41,6 +58,16 @@ func GetArticleByID(id uuid.UUID) (model.Article, error) {
 	return dataarticle, nil
 }
 
+func UserGetAllArticle() ([]model.Article, error) {
+	var dataarticlesdashboard []model.Article
+
+	tx := database.DB.Find(&dataarticlesdashboard)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return dataarticlesdashboard, nil
+}
+
 func UserGetArticleByID(id uuid.UUID) (model.Article, error) {
 	var dataarticle model.Article
 
@@ -48,7 +75,7 @@ func UserGetArticleByID(id uuid.UUID) (model.Article, error) {
 	if tx.Error != nil {
 		return model.Article{}, tx.Error
 	}
-	database.DB.Model(&dataarticle).Where("id = ?", id).Updates(map[string]interface{}{"View": dataarticle.View+1})
+	database.DB.Model(&dataarticle).Where("id = ?", id).Updates(map[string]interface{}{"View": dataarticle.View + 1})
 
 	return dataarticle, nil
 }

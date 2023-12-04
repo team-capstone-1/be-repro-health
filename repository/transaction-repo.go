@@ -11,14 +11,71 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetAllTransactions() ([]model.Transaction, error) {
+func GetAllTransactionsByDoctorID(doctorID uuid.UUID) ([]model.Transaction, error) {
 	var datatransactions []model.Transaction
 
-	tx := database.DB.Preload("Consultation").Find(&datatransactions)
+	tx := database.DB.Preload("Consultation").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ?", doctorID).
+		Find(&datatransactions)
+
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
+
 	return datatransactions, nil
+}
+
+func GetDoneTransactionsByDoctorAndMonth(doctorID uuid.UUID, month time.Time) ([]model.Transaction, error) {
+	var transactions []model.Transaction
+	startOfMonth := month.AddDate(0, 0, 1)
+	endOfMonth := startOfMonth.AddDate(0, 1, -1)
+
+	tx := database.DB.
+		Preload("Consultation").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ? AND transactions.date BETWEEN ? AND ? AND transactions.payment_status = 'done'", doctorID, startOfMonth, endOfMonth).
+		Find(&transactions)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return transactions, nil
+}
+
+func GetDoneTransactionsByDoctorAndWeek(doctorID uuid.UUID, week time.Time) ([]model.Transaction, error) {
+	var transactions []model.Transaction
+	startOfWeek := week.AddDate(0, 0, 0)
+	endOfWeek := startOfWeek.AddDate(0, 0, 7)
+
+	tx := database.DB.
+		Preload("Consultation").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ? AND transactions.date BETWEEN ? AND ? AND transactions.payment_status = 'done'", doctorID, startOfWeek, endOfWeek).
+		Find(&transactions)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return transactions, nil
+}
+
+func GetDoneTransactionsByDoctorAndTimeRange(doctorID uuid.UUID, start, end time.Time) ([]model.Transaction, error) {
+	var transactions []model.Transaction
+
+	tx := database.DB.
+		Preload("Consultation").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ? AND transactions.date BETWEEN ? AND ? AND transactions.payment_status = 'done'", doctorID, start, end).
+		Find(&transactions)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return transactions, nil
 }
 
 func GetPatientTransactions(id uuid.UUID) ([]model.Transaction, error) {

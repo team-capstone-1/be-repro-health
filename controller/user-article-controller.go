@@ -3,20 +3,20 @@ package controller
 import (
 	"net/http"
 
-	"capstone-project/repository"
 	"capstone-project/dto"
 	m "capstone-project/middleware"
+	"capstone-project/repository"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 func GetArticlesController(c echo.Context) error {
-	responseData, err := repository.GetAllArticleDashboard()
+	responseData, err := repository.UserGetAllArticle()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get articles",
-			"response":   err.Error(),
+			"message":  "failed get articles",
+			"response": err.Error(),
 		})
 	}
 
@@ -26,8 +26,8 @@ func GetArticlesController(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get articles",
-		"response":   articleResponse,
+		"message":  "success get articles",
+		"response": articleResponse,
 	})
 }
 
@@ -60,7 +60,7 @@ func CreateCommentController(c echo.Context) error {
 	errBind := c.Bind(&comment)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
+			"message":  "error bind data",
 			"response": errBind.Error(),
 		})
 	}
@@ -69,10 +69,10 @@ func CreateCommentController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed create comment",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
-	if checkPatient.UserID != user{
+	if checkPatient.UserID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
 			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
@@ -81,20 +81,20 @@ func CreateCommentController(c echo.Context) error {
 
 	commentData := dto.ConvertToCommentModel(comment)
 	commentData.ArticleID = uuid
-	
+
 	responseData, err := repository.InsertComment(commentData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create comment",
-			"response":  err.Error(),
+			"message":  "failed create comment",
+			"response": err.Error(),
 		})
 	}
 
 	commentResponse := dto.ConvertToCommentResponse(responseData)
 
 	return c.JSON(http.StatusCreated, map[string]any{
-		"message": "success create new comment",
-		"response":    commentResponse,
+		"message":  "success create new comment",
+		"response": commentResponse,
 	})
 }
 
