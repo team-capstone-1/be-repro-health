@@ -58,8 +58,8 @@ func GetPatientByDoctorAndMonth(doctorID uuid.UUID, month time.Time) ([]model.Pa
 func GetPatientByDoctorAndWeek(doctorID uuid.UUID, week time.Time) ([]model.Patient, error) {
 	var patients []model.Patient
 
-	startOfWeek := week.AddDate(0, 0, -7)
-	endOfWeek := startOfWeek.AddDate(0, 0, -14)
+	startOfWeek := week.AddDate(0, 0, 0)
+	endOfWeek := startOfWeek.AddDate(0, 0, 7)
 
 	tx := database.DB.
 		Preload("User").

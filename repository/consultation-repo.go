@@ -73,8 +73,8 @@ func GetConsultationByDoctorAndMonth(doctorID uuid.UUID, month time.Time) ([]mod
 func GetConsultationByDoctorAndWeek(doctorID uuid.UUID, week time.Time) ([]model.Consultation, error) {
 	var consultations []model.Consultation
 
-	startOfWeek := week.AddDate(0, 0, -7)
-	endOfWeek := startOfWeek.AddDate(0, 0, -14)
+	startOfWeek := week.AddDate(0, 0, 0)
+	endOfWeek := startOfWeek.AddDate(0, 0, 7)
 
 	tx := database.DB.
 		Preload("Doctor").

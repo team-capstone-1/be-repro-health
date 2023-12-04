@@ -38,8 +38,8 @@ func DoctorGetAllArticlesByMonth(doctorID uuid.UUID, month time.Time) ([]model.A
 func DoctorGetAllArticlesByWeek(doctorID uuid.UUID, week time.Time) ([]model.Article, error) {
 	var dataarticles []model.Article
 
-	startOfWeek := week.AddDate(0, 0, -7)
-	endOfWeek := startOfWeek.AddDate(0, 0, -1)
+	startOfWeek := week.AddDate(0, 0, 0)
+	endOfWeek := startOfWeek.AddDate(0, 0, 7)
 
 	tx := database.DB.Where("doctor_id = ? AND date BETWEEN ? AND ?", doctorID, startOfWeek, endOfWeek).Find(&dataarticles)
 	if tx.Error != nil {

@@ -201,10 +201,8 @@ func GetDataCountForDoctorControllerOneWeek(c echo.Context) error {
 		})
 	}
 
-	today := time.Now()
-
 	// Consultation
-	lastWeekConsultation := time.Now().AddDate(0, 0, -7)
+	lastWeekConsultation := time.Now().AddDate(0, 0, -14)
 	lastWeekConsultationData, err := repository.GetConsultationByDoctorAndWeek(doctor, lastWeekConsultation)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -213,7 +211,7 @@ func GetDataCountForDoctorControllerOneWeek(c echo.Context) error {
 		})
 	}
 
-	thisWeekConsultation := time.Now().AddDate(0, 0, -1)
+	thisWeekConsultation := time.Now().AddDate(0, 0, -7)
 	thisWeekConsultationData, err := repository.GetConsultationByDoctorAndWeek(doctor, thisWeekConsultation)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -237,7 +235,7 @@ func GetDataCountForDoctorControllerOneWeek(c echo.Context) error {
 	}
 
 	// Patient
-	lastWeekPatient := time.Now().AddDate(0, 0, 7)
+	lastWeekPatient := time.Now().AddDate(0, 0, -14)
 	lastWeekPatientData, err := repository.GetPatientByDoctorAndWeek(doctor, lastWeekPatient)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -246,7 +244,7 @@ func GetDataCountForDoctorControllerOneWeek(c echo.Context) error {
 		})
 	}
 
-	thisWeekPatient := time.Now().AddDate(0, 0, -1)
+	thisWeekPatient := time.Now().AddDate(0, 0, -7)
 	thisWeekPatientData, err := repository.GetPatientByDoctorAndWeek(doctor, thisWeekPatient)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -278,7 +276,7 @@ func GetDataCountForDoctorControllerOneWeek(c echo.Context) error {
 		})
 	}
 
-	lastWeekTrasaction := time.Now().AddDate(0, 0, 7)
+	lastWeekTrasaction := time.Now().AddDate(0, 0, -14)
 	lastWeekTrasactionData, err := repository.GetDoneTransactionsByDoctorAndWeek(doctor, lastWeekTrasaction)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -287,7 +285,7 @@ func GetDataCountForDoctorControllerOneWeek(c echo.Context) error {
 		})
 	}
 
-	thisWeekTrasaction := time.Now().AddDate(0, 0, -1)
+	thisWeekTrasaction := time.Now().AddDate(0, 0, -7)
 	thisWeekTrasactionData, err := repository.GetDoneTransactionsByDoctorAndWeek(doctor, thisWeekTrasaction)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -311,24 +309,20 @@ func GetDataCountForDoctorControllerOneWeek(c echo.Context) error {
 	}
 
 	// Article
-	// Menghitung rentang waktu untuk hari ini
 
-
-	// Menghitung rentang waktu untuk satu hari yang lalu dari hari ini
-	thisWeekArticle := today.AddDate(0, 0, -1).Truncate(24 * time.Hour)
-	lastWeekArticle := today.AddDate(0, 0, -7).Truncate(24 * time.Hour)
-
+	lastWeekArticle := time.Now().AddDate(0, 0, -14)
 	lastWeekArticleData, err := repository.DoctorGetAllArticlesByWeek(doctor, lastWeekArticle)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get last week article data",
 			"response": err.Error(),
 		})
 	}
 
+	thisWeekArticle := time.Now().AddDate(0, 0, -7)
 	thisWeekArticleData, err := repository.DoctorGetAllArticlesByWeek(doctor, thisWeekArticle)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed get this week article data",
 			"response": err.Error(),
 		})

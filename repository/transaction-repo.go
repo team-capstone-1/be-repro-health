@@ -46,8 +46,8 @@ func GetDoneTransactionsByDoctorAndMonth(doctorID uuid.UUID, month time.Time) ([
 
 func GetDoneTransactionsByDoctorAndWeek(doctorID uuid.UUID, week time.Time) ([]model.Transaction, error) {
 	var transactions []model.Transaction
-	startOfWeek := week.AddDate(0, 0, -7)
-	endOfWeek := startOfWeek.AddDate(0, 0, -14)
+	startOfWeek := week.AddDate(0, 0, 0)
+	endOfWeek := startOfWeek.AddDate(0, 0, 7)
 
 	tx := database.DB.
 		Preload("Consultation").
