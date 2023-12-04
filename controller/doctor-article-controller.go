@@ -198,10 +198,28 @@ func UpdateDoctorArticleController(c echo.Context) error {
 		})
 	}
 
+	articleImage, err := c.FormFile("image")
+	if err != http.ErrMissingFile {
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload article image",
+				"response": err.Error(),
+			})
+		}
+
+		articleURL, err := util.UploadToCloudinary(articleImage)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]any{
+				"message":  "error upload article image to Cloudinary",
+				"response": err.Error(),
+			})
+		}
+		articleData.Image = articleURL
+	}
+
 	articleData.Title = article.Title
 	articleData.Tags = article.Tags
 	articleData.Reference = article.Reference
-	articleData.Image = article.Image
 	articleData.ImageDesc = article.ImageDesc
 	articleData.Content = article.Content
 
