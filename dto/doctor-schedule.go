@@ -15,10 +15,9 @@ type DoctorGetSchedule struct {
 	Session     string          `json:"session"`
 	QueueNumber string          `json:"queue_number"`
 	Patient     PatientResponse `json:"patient"`
-	Clinic      ClinicResponse  `json:"clinic"`
 }
 
-func ConvertToDoctorScheduleResponse(consultation model.Consultation) DoctorGetSchedule {
+func ConvertToDoctorScheduleResponse(consultation model.Consultation, patient model.Patient) DoctorGetSchedule {
 	return DoctorGetSchedule{
 		ID:          consultation.ID,
 		DoctorID:    consultation.DoctorID,
@@ -26,6 +25,6 @@ func ConvertToDoctorScheduleResponse(consultation model.Consultation) DoctorGetS
 		Date:        consultation.Date,
 		QueueNumber: consultation.QueueNumber,
 		Session:     consultation.Session,
-		Clinic:      ConvertToClinicResponse(consultation.Clinic),
+		Patient:     ConvertToPatientResponse(patient),
 	}
 }
