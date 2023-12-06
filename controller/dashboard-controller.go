@@ -624,3 +624,26 @@ func calculateTotalArticle(articles []model.Article) float64 {
 // 	})
 // }
 
+func GetGraphController(c echo.Context) error {
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Doctor is not valid.",
+		})
+	}
+
+	responseData, err := repository.GetIncomeByDoctorID(doctor)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "failed get consultation",
+			"response": err.Error(),
+		})
+	}
+
+	return c.JSON(http.StatusOK, map[string]interface{}{
+		"message":  "success get data",
+		"response": responseData,
+	})
+}
+
