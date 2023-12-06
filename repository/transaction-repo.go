@@ -175,3 +175,24 @@ func UpdateTransactionPaymentStatus(id uuid.UUID, status string) error {
 
     return nil
 }
+
+func GetIncomeByDoctorID(doctorID uuid.UUID) ([]map[string]interface{}, error) {
+	var result []map[string]interface{}
+
+	// Group by consultation date and sum the prices
+	tx := database.DB.Table("transactions").
+		Select("DATE(consultations.date) as date, sum(transactions.price) as income").
+		Where("transactions.status = ? AND consultations.date < ?", "done", time.Now()).
+		Group("DATE(consultations.date)").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ?", doctorID).
+		Scan(&result)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return result, nil
+}
+
+

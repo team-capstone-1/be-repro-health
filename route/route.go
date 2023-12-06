@@ -132,6 +132,7 @@ func New() *echo.Echo {
 	doctor.GET("/dashboard/data-count-one-month", controller.GetDataCountForDoctorControllerOneMonth, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/dashboard/data-count-one-week", controller.GetDataCountForDoctorControllerOneWeek, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/dashboard/data-count-one-day", controller.GetDataCountForDoctorControllerOneDay, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/dashboard/graph", controller.GetGraphController, m.CheckRole(constant.ROLE_DOCTOR))
 	// doctor.GET("/dashboard/calendar", controller.GetCalendarController, m.CheckRole(constant.ROLE_DOCTOR))
 
 	// DOCTOR APPOINTMENT
