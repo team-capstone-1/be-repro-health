@@ -24,10 +24,17 @@ func DoctorLoginController(c echo.Context) error {
 		})
 	}
 
+	if loginReq.Email == "" || loginReq.Password == "" {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "email or password cannot be blank",
+			"response": nil,
+		})
+	}
+
 	data, token, err := repository.CheckDoctor(loginReq.Email, loginReq.Password)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]any{
-			"message":  "fail login",
+		return c.JSON(http.StatusNotFound, map[string]any{
+			"message":  "doctor account not found",
 			"response": err.Error(),
 		})
 	}
