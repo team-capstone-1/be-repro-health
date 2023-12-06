@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"capstone-project/dto"
+	"capstone-project/model"
 	"capstone-project/repository"
 	"capstone-project/util"
 
@@ -66,7 +67,7 @@ func GetPatientTransactionsController(c echo.Context) error {
 }
 
 func CreatePaymentController(c echo.Context) error {
-	uuid, err := uuid.Parse(c.Param("id"))
+	transactionID, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error parse id",
@@ -74,7 +75,7 @@ func CreatePaymentController(c echo.Context) error {
 		})
 	}
 
-	paymentExist := repository.CheckPayment(uuid)
+	paymentExist := repository.CheckPayment(transactionID)
 	if paymentExist {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "failed create payment",
@@ -91,33 +92,41 @@ func CreatePaymentController(c echo.Context) error {
 		})
 	}
 
-	transaction, err := repository.GetTransactionByID(uuid)
+	transaction, err := repository.GetTransactionByID(transactionID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create payment",
+			"message": "transaction does not exist",
 			"reponse": err.Error(),
 		})
 	}
 
-	paymentImage, err := c.FormFile("image")
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error upload payment image",
-			"response": err.Error(),
-		})
+	paymentData := model.Payment{
+		ID:    	uuid.New(),
+		Method: payment.Method,
 	}
 
-	paymentImageURL, err := util.UploadToCloudinary(paymentImage)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error upload profile image to Cloudinary",
-			"response": err.Error(),
-		})
+	if payment.Method == "manual_transfer"{
+		paymentImage, err := c.FormFile("image")
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload payment image",
+				"response": err.Error(),
+			})
+		}
+	
+		paymentImageURL, err := util.UploadToCloudinary(paymentImage)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload profile image to Cloudinary",
+				"response": err.Error(),
+			})
+		}
+	
+		paymentData = dto.ConvertToPaymentModel(payment)
+		paymentData.Image = paymentImageURL
 	}
 
-	paymentData := dto.ConvertToPaymentModel(payment)
-	paymentData.Image = paymentImageURL
-	paymentData.TransactionID = uuid
+	paymentData.TransactionID = transactionID
 
 	responseData, err := repository.InsertPayment(paymentData)
 	if err != nil {
@@ -244,9 +253,11 @@ func CancelTransactionController(c echo.Context) error {
 			})
 		}
 
+		responseData := dto.ConvertToTransactionResponse(transaction)
+
 		return c.JSON(http.StatusOK, map[string]any{
 			"message":  "success cancel appointment",
-			"response": transaction,
+			"response": responseData,
 		})
 	} else {
 		paymentExist := repository.CheckPayment(uuid)

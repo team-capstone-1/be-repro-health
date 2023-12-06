@@ -40,6 +40,7 @@ type ConsultationResponse struct {
 	Date        time.Time `json:"date"`
 	Session     string    `json:"session"`
 	QueueNumber string    `json:"queue_number"`
+	Patient     PatientResponse   `json:"patient"`
 	Clinic      ClinicResponse    `json:"clinic"`
 	Doctor      TransactionDoctorResponse    `json:"doctor"`
 }
@@ -85,6 +86,7 @@ func ConvertToConsultationResponse(consultation model.Consultation) Consultation
 		Date: consultation.Date,
 		QueueNumber: consultation.QueueNumber,
 		Session: consultation.Session,
+		Patient: ConvertToPatientResponse(consultation.Patient),
 		Clinic: ConvertToClinicResponse(consultation.Clinic),
 		Doctor: ConvertToTransactionDoctorResponse(consultation.Doctor),
 	}
