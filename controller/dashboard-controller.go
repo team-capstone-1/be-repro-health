@@ -374,6 +374,188 @@ func GetDataCountForDoctorControllerOneWeek(c echo.Context) error {
 	})
 }
 
+func GetDataCountForDoctorControllerOneDay(c echo.Context) error {
+	doctor := m.ExtractTokenUserId(c)
+	if doctor == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Doctor is not valid.",
+		})
+	}
+
+	// Consultation
+	lastDayConsultation := time.Now().AddDate(0, 0, -1)
+	lastDayConsultationData, err := repository.GetConsultationByDoctorAndDay(doctor, lastDayConsultation)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get last day consultation data",
+			"response": err.Error(),
+		})
+	}
+
+	thisDayConsultation := time.Now()
+	thisDayConsultationData, err := repository.GetConsultationByDoctorAndDay(doctor, thisDayConsultation)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get this day consultation data",
+			"response": err.Error(),
+		})
+	}
+
+	allConsultations := append(lastDayConsultationData, thisDayConsultationData...)
+
+	totalConsultationLastDay := float64(len(lastDayConsultationData))
+	totalConsultationThisDay := float64(len(thisDayConsultationData))
+
+	var consultationPercentage float64
+	if totalConsultationLastDay > 0 {
+		consultationPercentage = ((totalConsultationThisDay - totalConsultationLastDay) / totalConsultationLastDay) * 100
+	} else if totalConsultationLastDay == 0 && totalConsultationThisDay > 0 {
+		consultationPercentage = 100.0
+	} else {
+		consultationPercentage = 0.0
+	}
+
+	// Patient
+	lastDayPatient := time.Now().AddDate(0, 0, -1)
+	lastDayPatientData, err := repository.GetPatientByDoctorAndDay(doctor, lastDayPatient)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get last day patient data",
+			"response": err.Error(),
+		})
+	}
+
+	thisDayPatient := time.Now()
+	thisDayPatientData, err := repository.GetPatientByDoctorAndDay(doctor, thisDayPatient)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get this day patient data",
+			"response": err.Error(),
+		})
+	}
+
+	allPatients := append(lastDayPatientData, thisDayPatientData...)
+
+	totalPatientLastDay := float64(len(lastDayPatientData))
+	totalPatientThisDay := float64(len(thisDayPatientData))
+
+	var patientPercentage float64
+	if totalPatientLastDay > 0 {
+		patientPercentage = ((totalPatientThisDay - totalPatientLastDay) / totalPatientLastDay) * 100
+	} else if totalPatientLastDay == 0 && totalPatientThisDay > 0 {
+		patientPercentage = 100.0
+	} else {
+		patientPercentage = 0.0
+	}
+
+	// Transaction
+	transactionResponseData, err := repository.GetAllTransactionsByDoctorID(doctor)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get transaction data",
+			"response": err.Error(),
+		})
+	}
+
+	lastDayTrasaction := time.Now().AddDate(0, 0, -1)
+	lastDayTrasactionData, err := repository.GetDoneTransactionsByDoctorAndDay(doctor, lastDayTrasaction)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get last day transaction data",
+			"response": err.Error(),
+		})
+	}
+
+	thisDayTrasaction := time.Now()
+	thisDayTrasactionData, err := repository.GetDoneTransactionsByDoctorAndDay(doctor, thisDayTrasaction)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get this day transaction data",
+			"response": err.Error(),
+		})
+	}
+
+	allTransactions := append(lastDayTrasactionData, thisDayTrasactionData...)
+
+	totalPriceLastDayTransaction := calculateTotalTransaction(lastDayTrasactionData)
+	totalPriceThisDayTransaction := calculateTotalTransaction(thisDayTrasactionData)
+
+	var transactionPercentage float64
+	if totalPriceLastDayTransaction > 0 {
+		transactionPercentage = ((totalPriceThisDayTransaction - totalPriceLastDayTransaction) / totalPriceLastDayTransaction) * 100
+	} else if totalPriceLastDayTransaction > 0 {
+		transactionPercentage = 100.0
+	} else {
+		transactionPercentage = 0.0
+	}
+
+	// Article
+
+	lastDayArticle := time.Now().AddDate(0, 0, -1)
+	lastDayArticleData, err := repository.DoctorGetAllArticlesByDay(doctor, lastDayArticle)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get last day article data",
+			"response": err.Error(),
+		})
+	}
+
+	thisDayArticle := time.Now()
+	thisDayArticleData, err := repository.DoctorGetAllArticlesByDay(doctor, thisDayArticle)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get this day article data",
+			"response": err.Error(),
+		})
+	}
+
+	allArticles := append(lastDayArticleData, thisDayArticleData...)
+
+	totalArticleLastDay := calculateTotalArticle(lastDayArticleData)
+	totalArticleThisDay := calculateTotalArticle(thisDayArticleData)
+
+	var articlePercentage float64
+	if totalArticleLastDay > 0 {
+		articlePercentage = ((totalArticleThisDay - totalArticleLastDay) / totalArticleLastDay) * 100
+	} else if totalArticleLastDay == 0 && totalArticleThisDay > 0 {
+		articlePercentage = 100.0
+	} else {
+		articlePercentage = 0.0
+	}
+
+	totalTransaction := len(transactionResponseData)
+	totalConsultations := calculateTotalConsultation(allConsultations)
+	totalTransactions := calculateTotalTransaction(allTransactions)
+	totalPatients := calculateTotalPatient(allPatients)
+	totalArticle := calculateTotalArticle(allArticles)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message": "success get dashboard data for one day",
+		// Consultation
+		"totalConsultations":        totalConsultations,
+		"totalConsultationLastDay": totalConsultationLastDay,
+		"totalConsultationThisDay": totalConsultationThisDay,
+		"consultationPercentage":    consultationPercentage,
+		// Patients
+		"totalPatients":        totalPatients,
+		"totalPatientLastDay": totalPatientLastDay,
+		"totalPatientThisDay": totalPatientThisDay,
+		"patientPercentage":    patientPercentage,
+		// Transaction
+		"totalTransaction":      totalTransaction,
+		"totalTransactions":     totalTransactions,
+		"totalPriceLastDay":    totalPriceLastDayTransaction,
+		"totalPriceThisDay":    totalPriceThisDayTransaction,
+		"transactionPercentage": transactionPercentage,
+		// Article
+		"totalArticles":        totalArticle,
+		"totalArticleLastDay": totalArticleLastDay,
+		"totalArticleThisDay": totalArticleThisDay,
+		"articlePercentage":    articlePercentage,
+	})
+}
+
 func calculateTotalTransaction(transactions []model.Transaction) float64 {
 	totalTransaction := 0.0
 	for _, transaction := range transactions {
@@ -405,3 +587,40 @@ func calculateTotalArticle(articles []model.Article) float64 {
 	}
 	return totalArticle
 }
+
+// func GetCalendarController(c echo.Context) error {
+// 	doctor := m.ExtractTokenUserId(c)
+// 	if doctor == uuid.Nil {
+// 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+// 			"message":  "unauthorized",
+// 			"response": "Permission Denied: Doctor is not valid.",
+// 		})
+// 	}
+
+// 	responseData, err := repository.UserGetConsultationForDashboard(doctor)
+// 	if err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+// 			"message":  "failed get consultation",
+// 			"response": err.Error(),
+// 		})
+// 	}
+
+// 	// Count occurrences of each date
+// 	dateCountMap := make(map[string]int)
+// 	for _, consultation := range responseData {
+// 		dateString := consultation.Date.Format(time.RFC3339)
+// 		dateCountMap[dateString]++
+// 	}
+
+// 	// Construct the result with date counts
+// 	result := make(map[string]int)
+// 	for date, count := range dateCountMap {
+// 		result[date] = count
+// 	}
+
+// 	return c.JSON(http.StatusOK, map[string]interface{}{
+// 		"message":  "success get data",
+// 		"response": result,
+// 	})
+// }
+

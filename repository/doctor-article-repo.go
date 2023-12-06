@@ -48,6 +48,19 @@ func DoctorGetAllArticlesByWeek(doctorID uuid.UUID, week time.Time) ([]model.Art
 	return dataarticles, nil
 }
 
+func DoctorGetAllArticlesByDay(doctorID uuid.UUID, day time.Time) ([]model.Article, error) {
+	var dataarticles []model.Article
+
+	startOfDay := day.AddDate(0, 0, 0)
+	endOfDay := startOfDay.AddDate(0, 0, 7)
+
+	tx := database.DB.Where("doctor_id = ? AND date BETWEEN ? AND ?", doctorID, startOfDay, endOfDay).Find(&dataarticles)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return dataarticles, nil
+}
+
 func GetArticleByID(id uuid.UUID) (model.Article, error) {
 	var dataarticle model.Article
 

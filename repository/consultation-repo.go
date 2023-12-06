@@ -89,6 +89,25 @@ func GetConsultationByDoctorAndWeek(doctorID uuid.UUID, week time.Time) ([]model
 	return consultations, nil
 }
 
+func GetConsultationByDoctorAndDay(doctorID uuid.UUID, day time.Time) ([]model.Consultation, error) {
+	var consultations []model.Consultation
+
+	startOfDay := day.AddDate(0, 0, 0)
+	endOfDay := startOfDay.AddDate(0, 0, 1)
+
+	tx := database.DB.
+		Preload("Doctor").
+		Joins("JOIN transactions ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ? AND consultations.date BETWEEN ? AND ? AND transactions.payment_status = 'done'", doctorID, startOfDay, endOfDay).
+		Find(&consultations)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return consultations, nil
+}
+
 func InsertConsultation(data model.Consultation) (model.Consultation, error) {
 	tx := database.DB.Save(&data)
 	if tx.Error != nil {
@@ -119,3 +138,18 @@ func GetConsultationByTransactionID(transactionID uuid.UUID) (model.Consultation
 
 	return dataconsultation, nil
 }
+
+// func UserGetConsultationForDashboard(doctorID uuid.UUID) ([]model.Consultation, error) {
+// 	var dataconsultation []model.Consultation
+
+// 	tx := database.DB.Joins("JOIN transactions ON consultations.id = transactions.consultation_id").
+// 		Where("consultations.doctor_id = ? AND transactions.status IN (?, ?)",
+// 			doctorID, "processed", "done").
+// 		Find(&dataconsultation)
+
+// 	if tx.Error != nil {
+// 		return nil, tx.Error
+// 	}
+
+// 	return dataconsultation, nil
+// }
