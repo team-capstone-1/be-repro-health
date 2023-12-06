@@ -73,7 +73,7 @@ func New() *echo.Echo {
 	r.PUT("/transactions/:id/reschedule", controller.RescheduleController, m.CheckRole(constant.ROLE_USER))
 	r.POST("/transactions/:id/cancel", controller.CancelTransactionController, m.CheckRole(constant.ROLE_USER))
 	r.PUT("/refund/:id", controller.ValidateRefund, m.CheckRole(constant.ROLE_ADMIN))
-	
+
 	r.GET("/notifications/patients/:id", controller.GetNotificationsController, m.CheckRole(constant.ROLE_USER))
 	// davin
 
@@ -144,6 +144,9 @@ func New() *echo.Echo {
 
 	// DOCTOR CHANGE PASSWORD
 	doctor.PUT("/change-password", controller.ChangeDoctorPasswordController)
+
+	// DOCTOR SCHEDULE
+	doctor.GET("/schedule", controller.GetAllDoctorScheduleController, m.CheckRole(constant.ROLE_DOCTOR))
 
 	return e
 }
