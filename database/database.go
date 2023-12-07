@@ -56,19 +56,26 @@ func InitDB() {
 }
 
 func InitialMigration() {
-	DB.AutoMigrate(&model.User{}, &model.Doctor{}, &model.DoctorWorkHistory{}, &model.DoctorEducation{}, &model.DoctorCertification{})
-	DB.AutoMigrate(&model.Patient{})
-	DB.AutoMigrate(&model.Article{})
-	DB.AutoMigrate(&model.Specialist{})
-	DB.AutoMigrate(&model.Consultation{})
-	DB.AutoMigrate(&model.Transaction{})
-	DB.AutoMigrate(&model.Payment{})
-	DB.AutoMigrate(&model.Refund{})
-	DB.AutoMigrate(&model.Forum{})
-	DB.AutoMigrate(&model.ForumReply{})
-	DB.AutoMigrate(&model.Comment{})
-	DB.AutoMigrate(&model.Notification{})
-	DB.AutoMigrate(&model.HealthRecommendation{})
+    DB.AutoMigrate(
+        &model.User{},
+        &model.Doctor{},
+        &model.DoctorWorkHistory{},
+        &model.DoctorEducation{},
+        &model.DoctorCertification{},
+        &model.Patient{},
+        &model.Article{},
+        &model.Specialist{},
+        &model.Consultation{},
+        &model.Transaction{},
+        &model.Payment{},
+        &model.Refund{},
+        &model.Forum{},
+        &model.ForumReply{},
+        &model.Comment{},
+        &model.Notification{},
+        &model.HealthRecommendation{},
+        &model.DoctorHealthRecommendation{}, 
+    )
 }
 
 func Seeders() {

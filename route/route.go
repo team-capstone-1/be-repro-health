@@ -73,7 +73,7 @@ func New() *echo.Echo {
 	r.PUT("/transactions/:id/reschedule", controller.RescheduleController, m.CheckRole(constant.ROLE_USER))
 	r.POST("/transactions/:id/cancel", controller.CancelTransactionController, m.CheckRole(constant.ROLE_USER))
 	r.PUT("/refund/:id", controller.ValidateRefund, m.CheckRole(constant.ROLE_ADMIN))
-	
+
 	r.GET("/notifications/patients/:id", controller.GetNotificationsController, m.CheckRole(constant.ROLE_USER))
 	// davin
 
@@ -134,6 +134,13 @@ func New() *echo.Echo {
 	doctor.GET("/dashboard/data-count-one-day", controller.GetDataCountForDoctorControllerOneDay, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/dashboard/graph", controller.GetGraphController, m.CheckRole(constant.ROLE_DOCTOR))
 	// doctor.GET("/dashboard/calendar", controller.GetCalendarController, m.CheckRole(constant.ROLE_DOCTOR))
+
+	// DOCTOR AI
+	doctorAIController := controller.NewDoctorAIController(repository.NewDoctorAIRepository())
+	doctor.POST("/chatbot/health-recommendation", doctorAIController.DoctorGetHealthRecommendation, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/chatbot/health-recommendation/:doctor_id", doctorAIController.GetHealthRecommendationDoctorHistory, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/chatbot/health-recommendation/session/:session_id", doctorAIController.GetHealthRecommendationDoctorHistoryFromSession, m.CheckRole(constant.ROLE_DOCTOR))
+	// per session +
 
 	// DOCTOR APPOINTMENT
 	doctor.GET("/appointments/details-transaction/:id", controller.DoctorGetDetailsTransactionController, m.CheckRole(constant.ROLE_DOCTOR))
