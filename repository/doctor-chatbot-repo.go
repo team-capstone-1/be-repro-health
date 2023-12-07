@@ -190,5 +190,7 @@ func (r *DoctorAIRepositoryImpl) DoctorGetAllHealthRecommendationsByDoctorID(doc
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
+	fmt.Println("fdsdfhkjdf", doctorDataHealthRecommendations)
+	fmt.Println("end")
 	return doctorDataHealthRecommendations, nil
 }

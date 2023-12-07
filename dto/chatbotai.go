@@ -41,20 +41,20 @@ type HealthRecommendationHistoryResponse struct {
 }
 
 // Doctor
-type HealthRecommendationHistoryDoctorResponse struct {
-	Status    string    `json:"status"`
-	Data      struct {
-		ID        uuid.UUID `json:"id"`
-		TitleChat string    `json:"titleChat"`
-		Tgl       string    `json:"tgl"`
-		Pesan     []struct {
-			ID       uuid.UUID `json:"id"`
-			Pesan    string    `json:"pesan"`
-			Waktu    string    `json:"waktu"`
-			Pengirim string    `json:"pengirim"`
-		} `json:"pesan"`
-	} `json:"data"`
-}
+// type HealthRecommendationHistoryDoctorResponse struct {
+// 	Status    string    `json:"status"`
+// 	Data      struct {
+// 		ID        uuid.UUID `json:"id"`
+// 		TitleChat string    `json:"titleChat"`
+// 		Tgl       string    `json:"tgl"`
+// 		Pesan     []struct {
+// 			ID       uuid.UUID `json:"id"`
+// 			Pesan    string    `json:"pesan"`
+// 			Waktu    string    `json:"waktu"`
+// 			Pengirim string    `json:"pengirim"`
+// 		} `json:"pesan"`
+// 	} `json:"data"`
+// }
 
 // User
 func ConvertToHealthRecommendationHistoryResponse(healthRecommendation model.HealthRecommendation) HealthRecommendationHistoryResponse {
@@ -67,37 +67,95 @@ func ConvertToHealthRecommendationHistoryResponse(healthRecommendation model.Hea
 }
 
 // Doctor
-func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendation model.DoctorHealthRecommendation) HealthRecommendationHistoryDoctorResponse {
-	response := HealthRecommendationHistoryDoctorResponse{
-		Status:    "success",
-		Data: struct {
-			ID        uuid.UUID `json:"id"`
-			TitleChat string    `json:"titleChat"`
-			Tgl       string    `json:"tgl"`
-			Pesan     []struct {
-				ID       uuid.UUID `json:"id"`
-				Pesan    string    `json:"pesan"`
-				Waktu    string    `json:"waktu"`
-				Pengirim string    `json:"pengirim"`
-			} `json:"pesan"`
-		}{
-			ID:        doctorHealthRecommendation.SessionID,
-			TitleChat: "",
-			Tgl:       doctorHealthRecommendation.CreatedAt.Format("02/01/2006"),
-			Pesan: []struct {
-				ID       uuid.UUID `json:"id"`
-				Pesan    string    `json:"pesan"`
-				Waktu    string    `json:"waktu"`
-				Pengirim string    `json:"pengirim"`
+// func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendation model.DoctorHealthRecommendation) HealthRecommendationHistoryDoctorResponse {
+// 	response := HealthRecommendationHistoryDoctorResponse{
+// 		Status:    "success",
+// 		Data: struct {
+// 			ID        uuid.UUID `json:"id"`
+// 			TitleChat string    `json:"titleChat"`
+// 			Tgl       string    `json:"tgl"`
+// 			Pesan     []struct {
+// 				ID       uuid.UUID `json:"id"`
+// 				Pesan    string    `json:"pesan"`
+// 				Waktu    string    `json:"waktu"`
+// 				Pengirim string    `json:"pengirim"`
+// 			} `json:"pesan"`
+// 		}{
+// 			ID:        doctorHealthRecommendation.SessionID,
+// 			TitleChat: "",
+// 			Tgl:       doctorHealthRecommendation.CreatedAt.Format("02/01/2006"),
+// 			Pesan: []struct {
+// 				ID       uuid.UUID `json:"id"`
+// 				Pesan    string    `json:"pesan"`
+// 				Waktu    string    `json:"waktu"`
+// 				Pengirim string    `json:"pengirim"`
+// 			}{
+// 				{
+// 					ID:       doctorHealthRecommendation.ID,
+// 					Pesan:    doctorHealthRecommendation.Answer,
+// 					Waktu:    doctorHealthRecommendation.CreatedAt.Format("02/01/2006"),
+// 					Pengirim: "",
+// 				},
+// 			},
+// 		},
+// 	}
+
+// 	return response
+// }
+
+type HealthRecommendationMessage struct {
+	ID       uuid.UUID `json:"id"`
+	Pesan    string    `json:"pesan"`
+	Waktu    string    `json:"waktu"`
+	Pengirim string    `json:"pengirim"`
+}
+
+type HealthRecommendationHistoryDoctorResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ID        uuid.UUID                  `json:"id"`
+		TitleChat string                     `json:"titleChat"`
+		Tgl       string                     `json:"tgl"`
+		Pesan     []HealthRecommendationMessage `json:"pesan"`
+	} `json:"data"`
+}
+
+func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendations []model.DoctorHealthRecommendation) []HealthRecommendationHistoryDoctorResponse {
+	// Create the final response slice
+	var response []HealthRecommendationHistoryDoctorResponse
+
+	// Create a map to group messages by session ID
+	messageMap := make(map[uuid.UUID][]HealthRecommendationMessage)
+
+	// Iterate over doctorHealthRecommendations and populate messageMap
+	for _, recommendation := range doctorHealthRecommendations {
+		sessionID := recommendation.SessionID
+		message := HealthRecommendationMessage{
+			ID:       recommendation.ID,
+			Pesan:    recommendation.Answer,
+			Waktu:    recommendation.CreatedAt.Format("02/01/2006"),
+			Pengirim: "", // Set appropriate value for Pengirim
+		}
+
+		messageMap[sessionID] = append(messageMap[sessionID], message)
+	}
+
+	// Iterate over the messageMap and create HealthRecommendationHistoryDoctorResponse
+	for sessionID, messages := range messageMap {
+		response = append(response, HealthRecommendationHistoryDoctorResponse{
+			Status: "success",
+			Data: struct {
+				ID        uuid.UUID                 `json:"id"`
+				TitleChat string                    `json:"titleChat"`
+				Tgl       string                    `json:"tgl"`
+				Pesan     []HealthRecommendationMessage `json:"pesan"`
 			}{
-				{
-					ID:       doctorHealthRecommendation.ID,
-					Pesan:    doctorHealthRecommendation.Answer,
-					Waktu:    doctorHealthRecommendation.CreatedAt.Format("02/01/2006"),
-					Pengirim: "",
-				},
+				ID:        sessionID,
+				TitleChat: "", // Set appropriate value for TitleChat
+				Tgl:       messages[0].Waktu,
+				Pesan:     messages,
 			},
-		},
+		})
 	}
 
 	return response
