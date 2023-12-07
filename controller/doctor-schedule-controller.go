@@ -23,7 +23,6 @@ func GetAllDoctorScheduleController(c echo.Context) error {
 	session := c.FormValue("session")
 
 	dateString := c.FormValue("date")
-	var date time.Time
 	if dateString != "" {
 		_, err := time.Parse("2006-01-02", dateString)
 		if err != nil {
@@ -34,7 +33,7 @@ func GetAllDoctorScheduleController(c echo.Context) error {
 		}
 	}
 
-	responseData, err := repository.DoctorGetAllSchedules(doctor, session, date)
+	responseData, err := repository.DoctorGetAllSchedules(doctor, session, dateString)
 	if err != nil {
 		return c.JSON(http.StatusNotFound, map[string]any{
 			"message":  "failed get schedules data",

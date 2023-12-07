@@ -3,12 +3,11 @@ package repository
 import (
 	"capstone-project/database"
 	"capstone-project/model"
-	"time"
 
 	"github.com/google/uuid"
 )
 
-func DoctorGetAllSchedules(doctorID uuid.UUID, session string, date time.Time) ([]model.Consultation, error) {
+func DoctorGetAllSchedules(doctorID uuid.UUID, session string, date string) ([]model.Consultation, error) {
 	var consultation []model.Consultation
 
 	tx := database.DB.Model(&consultation).Where("doctor_id = ?", doctorID).Preload("Patient")
@@ -17,7 +16,7 @@ func DoctorGetAllSchedules(doctorID uuid.UUID, session string, date time.Time) (
 		tx = tx.Where("session = ?", session)
 	}
 
-	if !date.IsZero() {
+	if date != "" {
 		tx = tx.Where("date = ?", date)
 	}
 

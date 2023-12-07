@@ -68,6 +68,11 @@ func GetArticleByID(id uuid.UUID) (model.Article, error) {
 	if tx.Error != nil {
 		return model.Article{}, tx.Error
 	}
+
+	if err := database.DB.Model(model.Article{}).Where("id = ?", id).Update("View", gorm.Expr("view + ?", 1)).Error; err != nil {
+		return dataarticle, err
+	}
+
 	return dataarticle, nil
 }
 
