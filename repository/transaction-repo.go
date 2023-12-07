@@ -62,6 +62,24 @@ func GetDoneTransactionsByDoctorAndWeek(doctorID uuid.UUID, week time.Time) ([]m
 	return transactions, nil
 }
 
+func GetDoneTransactionsByDoctorAndDay(doctorID uuid.UUID, day time.Time) ([]model.Transaction, error) {
+	var transactions []model.Transaction
+	startOfDay := day.AddDate(0, 0, 0)
+	endOfDay := startOfDay.AddDate(0, 0, 1)
+
+	tx := database.DB.
+		Preload("Consultation").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ? AND transactions.date BETWEEN ? AND ? AND transactions.payment_status = 'done'", doctorID, startOfDay, endOfDay).
+		Find(&transactions)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return transactions, nil
+}
+
 func GetDoneTransactionsByDoctorAndTimeRange(doctorID uuid.UUID, start, end time.Time) ([]model.Transaction, error) {
 	var transactions []model.Transaction
 
@@ -82,7 +100,7 @@ func GetPatientTransactions(id uuid.UUID) ([]model.Transaction, error) {
 	var datatransactions []model.Transaction
 
 	tx := database.DB.
-		Preload("Refund").Preload("Payment").Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").Preload("Consultation.Doctor.Specialist").
+		Preload("Refund").Preload("Payment").Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").Preload("Consultation.Doctor.Specialist").Preload("Consultation.Patient").
 		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
 		Where("consultations.patient_id = ?", id).
 		Find(&datatransactions)
@@ -95,7 +113,7 @@ func GetPatientTransactions(id uuid.UUID) ([]model.Transaction, error) {
 func GetTransactionByID(id uuid.UUID) (model.Transaction, error) {
 	var datatransaction model.Transaction
 
-	tx := database.DB.Preload("Refund").Preload("Payment").Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").Preload("Consultation.Doctor.Specialist").First(&datatransaction, id)
+	tx := database.DB.Preload("Refund").Preload("Payment").Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").Preload("Consultation.Doctor.Specialist").Preload("Consultation.Patient").First(&datatransaction, id)
 	if tx.Error != nil {
 		return model.Transaction{}, tx.Error
 	}
@@ -157,3 +175,24 @@ func UpdateTransactionPaymentStatus(id uuid.UUID, status string) error {
 
     return nil
 }
+
+func GetIncomeByDoctorID(doctorID uuid.UUID) ([]map[string]interface{}, error) {
+	var result []map[string]interface{}
+
+	// Group by consultation date and sum the prices
+	tx := database.DB.Table("transactions").
+		Select("DATE(consultations.date) as date, sum(transactions.price) as income").
+		Where("transactions.status = ? AND consultations.date < ?", "done", time.Now()).
+		Group("DATE(consultations.date)").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ?", doctorID).
+		Scan(&result)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return result, nil
+}
+
+

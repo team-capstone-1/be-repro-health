@@ -77,6 +77,28 @@ func GetPatientByDoctorAndWeek(doctorID uuid.UUID, week time.Time) ([]model.Pati
 	return patients, nil
 }
 
+func GetPatientByDoctorAndDay(doctorID uuid.UUID, day time.Time) ([]model.Patient, error) {
+	var patients []model.Patient
+
+	startOfDay := day.AddDate(0, 0, 0)
+	endOfDay := startOfDay.AddDate(0, 0, 1)
+
+	tx := database.DB.
+		Preload("User").
+		Joins("JOIN consultations ON consultations.patient_id = patients.id").
+		Joins("JOIN transactions ON transactions.consultation_id = consultations.id").
+		Where("consultations.doctor_id = ? AND transactions.payment_status = 'done'", doctorID).
+		Group("patients.id").
+		Having("MIN(consultations.date) BETWEEN ? AND ?", startOfDay, endOfDay).
+		Find(&patients)
+
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+
+	return patients, nil
+}
+
 func GetPatientByID(id uuid.UUID) (model.Patient, error) {
 	var datapatient model.Patient
 

@@ -12,17 +12,17 @@ type LoginRequest struct {
 }
 
 type OTPRequest struct {
-	Email    string `json:"email" form:"email"`
+	Email string `json:"email" form:"email"`
 }
 
 type ValidateOTPRequest struct {
-	Email    string `json:"email" form:"email"`
-	OTP      string `json:"otp" form:"otp"`
+	Email string `json:"email" form:"email"`
+	OTP   string `json:"otp" form:"otp"`
 }
 
 type ChangeUserPasswordRequest struct {
-	ID	     uuid.UUID `json:"id" form:"id"`
-	Password string `json:"password" form:"password"`
+	ID       uuid.UUID `json:"id" form:"id"`
+	Password string    `json:"password" form:"password"`
 }
 
 type UserRequest struct {
@@ -30,7 +30,6 @@ type UserRequest struct {
 	Email    string `json:"email" form:"email"`
 	Password string `json:"password" form:"password"`
 }
-
 type UserResponse struct {
 	ID    uuid.UUID `json:"id"`
 	Name  string    `json:"name"`
