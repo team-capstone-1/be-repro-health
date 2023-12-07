@@ -278,10 +278,12 @@ func (ac *DoctorAIController) GetHealthRecommendationDoctorHistory(c echo.Contex
 		})
 	}
 
-	var healthRecommendationResponse []dto.HealthRecommendationHistoryDoctorResponse
-	for _, healthRecommendation := range responseData {
-		healthRecommendationResponse = append(healthRecommendationResponse, dto.ConvertToHealthRecommendationHistoryDoctorResponse(healthRecommendation))
-	}
+	// var healthRecommendationResponse []dto.HealthRecommendationHistoryDoctorResponse
+	// for _, healthRecommendation := range responseData {
+	// 	healthRecommendationResponse = append(healthRecommendationResponse, dto.ConvertToHealthRecommendationHistoryDoctorResponse(healthRecommendation))
+	// }
+
+	healthRecommendationResponse := dto.ConvertToHealthRecommendationHistoryDoctorResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message":  "success get healthRecommendations",
@@ -308,10 +310,12 @@ func (ac *DoctorAIController) GetHealthRecommendationDoctorHistoryFromSession(c 
 		})
 	}
 
-	var healthRecommendationResponse []dto.HealthRecommendationHistoryDoctorResponse
-	for _, healthRecommendation := range responseData {
-		healthRecommendationResponse = append(healthRecommendationResponse, dto.ConvertToHealthRecommendationHistoryDoctorResponse(healthRecommendation))
-	}
+	// var healthRecommendationResponse []dto.HealthRecommendationHistoryDoctorResponse
+	// for _, healthRecommendation := range responseData {
+	// 	healthRecommendationResponse = append(healthRecommendationResponse, dto.ConvertToHealthRecommendationHistoryDoctorResponse(healthRecommendation))
+	// }
+
+	healthRecommendationResponse := dto.ConvertToHealthRecommendationHistoryDoctorResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"message":  "success get healthRecommendations",
