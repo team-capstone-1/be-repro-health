@@ -42,11 +42,18 @@ type HealthRecommendationHistoryResponse struct {
 
 // Doctor
 type HealthRecommendationHistoryDoctorResponse struct {
-	ID        uuid.UUID `json:"id"`
-	DoctorID  uuid.UUID `json:"doctor_id"`
-	Question  string    `json:"question"`
-	Answer    string    `json:"answer"`
-	SessionID uuid.UUID `json:"session_id"`
+	Status    string    `json:"status"`
+	Data      struct {
+		ID        uuid.UUID `json:"id"`
+		TitleChat string    `json:"titleChat"`
+		Tgl       string    `json:"tgl"`
+		Pesan     []struct {
+			ID       uuid.UUID `json:"id"`
+			Pesan    string    `json:"pesan"`
+			Waktu    string    `json:"waktu"`
+			Pengirim string    `json:"pengirim"`
+		} `json:"pesan"`
+	} `json:"data"`
 }
 
 // User
@@ -61,11 +68,37 @@ func ConvertToHealthRecommendationHistoryResponse(healthRecommendation model.Hea
 
 // Doctor
 func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendation model.DoctorHealthRecommendation) HealthRecommendationHistoryDoctorResponse {
-	return HealthRecommendationHistoryDoctorResponse{
-		ID:        doctorHealthRecommendation.ID,
-		DoctorID:  doctorHealthRecommendation.DoctorID,
-		Question:  doctorHealthRecommendation.Question,
-		Answer:    doctorHealthRecommendation.Answer,
-		SessionID: doctorHealthRecommendation.SessionID,
+	response := HealthRecommendationHistoryDoctorResponse{
+		Status:    "success",
+		Data: struct {
+			ID        uuid.UUID `json:"id"`
+			TitleChat string    `json:"titleChat"`
+			Tgl       string    `json:"tgl"`
+			Pesan     []struct {
+				ID       uuid.UUID `json:"id"`
+				Pesan    string    `json:"pesan"`
+				Waktu    string    `json:"waktu"`
+				Pengirim string    `json:"pengirim"`
+			} `json:"pesan"`
+		}{
+			ID:        doctorHealthRecommendation.SessionID,
+			TitleChat: "",
+			Tgl:       doctorHealthRecommendation.CreatedAt.Format("02/01/2006"),
+			Pesan: []struct {
+				ID       uuid.UUID `json:"id"`
+				Pesan    string    `json:"pesan"`
+				Waktu    string    `json:"waktu"`
+				Pengirim string    `json:"pengirim"`
+			}{
+				{
+					ID:       doctorHealthRecommendation.ID,
+					Pesan:    doctorHealthRecommendation.Answer,
+					Waktu:    doctorHealthRecommendation.CreatedAt.Format("02/01/2006"),
+					Pengirim: "",
+				},
+			},
+		},
 	}
+
+	return response
 }
