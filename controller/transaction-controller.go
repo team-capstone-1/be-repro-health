@@ -8,6 +8,7 @@ import (
 	"capstone-project/model"
 	"capstone-project/repository"
 	"capstone-project/util"
+	m "capstone-project/middleware"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -34,6 +35,34 @@ func GetTransactionController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get transaction",
+		"response": transactionResponse,
+	})
+}
+
+func GetTransactionsController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
+	responseData, err := repository.GetTransactions(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get transactions",
+			"reponse": err.Error(),
+		})
+	}
+
+	var transactionResponse []dto.TransactionResponse
+	for _, transaction := range responseData {
+		transactionResponse = append(transactionResponse, dto.ConvertToTransactionResponse(transaction))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get transactions",
 		"response": transactionResponse,
 	})
 }
