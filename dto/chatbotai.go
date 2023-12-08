@@ -113,9 +113,9 @@ type HealthRecommendationMessage struct {
 type HealthRecommendationHistoryDoctorResponse struct {
 	Status string `json:"status"`
 	Data   struct {
-		ID        uuid.UUID                  `json:"id"`
-		TitleChat string                     `json:"titleChat"`
-		Tgl       string                     `json:"tgl"`
+		ID        uuid.UUID                     `json:"id"`
+		TitleChat string                        `json:"titleChat"`
+		Tgl       string                        `json:"tgl"`
 		Pesan     []HealthRecommendationMessage `json:"pesan"`
 	} `json:"data"`
 }
@@ -145,9 +145,9 @@ func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendati
 		response = append(response, HealthRecommendationHistoryDoctorResponse{
 			Status: "success",
 			Data: struct {
-				ID        uuid.UUID                 `json:"id"`
-				TitleChat string                    `json:"titleChat"`
-				Tgl       string                    `json:"tgl"`
+				ID        uuid.UUID                     `json:"id"`
+				TitleChat string                        `json:"titleChat"`
+				Tgl       string                        `json:"tgl"`
 				Pesan     []HealthRecommendationMessage `json:"pesan"`
 			}{
 				ID:        sessionID,
