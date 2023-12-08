@@ -152,5 +152,8 @@ func New() *echo.Echo {
 	// DOCTOR CHANGE PASSWORD
 	doctor.PUT("/change-password", controller.ChangeDoctorPasswordController)
 
+	// DOCTOR SCHEDULE
+	doctor.GET("/schedule", controller.GetAllDoctorScheduleController, m.CheckRole(constant.ROLE_DOCTOR))
+
 	return e
 }
