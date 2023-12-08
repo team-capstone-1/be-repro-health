@@ -1,8 +1,8 @@
 package dto
 
 import (
-	d "capstone-project/database"
 	"capstone-project/model"
+	"capstone-project/repository"
 	"errors"
 	"strings"
 
@@ -64,11 +64,11 @@ type HealthRecommendationMessage struct {
 type HealthRecommendationHistoryDoctorResponse struct {
 	Status string `json:"status"`
 	Data   struct {
-		ID         uuid.UUID                     `json:"id"`
-		DoctorID   uuid.UUID                     `json:"doctor_id"`
-		TitleChat  string                        `json:"titleChat"`
-		Tgl        string                        `json:"tgl"`
-		Pesan      []HealthRecommendationMessage `json:"pesan"`
+		ID        uuid.UUID                     `json:"id"`
+		DoctorID  uuid.UUID                     `json:"doctor_id"`
+		TitleChat string                        `json:"titleChat"`
+		Tgl       string                        `json:"tgl"`
+		Pesan     []HealthRecommendationMessage `json:"pesan"`
 	} `json:"data"`
 }
 
@@ -104,17 +104,17 @@ func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendati
 		response = append(response, HealthRecommendationHistoryDoctorResponse{
 			Status: "success",
 			Data: struct {
-				ID         uuid.UUID                     `json:"id"`
-				DoctorID   uuid.UUID                     `json:"doctor_id"`
-				TitleChat  string                        `json:"titleChat"`
-				Tgl        string                        `json:"tgl"`
-				Pesan      []HealthRecommendationMessage `json:"pesan"`
+				ID        uuid.UUID                     `json:"id"`
+				DoctorID  uuid.UUID                     `json:"doctor_id"`
+				TitleChat string                        `json:"titleChat"`
+				Tgl       string                        `json:"tgl"`
+				Pesan     []HealthRecommendationMessage `json:"pesan"`
 			}{
-				ID:         sessionID,
-				DoctorID:   messages[0].ID,
-				TitleChat:  getChatTitle(messages[0].Pesan),
-				Tgl:        messages[0].Waktu,
-				Pesan:      messages,
+				ID:        sessionID,
+				DoctorID:  messages[0].ID,
+				TitleChat: getChatTitle(messages[0].Pesan),
+				Tgl:       messages[0].Waktu,
+				Pesan:     messages,
 			},
 		})
 	}
@@ -139,7 +139,7 @@ func getDoctorName(doctorID uuid.UUID) (string, error) {
 }
 
 func getDoctorFromDatabase(doctorID uuid.UUID) *model.Doctor {
-	doctor := d.GetDoctorByID(doctorID)
+	doctor := repository.GetDoctorByIDForAI(doctorID)
 
 	if doctor != nil {
 		return doctor
