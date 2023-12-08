@@ -2,76 +2,163 @@
 
 package controller
 
-import (
-	"capstone-project/dto"
-	"capstone-project/model"
-	"capstone-project/repository"
-	"context"
-	"net/http"
-	"regexp"
-	"strings"
+// import (
+// 	"capstone-project/dto"
+// 	"capstone-project/model"
+// 	"capstone-project/repository"
+// 	"context"
+// 	"net/http"
+// 	"regexp"
+// 	"strings"
 
-	"github.com/labstack/echo/v4"
-	"github.com/google/uuid"
-)
+// 	"github.com/google/uuid"
+// 	"github.com/labstack/echo/v4"
+// )
 
-type AIController struct {
-	AIRepo repository.AIRepository
-}
+// type AIController struct {
+// 	AIRepo repository.AIRepository
+// }
 
-func NewAIController(aiRepo repository.AIRepository) *AIController {
-	return &AIController{
-		AIRepo: aiRepo,
-	}
-}
+// func NewAIController(aiRepo repository.AIRepository) *AIController {
+// 	return &AIController{
+// 		AIRepo: aiRepo,
+// 	}
+// }
 
-func (ac *AIController) GetHealthRecommendation(c echo.Context) error {
-	req := new(dto.HealthRecommendationRequest)
-	if err := c.Bind(req); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message":  "error binding data",
-			"response": err.Error(),
-		})
-	}
+// func getCategoryFromQuestion(question string) string {
+// 	if strings.Contains(strings.ToLower(question), "janji temu") {
+// 		return "janji temu"
+// 	} else if strings.Contains(strings.ToLower(question), "artikel") {
+// 		return "artikel"
+// 	} else if strings.Contains(strings.ToLower(question), "forum") {
+// 		return "forum"
+// 	} else if strings.Contains(strings.ToLower(question), "riwayat") {
+// 		return "riwayat"
+// 	} else if strings.Contains(strings.ToLower(question), "profile") {
+// 		return "profile"
+// 	}
+// 	return "lainnya"
+// }
+
+// func (ac *AIController) GetHealthRecommendation(c echo.Context) error {
+// 	req := new(dto.HealthRecommendationRequest)
+// 	if err := c.Bind(req); err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+// 			"message":  "error binding data",
+// 			"response": err.Error(),
+// 		})
+// 	}
 
 // 	language := "id"
 
-	if false {
-		language = "en"
-	}
+// 	if false {
+// 		language = "en"
+// 	}
 
-	if isNonReproductiveHealthQuestion(req.Message) {
-		response := "Saya Emilia tidak bisa menjawab seputar hal diluar kesehatan reproduksi. Apakah ada pertanyaan lain yang berkaitan dengan kesehatan reproduksi?"
-		resp := dto.HealthRecommendationResponse{
-			Status: "success",
-			Data:   response,
-		}
-		return c.JSON(http.StatusOK, resp)
-	}
+// 	if isNonReproductiveHealthQuestion(req.Message) {
+// 		response := "Saya Emilia tidak bisa menjawab seputar hal diluar kesehatan reproduksi. Apakah ada pertanyaan lain yang berkaitan dengan kesehatan reproduksi?"
+// 		resp := dto.HealthRecommendationResponse{
+// 			Status: "success",
+// 			Data:   response,
+// 		}
+// 		return c.JSON(http.StatusOK, resp)
+// 	}
 
-	result, err := ac.AIRepo.GetHealthRecommendation(context.Background(), req.Message, language)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message":  "error getting health recommendations from AI",
-			"response": err.Error(),
-		})
-	}
+// 	questionCategory := getCategoryFromQuestion(req.Message)
+// 	var aiResponse string
 
-	resp := dto.HealthRecommendationResponse{
-		Status: "success",
-		Data:   result,
-	}
+// 	if questionCategory == "janji temu" {
+// 		if strings.Contains(strings.ToLower(req.Message), "batalkan") {
+// 			aiResponse = "Untuk membatalkan janji temu, silakan ikuti langkah berikut:\n1. Buka aplikasi kami.\n2. Pilih menu 'Janji Temu'.\n3. Temukan janji temu yang ingin dibatalkan.\n4. Pilih opsi 'Batalkan Janji Temu'.\nTerima kasih."
+// 		} else {
+// 			aiResponse = "Anda belum membuat jadwal dengan dokter. Silakan membuat jadwal terlebih dahulu."
+// 		}
+// 	} else if questionCategory == "artikel" {
+// 		// Check for specific questions related to the "artikel" category
+// 		if strings.Contains(strings.ToLower(req.Message), "buka menu artikel") {
+// 			aiResponse = "Untuk membuka menu artikel, Anda dapat:\n1. Masuk ke aplikasi kami.\n2. Pilih menu 'Artikel'.\n3. Temukan artikel yang ingin Anda baca.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "menjawab artikel") {
+// 			aiResponse = "Untuk menjawab artikel, Anda dapat:\n1. Buka artikel yang ingin Anda jawab.\n2. Temukan bagian komentar atau jawaban.\n3. Tulis komentar atau jawaban Anda.\n4. Tekan tombol 'Kirim'.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "siapa yang bisa membuat artikel") {
+// 			aiResponse = "Hanya dokter yang dapat membuat artikel. Jika Anda memiliki pertanyaan atau topik yang ingin diangkat, Anda dapat berbicara langsung dengan dokter Anda.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "apa yang tidak bisa dilakukan pengguna pada artikel") {
+// 			aiResponse = "Pengguna dapat membaca artikel, memberikan komentar, dan bertanya kepada dokter terkait artikel. Namun, pengguna tidak dapat membuat artikel sendiri. Jika Anda memiliki konten yang ingin dibagikan, sampaikan kepada dokter Anda.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "pertanyaan artikel lainnya") {
+// 			aiResponse = "Tentu, apa lagi yang ingin Anda ketahui tentang artikel? Saya siap membantu."
+// 		} else {
+// 			aiResponse = "Maaf, saya tidak mengerti pertanyaan Anda terkait artikel. Bisakah Anda memberikan informasi lebih lanjut?"
+// 		}
+// 	} else if questionCategory == "forum" {
+// 		// Check for specific questions related to the "forum" category
+// 		if strings.Contains(strings.ToLower(req.Message), "cara membuat forum") {
+// 			aiResponse = "Untuk membuat forum, Anda dapat:\n1. Masuk ke aplikasi kami.\n2. Pilih menu 'Forum'.\n3. Pilih opsi 'Buat Forum'.\n4. Tulis pertanyaan atau topik Anda.\n5. Tekan tombol 'Kirim'.\nDokter kami akan segera merespons. Terima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "siapa yang bisa membuat forum") {
+// 			aiResponse = "Hanya pengguna yang dapat membuat forum. Jika Anda memiliki pertanyaan atau topik yang ingin dibahas, silakan membuat forum dan dokter kami akan meresponsnya.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "cara dokter menjawab forum") {
+// 			aiResponse = "Dokter dapat merespons forum yang dibuat oleh pengguna. Jika Anda ingin mendapatkan jawaban dari dokter, buatlah forum dan mereka akan segera merespons.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "pertanyaan forum lainnya") {
+// 			aiResponse = "Tentu, apa lagi yang ingin Anda ketahui tentang forum? Saya siap membantu."
+// 		} else {
+// 			aiResponse = "Maaf, saya tidak mengerti pertanyaan Anda terkait forum. Bisakah Anda memberikan informasi lebih lanjut?"
+// 		}
+// 	} else if questionCategory == "riwayat" {
+// 		// Check for specific questions related to the "riwayat" (transaction history) category
+// 		if strings.Contains(strings.ToLower(req.Message), "bagaimana cara melihat riwayat transaksi saya") {
+// 			aiResponse = "Untuk melihat riwayat transaksi Anda, Anda dapat:\n1. Masuk ke akun Anda.\n2. Pilih menu 'Riwayat Transaksi'.\n3. Anda akan melihat daftar transaksi yang telah Anda lakukan.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "apa yang termasuk dalam riwayat transaksi") {
+// 			aiResponse = "Riwayat transaksi mencakup semua transaksi keuangan yang telah Anda lakukan, seperti pembayaran layanan atau produk kesehatan. Ini membantu Anda melacak pengeluaran dan layanan yang telah digunakan.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "bisa dihapus tidak riwayat transaksi saya") {
+// 			aiResponse = "Sayangnya, riwayat transaksi tidak dapat dihapus. Ini penting untuk memastikan transparansi dan akurasi informasi keuangan Anda.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "berapa lama riwayat transaksi disimpan") {
+// 			aiResponse = "Riwayat transaksi Anda akan disimpan dalam sistem dengan aman. Kami menjaga privasi data dan memastikan bahwa informasi keuangan Anda terlindungi.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "pertanyaan riwayat transaksi lainnya") {
+// 			aiResponse = "Jika Anda memiliki pertanyaan lebih lanjut atau ingin informasi tambahan tentang riwayat transaksi Anda, beri tahu saya. Saya siap membantu.\nTerima kasih."
+// 		} else {
+// 			aiResponse = "Maaf, saya tidak mengerti pertanyaan Anda terkait riwayat transaksi. Bisakah Anda memberikan informasi lebih lanjut?"
+// 		}
+// 	} else if questionCategory == "profile" {
+// 		// Check for specific questions related to the "profile" category
+// 		if strings.Contains(strings.ToLower(req.Message), "bagaimana cara melihat profil saya") {
+// 			aiResponse = "Untuk melihat profil Anda, Anda dapat:\n1. Masuk ke akun Anda.\n2. Pilih menu 'Profil' atau 'Akun Saya'.\n3. Anda akan melihat informasi profil Anda, termasuk detail pribadi dan pengaturan akun lainnya.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "apa yang dapat saya ubah di profil saya") {
+// 			aiResponse = "Anda dapat mengubah beberapa informasi di profil Anda, seperti foto profil, alamat, nomor telepon, dan preferensi lainnya. Pastikan untuk memeriksa opsi pengaturan di menu profil untuk melakukan perubahan.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "bisa dihapus tidak foto profil saya") {
+// 			aiResponse = "Ya, Anda dapat menghapus atau mengganti foto profil Anda. Lakukan langkah-langkah berikut:\n1. Masuk ke akun Anda.\n2. Buka menu 'Profil' atau 'Akun Saya'.\n3. Temukan opsi untuk mengganti atau menghapus foto profil Anda.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "apa informasi wajib di profil") {
+// 			aiResponse = "Informasi wajib di profil biasanya melibatkan data dasar seperti nama lengkap, tanggal lahir, dan alamat. Pastikan untuk melengkapi informasi tersebut agar kami dapat memberikan layanan yang lebih baik.\nTerima kasih."
+// 		} else if strings.Contains(strings.ToLower(req.Message), "pertanyaan profil lainnya") {
+// 			aiResponse = "Jika Anda memiliki pertanyaan lebih lanjut atau butuh bantuan terkait profil Anda, beri tahu saya. Saya siap membantu.\nTerima kasih."
+// 		} else {
+// 			aiResponse = "Maaf, saya tidak mengerti pertanyaan Anda terkait profil. Bisakah Anda memberikan informasi lebih lanjut?"
+// 		}
+// 	} else {
+// 		aiResponse = "Maaf, saya tidak mengerti pertanyaan Anda. Bisakah Anda memberikan informasi lebih lanjut?"
+// 	}
 
-	storeDB := model.HealthRecommendation{
-		ID: uuid.New(),
-		PatientID: req.PatientID,
-		Question: req.Message,
-		Answer: resp.Data,
-	}
-	ac.AIRepo.StoreChatToDB(storeDB)
+// 	// result, err := ac.AIRepo.GetHealthRecommendation(context.Background(), req.Message, language)
+// 	// if err != nil {
+// 	// 	return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+// 	// 		"message":  "error getting health recommendations from AI",
+// 	// 		"response": err.Error(),
+// 	// 	})
+// 	// }
 
-	return c.JSON(http.StatusOK, resp)
-}
+// 	resp := dto.HealthRecommendationResponse{
+// 		Status: "success",
+// 		Data:   aiResponse,
+// 		// Result: result,
+// 	}
+
+// 	storeDB := model.HealthRecommendation{
+// 		ID:        uuid.New(),
+// 		PatientID: req.PatientID,
+// 		Question:  req.Message,
+// 		Answer:    resp.Data,
+// 	}
+// 	ac.AIRepo.StoreChatToDB(storeDB)
+
+// 	return c.JSON(http.StatusOK, resp)
+// }
 
 // func isNonReproductiveHealthQuestion(question string) bool {
 // 	lowerQuestion := strings.ToLower(question)
@@ -178,30 +265,30 @@ func (ac *AIController) GetHealthRecommendation(c echo.Context) error {
 // 	return true
 // }
 
-func (ac *AIController) GetHealthRecommendationHistory(c echo.Context) error{
-	uuid, err := uuid.Parse(c.Param("id"))
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "error parse id",
-			"response": err.Error(),
-		})
-	}
+// func (ac *AIController) GetHealthRecommendationHistory(c echo.Context) error {
+// 	uuid, err := uuid.Parse(c.Param("id"))
+// 	if err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]any{
+// 			"message":  "error parse id",
+// 			"response": err.Error(),
+// 		})
+// 	}
 
-	responseData, err := ac.AIRepo.GetAllHealthRecommendations(uuid)
-	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get healthRecommendations",
-			"response":   err.Error(),
-		})
-	}
+// 	responseData, err := ac.AIRepo.GetAllHealthRecommendations(uuid)
+// 	if err != nil {
+// 		return c.JSON(http.StatusBadRequest, map[string]any{
+// 			"message":  "failed get healthRecommendations",
+// 			"response": err.Error(),
+// 		})
+// 	}
 
 // 	var healthRecommendationResponse []dto.HealthRecommendationHistoryResponse
 // 	for _, healthRecommendation := range responseData {
 // 		healthRecommendationResponse = append(healthRecommendationResponse, dto.ConvertToHealthRecommendationHistoryResponse(healthRecommendation))
 // 	}
 
-	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get healthRecommendations",
-		"response":   healthRecommendationResponse,
-	})
-}
+// 	return c.JSON(http.StatusOK, map[string]any{
+// 		"message":  "success get healthRecommendations",
+// 		"response": healthRecommendationResponse,
+// 	})
+// }
