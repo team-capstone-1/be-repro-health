@@ -77,24 +77,6 @@ func InitialMigration() {
 		&model.DoctorHealthRecommendation{},
 	)
 }
-
-func GetDoctorByID(doctorID uuid.UUID) *model.Doctor {
-	var doctor model.Doctor
-	result := DB.Where("id = ?", doctorID).First(&doctor)
-
-	if result.Error == gorm.ErrRecordNotFound {
-		// Doctor with the provided ID not found
-		return nil
-	}
-
-	if result.Error != nil {
-		// Handle other errors if needed
-		panic(result.Error)
-	}
-
-	return &doctor
-}
-
 func Seeders() {
 	// ADMIN SEEDERS
 	adminPasswordHash, err := bcrypt.GenerateFromPassword([]byte("Admin@123"), bcrypt.DefaultCost)

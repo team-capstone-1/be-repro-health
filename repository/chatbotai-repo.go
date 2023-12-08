@@ -1,15 +1,16 @@
 package repository
 
 import (
-	"capstone-project/model"
 	"capstone-project/database"
+	"capstone-project/model"
 
 	"context"
 	"fmt"
 	"os"
 
-	"github.com/sashabaranov/go-openai"
 	"github.com/google/uuid"
+	"github.com/sashabaranov/go-openai"
+	"gorm.io/gorm"
 )
 
 type AIRepository interface {
@@ -65,11 +66,11 @@ func (ar *aiRepository) GetHealthRecommendation(ctx context.Context, message, la
 	return fmt.Sprintf("%s%s", tipsPrefix, resp.Choices[0].Message.Content), nil
 }
 
-func (ar *aiRepository) StoreChatToDB(data model.HealthRecommendation){
+func (ar *aiRepository) StoreChatToDB(data model.HealthRecommendation) {
 	database.DB.Save(&data)
 }
 
-func (ar *aiRepository)GetAllHealthRecommendations(patient_id uuid.UUID) ([]model.HealthRecommendation, error) {
+func (ar *aiRepository) GetAllHealthRecommendations(patient_id uuid.UUID) ([]model.HealthRecommendation, error) {
 	var datahealthRecommendations []model.HealthRecommendation
 
 	tx := database.DB.Where("patient_id = ?", patient_id).Find(&datahealthRecommendations)
@@ -77,4 +78,21 @@ func (ar *aiRepository)GetAllHealthRecommendations(patient_id uuid.UUID) ([]mode
 		return nil, tx.Error
 	}
 	return datahealthRecommendations, nil
+}
+
+func GetDoctorByIDForAI(doctorID uuid.UUID) *model.Doctor {
+	var doctor model.Doctor
+	result := database.DB.Where("id = ?", doctorID).First(&doctor)
+
+	if result.Error == gorm.ErrRecordNotFound {
+		// Doctor with the provided ID not found
+		return nil
+	}
+
+	if result.Error != nil {
+		// Handle other errors if needed
+		panic(result.Error)
+	}
+
+	return &doctor
 }
