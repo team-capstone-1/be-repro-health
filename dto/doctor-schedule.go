@@ -2,7 +2,6 @@ package dto
 
 import (
 	"capstone-project/model"
-	"log"
 
 	"github.com/google/uuid"
 )
@@ -49,7 +48,6 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 	doctorSchedulesMap := make(map[string]map[string][]PatientResponse)
 
 	for _, schedule := range schedules {
-		// Use the correct date format when constructing the key
 		date := schedule.Date.Format("02-01-2006")
 		session := schedule.Session
 
@@ -68,18 +66,8 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 
 		// Access appointments directly from the Consultation object
 		for _, appointment := range schedule.Transaction {
-			// Add a log statement to check the content of appointment.Consultation.Patient
-			log.Println("Patient data:", appointment.Consultation.Patient)
-
-			// Add a log statement to check the content of ConvertToPatientResponse result
 			patientResponse := ConvertToPatientResponse(appointment.Consultation.Patient)
-			log.Println("PatientResponse:", patientResponse)
-
-			// Access appointments directly from the Consultation object
-			for _, appointment := range schedule.Transaction {
-				// Assuming ConvertToPatientResponse returns a valid PatientResponse
-				patientResponses = append(patientResponses, ConvertToPatientResponse(appointment.Consultation.Patient))
-			}
+			patientResponses = append(patientResponses, patientResponse)
 		}
 
 		// Update the map with the appointments for the current session
@@ -93,7 +81,7 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 
 		// Separate morning, afternoon, and evening sessions
 		for session, patientResponses := range patientResponsesMap {
-			// Adjust the doctorAvailable based on your logic
+			// Check if there are any appointments for the current session
 			doctorAvailable := len(patientResponses) > 0
 
 			// ConvertToAppointments converts a slice of PatientResponse to a slice of Appointment
@@ -117,56 +105,3 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 		Data:     doctorSchedules,
 	}
 }
-
-// type DoctorScheduleResponse struct {
-// 	DoctorID uuid.UUID        `json:"doctor_id"`
-// 	Data     []DoctorSchedule `json:"data"`
-// }
-
-// type DoctorSchedule struct {
-// 	Date     string        `json:"date"`
-// 	ListData []Appointment `json:"listData"`
-// }
-
-// type Appointment struct {
-// 	DoctorAvailable bool              `json:"doctor_available"`
-// 	Session         string            `json:"session"`
-// 	Appointments    []PatientResponse `json:"appointments"`
-// }
-
-// func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, date string, schedules []model.Consultation) DoctorScheduleResponse {
-// 	var doctorSchedulesMap = make(map[string][]PatientResponse)
-
-// 	// Group schedules by date
-// 	for _, schedule := range schedules {
-// 		date := schedule.Date.Format("02-01-2006")
-// 		patientResponses := doctorSchedulesMap[date]
-
-// 		// Access appointments directly from the Consultation object
-// 		for _, appointment := range schedule.Transaction {
-// 			patientResponses = append(patientResponses, ConvertToPatientResponse(appointment.Consultation.Patient))
-// 		}
-
-// 		doctorSchedulesMap[date] = patientResponses
-// 	}
-
-// 	// Convert the map to DoctorScheduleResponse format
-// 	var doctorSchedules []DoctorSchedule
-// 	for date, patientResponses := range doctorSchedulesMap {
-// 		doctorSchedules = append(doctorSchedules, DoctorSchedule{
-// 			Date: date,
-// 			ListData: []Appointment{
-// 				{
-// 					DoctorAvailable: len(patientResponses) > 0,
-// 					Session:         schedules[0].Session, // Assuming the session is the same for all appointments on the same date
-// 					Appointments:    patientResponses,
-// 				},
-// 			},
-// 		})
-// 	}
-
-// 	return DoctorScheduleResponse{
-// 		DoctorID: doctorID,
-// 		Data:     doctorSchedules,
-// 	}
-// }

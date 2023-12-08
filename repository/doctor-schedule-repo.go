@@ -23,5 +23,6 @@ func DoctorGetAllSchedules(doctorID uuid.UUID, session string, date string) ([]m
 	if err := tx.Find(&consultation).Error; err != nil {
 		return nil, err
 	}
+
 	return consultation, nil
 }
