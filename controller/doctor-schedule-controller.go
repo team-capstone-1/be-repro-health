@@ -14,7 +14,7 @@ import (
 func GetAllDoctorScheduleController(c echo.Context) error {
 	doctor := m.ExtractTokenUserId(c)
 	if doctor == uuid.Nil {
-		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Doctor is not valid.",
 		})
@@ -26,7 +26,7 @@ func GetAllDoctorScheduleController(c echo.Context) error {
 	if dateString != "" {
 		_, err := time.Parse("02-01-2006", dateString)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			return c.JSON(http.StatusBadRequest, map[string]any{
 				"message":  "failed to parse date",
 				"response": err.Error(),
 			})
@@ -35,7 +35,7 @@ func GetAllDoctorScheduleController(c echo.Context) error {
 
 	responseData, err := repository.DoctorGetAllSchedules(doctor, session, dateString)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]interface{}{
+		return c.JSON(http.StatusNotFound, map[string]any{
 			"message":  "failed get schedules data",
 			"response": err.Error(),
 		})
@@ -43,7 +43,7 @@ func GetAllDoctorScheduleController(c echo.Context) error {
 
 	doctorSchedules := dto.ConvertToDoctorScheduleResponse(doctor, responseData)
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
+	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get schedule data",
 		"response": doctorSchedules,
 	})
@@ -52,7 +52,7 @@ func GetAllDoctorScheduleController(c echo.Context) error {
 // func GetAllDoctorScheduleController(c echo.Context) error {
 // 	doctorID := m.ExtractTokenUserId(c)
 // 	if doctorID == uuid.Nil {
-// 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+// 		return c.JSON(http.StatusUnauthorized, map[string]any{
 // 			"message":  "unauthorized",
 // 			"response": "Permission Denied: Doctor is not valid.",
 // 		})
@@ -64,7 +64,7 @@ func GetAllDoctorScheduleController(c echo.Context) error {
 // 	if dateString != "" {
 // 		_, err := time.Parse("02-01-2006", dateString)
 // 		if err != nil {
-// 			return c.JSON(http.StatusBadRequest, map[string]interface{}{
+// 			return c.JSON(http.StatusBadRequest, map[string]any{
 // 				"message":  "failed to parse date",
 // 				"response": err.Error(),
 // 			})
@@ -73,7 +73,7 @@ func GetAllDoctorScheduleController(c echo.Context) error {
 
 // 	responseData, err := repository.DoctorGetAllSchedules(doctorID, session, dateString)
 // 	if err != nil {
-// 		return c.JSON(http.StatusNotFound, map[string]interface{}{
+// 		return c.JSON(http.StatusNotFound, map[string]any{
 // 			"message":  "failed get schedules data",
 // 			"response": err.Error(),
 // 		})
@@ -93,7 +93,7 @@ func GetAllDoctorScheduleController(c echo.Context) error {
 // 		doctorSchedules = append(doctorSchedules, doctorSchedule)
 // 	}
 
-// 	return c.JSON(http.StatusOK, map[string]interface{}{
+// 	return c.JSON(http.StatusOK, map[string]any{
 // 		"message":  "success get schedule data",
 // 		"response": doctorSchedules,
 // 	})
