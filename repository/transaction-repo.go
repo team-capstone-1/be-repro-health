@@ -110,6 +110,20 @@ func GetPatientTransactions(id uuid.UUID) ([]model.Transaction, error) {
 	return datatransactions, nil
 }
 
+func GetTransactions(id uuid.UUID) ([]model.Transaction, error) {
+	var datatransactions []model.Transaction
+
+	tx := database.DB.
+		Preload("Refund").Preload("Payment").Preload("Consultation").Preload("Consultation.Clinic").Preload("Consultation.Doctor").Preload("Consultation.Doctor.Specialist").Preload("Consultation.Patient").
+		Joins("JOIN consultations ON transactions.consultation_id = consultations.id").Joins("JOIN patients ON consultations.patient_id = patients.id").
+		Where("patients.user_id = ?", id).
+		Find(&datatransactions)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return datatransactions, nil
+}
+
 func GetTransactionByID(id uuid.UUID) (model.Transaction, error) {
 	var datatransaction model.Transaction
 

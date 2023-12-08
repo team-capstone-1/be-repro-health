@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"capstone-project/dto"
-	"capstone-project/model"
 	"capstone-project/repository"
 	"capstone-project/util"
+	m "capstone-project/middleware"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -34,6 +34,34 @@ func GetTransactionController(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get transaction",
+		"response": transactionResponse,
+	})
+}
+
+func GetTransactionsController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
+	responseData, err := repository.GetTransactions(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get transactions",
+			"reponse": err.Error(),
+		})
+	}
+
+	var transactionResponse []dto.TransactionResponse
+	for _, transaction := range responseData {
+		transactionResponse = append(transactionResponse, dto.ConvertToTransactionResponse(transaction))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get transactions",
 		"response": transactionResponse,
 	})
 }
@@ -100,31 +128,31 @@ func CreatePaymentController(c echo.Context) error {
 		})
 	}
 
-	paymentData := model.Payment{
-		ID:    	uuid.New(),
-		Method: payment.Method,
+	if transaction.PaymentStatus == "done"{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "transaction payment status is done",
+			"reponse": errors.New("Can't create Payment when Transaction Payment Status is done").Error(),
+		})
 	}
 
-	if payment.Method == "manual_transfer"{
-		paymentImage, err := c.FormFile("image")
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]any{
-				"message":  "error upload payment image",
-				"response": err.Error(),
-			})
-		}
-	
-		paymentImageURL, err := util.UploadToCloudinary(paymentImage)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]any{
-				"message":  "error upload profile image to Cloudinary",
-				"response": err.Error(),
-			})
-		}
-	
-		paymentData = dto.ConvertToPaymentModel(payment)
-		paymentData.Image = paymentImageURL
+	paymentImage, err := c.FormFile("image")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error upload payment image",
+			"response": err.Error(),
+		})
 	}
+
+	paymentImageURL, err := util.UploadToCloudinary(paymentImage)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error upload profile image to Cloudinary",
+			"response": err.Error(),
+		})
+	}
+
+	paymentData := dto.ConvertToPaymentModel(payment)
+	paymentData.Image = paymentImageURL
 
 	paymentData.TransactionID = transactionID
 
@@ -236,7 +264,7 @@ func CancelTransactionController(c echo.Context) error {
 		})
 	}
 
-	if transaction.Payment.Method == "clinic_payment" {
+	if transaction.Consultation.PaymentMethod == "clinic_payment" {
 		err := repository.UpdateTransactionStatus(uuid, "cancelled")
 		if err != nil {
 			return c.JSON(http.StatusBadRequest, map[string]any{
@@ -335,5 +363,53 @@ func ValidateRefund(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success update refund",
 		"response": refundResponse,
+	})
+}
+
+func PaymentTimeOut(c echo.Context) error {
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	transaction, err := repository.GetTransactionByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get transaction",
+			"reponse": err.Error(),
+		})
+	}
+
+	if transaction.PaymentStatus != "pending"{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed update transaction",
+			"reponse": errors.New("You can't time-out a transaction if the payment status is not pending").Error(),
+		})
+	}
+
+	err = repository.UpdateTransactionStatus(uuid, "cancelled")
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed update transaction",
+			"reponse": err.Error(),
+		})
+	}
+
+	transaction, err = repository.GetTransactionByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get transaction",
+			"reponse": err.Error(),
+		})
+	}
+
+	transactionResponse := dto.ConvertToTransactionResponse(transaction)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success update transaction",
+		"response": transactionResponse,
 	})
 }
