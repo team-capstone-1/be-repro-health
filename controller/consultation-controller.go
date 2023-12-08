@@ -97,6 +97,11 @@ func generateTransaction(consultation dto.UserConsultationResponse) (model.Trans
 		return model.Transaction{},err
 	}
 
+	var payment_method = "done"
+	if consultation.PaymentMethod != "clinic_payment"{
+		payment_method = "pending"
+	}
+
 	transaction := model.Transaction{
 		ID: uuid.New(),
 		ConsultationID: consultation.ID,
@@ -106,7 +111,7 @@ func generateTransaction(consultation dto.UserConsultationResponse) (model.Trans
 		AdminPrice: constant.ADMIN_FEE,
 		Total: consultation.Doctor.Price + constant.ADMIN_FEE,
 		Status: model.Waiting,
-		PaymentStatus: "pending",
+		PaymentStatus: payment_method,
 	}
 
 	transaction, err = repository.InsertTransaction(transaction)

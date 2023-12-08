@@ -62,16 +62,18 @@ func New() *echo.Echo {
 	r.POST("/articles/:id/comments", controller.CreateCommentController)
 
 	// user ai
-	aiController := controller.NewAIController(repository.NewAIRepository())
-	r.POST("/chatbot/health-recommendation", aiController.GetHealthRecommendation, m.CheckRole(constant.ROLE_USER))
-	r.GET("/chatbot/health-recommendation/patients/:id", aiController.GetHealthRecommendationHistory, m.CheckRole(constant.ROLE_USER))
+	// aiController := controller.NewAIController(repository.NewAIRepository())
+	// r.POST("/chatbot/health-recommendation", aiController.GetHealthRecommendation, m.CheckRole(constant.ROLE_USER))
+	// r.GET("/chatbot/health-recommendation/patients/:id", aiController.GetHealthRecommendationHistory, m.CheckRole(constant.ROLE_USER))
 
 	// transaction
 	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole(constant.ROLE_USER))
+	r.GET("/transactions", controller.GetTransactionsController, m.CheckRole(constant.ROLE_USER))
 	r.GET("/transactions/patients/:id", controller.GetPatientTransactionsController, m.CheckRole(constant.ROLE_USER))
 	r.POST("/transactions/:id/payments", controller.CreatePaymentController, m.CheckRole(constant.ROLE_USER))
 	r.PUT("/transactions/:id/reschedule", controller.RescheduleController, m.CheckRole(constant.ROLE_USER))
 	r.POST("/transactions/:id/cancel", controller.CancelTransactionController, m.CheckRole(constant.ROLE_USER))
+	r.PUT("/transactions/:id/payment-timeout", controller.PaymentTimeOut, m.CheckRole(constant.ROLE_USER))
 	r.PUT("/refund/:id", controller.ValidateRefund, m.CheckRole(constant.ROLE_ADMIN))
 
 	r.GET("/notifications/patients/:id", controller.GetNotificationsController, m.CheckRole(constant.ROLE_USER))
@@ -134,6 +136,13 @@ func New() *echo.Echo {
 	doctor.GET("/dashboard/data-count-one-day", controller.GetDataCountForDoctorControllerOneDay, m.CheckRole(constant.ROLE_DOCTOR))
 	doctor.GET("/dashboard/graph", controller.GetGraphController, m.CheckRole(constant.ROLE_DOCTOR))
 	// doctor.GET("/dashboard/calendar", controller.GetCalendarController, m.CheckRole(constant.ROLE_DOCTOR))
+
+	// DOCTOR AI
+	doctorAIController := controller.NewDoctorAIController(repository.NewDoctorAIRepository())
+	doctor.POST("/chatbot/health-recommendation", doctorAIController.DoctorGetHealthRecommendation, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/chatbot/health-recommendation/:doctor_id", doctorAIController.GetHealthRecommendationDoctorHistory, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.GET("/chatbot/health-recommendation/session/:session_id", doctorAIController.GetHealthRecommendationDoctorHistoryFromSession, m.CheckRole(constant.ROLE_DOCTOR))
+	// per session +
 
 	// DOCTOR APPOINTMENT
 	doctor.GET("/appointments/details-transaction/:id", controller.DoctorGetDetailsTransactionController, m.CheckRole(constant.ROLE_DOCTOR))

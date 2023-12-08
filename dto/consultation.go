@@ -12,6 +12,7 @@ type ConsultationRequest struct {
 	PatientID uuid.UUID `json:"patient_id" form:"patient_id"`
 	Date      time.Time `json:"date" form:"date"`
 	Session   string    `json:"session" form:"session"`
+	PaymentMethod string `json:"payment_method" form:"payment_method"`
 }
 
 type ConsultationRescheduleRequest struct {
@@ -28,6 +29,7 @@ type UserConsultationResponse struct {
 	Date        time.Time `json:"date"`
 	Session     string    `json:"session"`
 	QueueNumber string    `json:"queue_number"`
+	PaymentMethod string    `json:"payment_method"`
 	Clinic      ClinicResponse    `json:"clinic"`
 	Doctor      TransactionDoctorResponse    `json:"doctor"`
 }
@@ -40,6 +42,7 @@ type ConsultationResponse struct {
 	Date        time.Time `json:"date"`
 	Session     string    `json:"session"`
 	QueueNumber string    `json:"queue_number"`
+	PaymentMethod string  `json:"payment_method"`
 	Patient     PatientResponse   `json:"patient"`
 	Clinic      ClinicResponse    `json:"clinic"`
 	Doctor      TransactionDoctorResponse    `json:"doctor"`
@@ -52,6 +55,7 @@ func ConvertToConsultationModel(consultation ConsultationRequest) model.Consulta
 		PatientID: consultation.PatientID,
 		Date:      consultation.Date,
 		Session:   consultation.Session,
+		PaymentMethod:   consultation.PaymentMethod,
 	}
 }
 
@@ -71,6 +75,7 @@ func ConvertToUserConsultationResponse(consultation model.Consultation) UserCons
 		ClinicID: consultation.ClinicID,
 		Date: consultation.Date,
 		QueueNumber: consultation.QueueNumber,
+		PaymentMethod: consultation.PaymentMethod,
 		Session: consultation.Session,
 		Clinic: ConvertToClinicResponse(consultation.Clinic),
 		Doctor: ConvertToTransactionDoctorResponse(consultation.Doctor),
@@ -85,6 +90,7 @@ func ConvertToConsultationResponse(consultation model.Consultation) Consultation
 		ClinicID: consultation.ClinicID,
 		Date: consultation.Date,
 		QueueNumber: consultation.QueueNumber,
+		PaymentMethod: consultation.PaymentMethod,
 		Session: consultation.Session,
 		Patient: ConvertToPatientResponse(consultation.Patient),
 		Clinic: ConvertToClinicResponse(consultation.Clinic),
