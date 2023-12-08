@@ -1,7 +1,10 @@
 package dto
 
 import (
+	d "capstone-project/database"
 	"capstone-project/model"
+	"errors"
+	"strings"
 
 	"github.com/google/uuid"
 )
@@ -38,14 +41,7 @@ type HealthRecommendationHistoryResponse struct {
 	PatientSessionID uuid.UUID `json:"session_id"`
 }
 
-type HealthRecommendationHistoryDoctorResponse struct {
-	ID        uuid.UUID `json:"id"`
-	DoctorID  uuid.UUID `json:"doctor_id"`
-	Question  string    `json:"question"`
-	Answer    string    `json:"answer"`
-	SessionID uuid.UUID `json:"session_id"`
-}
-
+// User
 func ConvertToHealthRecommendationHistoryResponse(healthRecommendation model.HealthRecommendation) HealthRecommendationHistoryResponse {
 	return HealthRecommendationHistoryResponse{
 		ID:               healthRecommendation.ID,
@@ -56,12 +52,96 @@ func ConvertToHealthRecommendationHistoryResponse(healthRecommendation model.Hea
 	}
 }
 
-func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendation model.DoctorHealthRecommendation) HealthRecommendationHistoryDoctorResponse {
-	return HealthRecommendationHistoryDoctorResponse{
-		ID:        doctorHealthRecommendation.ID,
-		DoctorID:  doctorHealthRecommendation.DoctorID,
-		Question:  doctorHealthRecommendation.Question,
-		Answer:    doctorHealthRecommendation.Answer,
-		SessionID: doctorHealthRecommendation.SessionID,
+type HealthRecommendationMessage struct {
+	ID       uuid.UUID `json:"id"`
+	Pesan    string    `json:"pesan"`
+	Jawaban  string    `json:"jawaban"`
+	Waktu    string    `json:"waktu"`
+	Pengirim string    `json:"pengirim"`
+}
+
+type HealthRecommendationHistoryDoctorResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ID         uuid.UUID                     `json:"id"`
+		DoctorID   uuid.UUID                     `json:"doctor_id"`
+		TitleChat  string                        `json:"titleChat"`
+		Tgl        string                        `json:"tgl"`
+		Pesan      []HealthRecommendationMessage `json:"pesan"`
+	} `json:"data"`
+}
+
+func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendations []model.DoctorHealthRecommendation) []HealthRecommendationHistoryDoctorResponse {
+	// Create the final response slice
+	var response []HealthRecommendationHistoryDoctorResponse
+
+	// Create a map to group messages by session ID
+	messageMap := make(map[uuid.UUID][]HealthRecommendationMessage)
+
+	// Iterate over doctorHealthRecommendations and populate messageMap
+	for _, recommendation := range doctorHealthRecommendations {
+		sessionID := recommendation.SessionID
+		doctorID := recommendation.DoctorID
+		doctorName, err := getDoctorName(doctorID)
+		if err != nil {
+			continue
+		}
+
+		message := HealthRecommendationMessage{
+			ID:       recommendation.ID,
+			Pesan:    recommendation.Question,
+			Jawaban:  recommendation.Answer,
+			Waktu:    recommendation.CreatedAt.Format("02/01/2006 15:04:05"),
+			Pengirim: doctorName,
+		}
+
+		messageMap[sessionID] = append(messageMap[sessionID], message)
 	}
+
+	// Iterate over the messageMap and create HealthRecommendationHistoryDoctorResponse
+	for sessionID, messages := range messageMap {
+		response = append(response, HealthRecommendationHistoryDoctorResponse{
+			Status: "success",
+			Data: struct {
+				ID         uuid.UUID                     `json:"id"`
+				DoctorID   uuid.UUID                     `json:"doctor_id"`
+				TitleChat  string                        `json:"titleChat"`
+				Tgl        string                        `json:"tgl"`
+				Pesan      []HealthRecommendationMessage `json:"pesan"`
+			}{
+				ID:         sessionID,
+				DoctorID:   messages[0].ID,
+				TitleChat:  getChatTitle(messages[0].Pesan),
+				Tgl:        messages[0].Waktu,
+				Pesan:      messages,
+			},
+		})
+	}
+
+	return response
+}
+
+func getChatTitle(question string) string {
+	words := strings.Fields(question)
+	if len(words) > 0 {
+		return strings.Join(words[:3], " ")
+	}
+	return "Default Title"
+}
+
+func getDoctorName(doctorID uuid.UUID) (string, error) {
+	doctor := getDoctorFromDatabase(doctorID)
+	if doctor != nil {
+		return doctor.Name, nil
+	}
+	return "", errors.New("Doctor not found")
+}
+
+func getDoctorFromDatabase(doctorID uuid.UUID) *model.Doctor {
+	doctor := d.GetDoctorByID(doctorID)
+
+	if doctor != nil {
+		return doctor
+	}
+	return nil
 }

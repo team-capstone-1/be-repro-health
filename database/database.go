@@ -56,26 +56,43 @@ func InitDB() {
 }
 
 func InitialMigration() {
-    DB.AutoMigrate(
-        &model.User{},
-        &model.Doctor{},
-        &model.DoctorWorkHistory{},
-        &model.DoctorEducation{},
-        &model.DoctorCertification{},
-        &model.Patient{},
-        &model.Article{},
-        &model.Specialist{},
-        &model.Consultation{},
-        &model.Transaction{},
-        &model.Payment{},
-        &model.Refund{},
-        &model.Forum{},
-        &model.ForumReply{},
-        &model.Comment{},
-        &model.Notification{},
-        &model.HealthRecommendation{},
-        &model.DoctorHealthRecommendation{}, 
-    )
+	DB.AutoMigrate(
+		&model.User{},
+		&model.Doctor{},
+		&model.DoctorWorkHistory{},
+		&model.DoctorEducation{},
+		&model.DoctorCertification{},
+		&model.Patient{},
+		&model.Article{},
+		&model.Specialist{},
+		&model.Consultation{},
+		&model.Transaction{},
+		&model.Payment{},
+		&model.Refund{},
+		&model.Forum{},
+		&model.ForumReply{},
+		&model.Comment{},
+		&model.Notification{},
+		&model.HealthRecommendation{},
+		&model.DoctorHealthRecommendation{},
+	)
+}
+
+func GetDoctorByID(doctorID uuid.UUID) *model.Doctor {
+	var doctor model.Doctor
+	result := DB.Where("id = ?", doctorID).First(&doctor)
+
+	if result.Error == gorm.ErrRecordNotFound {
+		// Doctor with the provided ID not found
+		return nil
+	}
+
+	if result.Error != nil {
+		// Handle other errors if needed
+		panic(result.Error)
+	}
+
+	return &doctor
 }
 
 func Seeders() {

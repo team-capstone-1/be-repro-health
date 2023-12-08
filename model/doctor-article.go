@@ -14,7 +14,7 @@ type Article struct {
 	Title     string    `gorm:"size:255"`
 	Tags      string    `gorm:"size:255"`
 	Reference string    `gorm:"size:255"`
-	Content   string    `gorm:"size:255"`
+	Content   string    `gorm:"size:5000"`
 	Image     string    `gorm:"size:255"`
 	ImageDesc string    `gorm:"size:255"`
 	Date      time.Time `gorm:"type:datetime"`
