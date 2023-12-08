@@ -17,7 +17,7 @@ type AIRepository interface {
 	PatientGetHealthRecommendationWithContext(ctx context.Context, currentQuestion, previousQuestion, message, language string) (string, error)
 	PatientGetHealthRecommendation(ctx context.Context, message, language string) (string, error)
 	StoreChatToDB(data model.HealthRecommendation)
-	GetAllHealthRecommendations(patient_id uuid.UUID) ([]model.HealthRecommendation, error)
+	PatientGetAllHealthRecommendations(patient_id uuid.UUID) ([]model.HealthRecommendation, error)
 	GetPatientSessionIDFromDatabase(ctx context.Context, PatientID uuid.UUID) (uuid.UUID, error)
 }
 
@@ -160,7 +160,7 @@ func (ar *PatientAIRepository) StoreChatToDB(data model.HealthRecommendation) {
 	database.DB.Save(&data)
 }
 
-func (ar *PatientAIRepository) GetAllHealthRecommendations(patient_id uuid.UUID) ([]model.HealthRecommendation, error) {
+func (ar *PatientAIRepository) PatientGetAllHealthRecommendations(patient_id uuid.UUID) ([]model.HealthRecommendation, error) {
 	var datahealthRecommendations []model.HealthRecommendation
 
 	tx := database.DB.Where("patient_id = ?", patient_id).Find(&datahealthRecommendations)
