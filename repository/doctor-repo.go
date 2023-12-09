@@ -183,3 +183,10 @@ func GetDoctorsBySpecialistAndClinic(specialist_id, clinic_id uuid.UUID) ([]mode
 	}
 	return datadoctors, nil
 }
+
+func GetProfileByDoctorID(id uuid.UUID) string {
+	var data model.Doctor
+	database.DB.Where("id = ?", id).First(&data)
+
+	return data.ProfileImage
+}

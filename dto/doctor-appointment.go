@@ -152,7 +152,7 @@ func ConvertToDoctorGetDetailsTransactionResponse(transaction model.Transaction)
 	return DoctorGetDetailsTransactionResponse{
 		ID:            transaction.ID,
 		Invoice:       transaction.Invoice,
-		Date:          transaction.Date,
+		Date:          transaction.CreatedAt,
 		PaymentMethod: transaction.Consultation.PaymentMethod,
 		Name:          transaction.Payment.Name,
 		Price:         transaction.Price,

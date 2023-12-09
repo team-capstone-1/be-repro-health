@@ -11,7 +11,43 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+func GetBookmarkedArticlesController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
+	userBookmark, err := repository.GetArticleBookmark(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get bookmarks",
+			"response": err.Error(),
+		})
+	}
+
+	var articleResponse []dto.UserArticleResponse
+	for _, article := range userBookmark {
+		articleResponse = append(articleResponse, dto.ConvertToUserArticleResponse(article, true))
+	}
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get bookmarked articles",
+		"response": articleResponse,
+	})
+}
+
 func GetArticlesController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
 	responseData, err := repository.UserGetAllArticle()
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -20,9 +56,23 @@ func GetArticlesController(c echo.Context) error {
 		})
 	}
 
-	var articleResponse []dto.DoctorArticleResponse
+	userBookmark, err := repository.GetArticleBookmark(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get bookmarks",
+			"response": err.Error(),
+		})
+	}
+
+	bookmarkMap := make(map[uuid.UUID]struct{})
+	for _, bookmark := range userBookmark {
+		bookmarkMap[bookmark.ID] = struct{}{}
+	}
+
+	var articleResponse []dto.UserArticleResponse
 	for _, article := range responseData {
-		articleResponse = append(articleResponse, dto.ConvertToDoctorArticleResponse(article))
+		_, bookmarked := bookmarkMap[article.ID]
+		articleResponse = append(articleResponse, dto.ConvertToUserArticleResponse(article, bookmarked))
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
@@ -90,7 +140,7 @@ func CreateCommentController(c echo.Context) error {
 		})
 	}
 
-	commentResponse := dto.ConvertToCommentResponse(responseData)
+	commentResponse := dto.ConvertToCommentResponse(responseData, repository.GetProfileByPatientID(responseData.PatientID))
 
 	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create new comment",
@@ -99,6 +149,62 @@ func CreateCommentController(c echo.Context) error {
 }
 
 func GetArticleController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
+	articleID, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err := repository.UserGetArticleByID(articleID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get article",
+			"reponse": err.Error(),
+		})
+	}
+
+	userBookmark, err := repository.GetArticleBookmark(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get bookmarks",
+			"response": err.Error(),
+		})
+	}
+
+	bookmarkMap := make(map[uuid.UUID]struct{})
+	for _, bookmark := range userBookmark {
+		bookmarkMap[bookmark.ID] = struct{}{}
+	}
+
+	_, bookmarked := bookmarkMap[articleID]
+	articleResponse := dto.ConvertToUserArticleResponse(responseData, bookmarked)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get article",
+		"response": articleResponse,
+	})
+}
+
+
+func BookmarkController(c echo.Context) error {
+	user := m.ExtractTokenUserId(c)
+	if user == uuid.Nil {
+		return c.JSON(http.StatusUnauthorized, map[string]any{
+			"message":  "unauthorized",
+			"response": "Permission Denied: Permission Denied: User is not valid.",
+		})
+	}
+
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -107,18 +213,29 @@ func GetArticleController(c echo.Context) error {
 		})
 	}
 
-	responseData, err := repository.UserGetArticleByID(uuid)
+	err = repository.UpdateBookmark(user, uuid)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get article",
-			"reponse": err.Error(),
+			"message":  "failed update bookmark",
+			"response": err.Error(),
 		})
 	}
 
-	articleResponse := dto.ConvertToUserArticleResponse(responseData)
+	userBookmark, err := repository.GetArticleBookmark(user)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed get bookmarks",
+			"response": err.Error(),
+		})
+	}
 
-	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success get article",
+	var articleResponse []dto.UserArticleResponse
+	for _, article := range userBookmark {
+		articleResponse = append(articleResponse, dto.ConvertToUserArticleResponse(article, true))
+	}
+
+	return c.JSON(http.StatusCreated, map[string]any{
+		"message":  "success update bookmark",
 		"response": articleResponse,
 	})
 }

@@ -142,7 +142,7 @@ func InsertTransaction(data model.Transaction) (model.Transaction, error) {
 	return data, nil
 }
 
-func GenerateNextInvoice() (string, time.Time, error) {
+func GenerateNextInvoice() (string, error) {
     now := time.Now()
     year, month, day := now.Year(), now.Month(), now.Day()
 
@@ -153,19 +153,19 @@ func GenerateNextInvoice() (string, time.Time, error) {
         if err == gorm.ErrRecordNotFound {
             formattedInvoice += "0001"
         } else {
-            return "", now, err
+            return "", err
         }
     } else {
         var sequence int
         _, err := fmt.Sscanf(lastInvoice.Invoice, formattedInvoice+"%04d", &sequence)
         if err != nil {
-            return "", now, err
+            return "", err
         }
 
         formattedInvoice += fmt.Sprintf("%04d", sequence+1)
     }
 
-    return formattedInvoice, now, nil
+    return formattedInvoice, nil
 }
 
 func UpdateTransactionStatus(id uuid.UUID, status string) error {
