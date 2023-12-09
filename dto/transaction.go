@@ -1,6 +1,8 @@
 package dto
 
 import (
+	"time"
+
 	"capstone-project/model"
 
 	"github.com/google/uuid"
@@ -28,6 +30,7 @@ type TransactionResponse struct {
 	Total          float64              `json:"total"`
 	Status         string               `json:"status"`
 	PaymentStatus  string               `json:"payment_status"`
+	CreatedAt	   time.Time 			`json:"created_at"`
 	Refund         []RefundResponse       `json:"refund"`
 	Payment        []PaymentResponse      `json:"payment"`
 }
@@ -68,6 +71,7 @@ func ConvertToTransactionResponse(transaction model.Transaction) TransactionResp
 		PaymentStatus:  string(transaction.PaymentStatus),
 		Refund:        	articleRefundResponses,
 		Payment:        articlePaymentResponses,
+		CreatedAt: 		transaction.CreatedAt,
 	}
 }
 

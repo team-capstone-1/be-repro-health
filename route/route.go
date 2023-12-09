@@ -57,9 +57,11 @@ func New() *echo.Echo {
 	r.DELETE("/forums/:id", controller.DeleteForumController)
 
 	// user article
-	e.GET("/articles", controller.GetArticlesController)
-	e.GET("/articles/:id", controller.GetArticleController)
+	r.GET("/articles", controller.GetArticlesController)
+	r.GET("/articles/bookmarks", controller.GetBookmarkedArticlesController)
+	r.GET("/articles/:id", controller.GetArticleController)
 	r.POST("/articles/:id/comments", controller.CreateCommentController)
+	r.POST("/articles/:id/bookmarks", controller.BookmarkController)
 
 	// user ai
 	// aiController := controller.NewAIController(repository.NewAIRepository())

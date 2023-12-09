@@ -92,7 +92,7 @@ func CreateConsultationController(c echo.Context) error {
 }
 
 func generateTransaction(consultation dto.UserConsultationResponse) (model.Transaction, error) {
-	invoice, date, err := repository.GenerateNextInvoice()
+	invoice, err := repository.GenerateNextInvoice()
 	if err != nil {
 		return model.Transaction{},err
 	}
@@ -105,7 +105,6 @@ func generateTransaction(consultation dto.UserConsultationResponse) (model.Trans
 	transaction := model.Transaction{
 		ID: uuid.New(),
 		ConsultationID: consultation.ID,
-		Date: date,
 		Invoice: invoice,
 		Price: consultation.Doctor.Price,
 		AdminPrice: constant.ADMIN_FEE,

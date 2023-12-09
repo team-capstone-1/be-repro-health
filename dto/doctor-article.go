@@ -31,20 +31,6 @@ type DoctorArticleResponse struct {
 	Comment   []CommentResponse `json:"comments"`
 }
 
-type UserArticleResponse struct {
-	ID        uuid.UUID         `json:"id"`
-	DoctorID  uuid.UUID         `json:"doctor_id"`
-	Title     string            `json:"title"`
-	Tags      string            `json:"tags"`
-	Reference string            `json:"reference"`
-	Date      time.Time         `json:"date"`
-	Image     string            `json:"image"`
-	ImageDesc string            `json:"image_desc"`
-	Content   string            `json:"content"`
-	View      int               `json:"views"`
-	Comment   []CommentResponse `json:"comments"`
-}
-
 func ConvertToDoctorArticleModel(doctor DoctorArticleRequest) model.Article {
 	return model.Article{
 		ID:        uuid.New(),
@@ -89,27 +75,5 @@ func ConvertToDoctorArticleDashboardResponse(article model.Article) DoctorArticl
 		Image:     article.Image,
 		ImageDesc: article.ImageDesc,
 		Content:   article.Content,
-	}
-}
-
-func ConvertToUserArticleResponse(article model.Article) UserArticleResponse {
-	var articleCommentResponses []CommentResponse
-
-	for _, reply := range article.Comment {
-		articleCommentResponses = append(articleCommentResponses, ConvertToCommentResponse(reply))
-	}
-
-	return UserArticleResponse{
-		ID:        article.ID,
-		DoctorID:  article.DoctorID,
-		Title:     article.Title,
-		Tags:      article.Tags,
-		Reference: article.Reference,
-		Date:      article.Date,
-		Image:     article.Image,
-		ImageDesc: article.ImageDesc,
-		Content:   article.Content,
-		View:      article.View,
-		Comment:   articleCommentResponses,
 	}
 }
