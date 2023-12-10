@@ -59,7 +59,7 @@ func DoctorInactiveScheduleController(c echo.Context) error {
 		})
 	}
 
-	// dateString := c.QueryParam("date")
+	dateString := c.QueryParam("date")
 	session := c.QueryParam("session")
 
 	// date, err := time.Parse("02-01-2006", dateString)
@@ -78,10 +78,10 @@ func DoctorInactiveScheduleController(c echo.Context) error {
 		})
 	}
 
-	// fmt.Printf("Doctor ID: %v\n", doctorID)
+	fmt.Printf("Doctor ID: %v\n", doctorID)
 	// fmt.Printf("Date: %v\n", date)
-	// fmt.Printf("Session: %v\n", session)
-	doctorHoliday, err := repository.DoctorInactiveSchedule(doctorID, session)
+	fmt.Printf("Session: %v\n", session)
+	doctorHoliday, err := repository.DoctorInactiveSchedule(doctorID, dateString, session)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message":  "failed to mark doctor as inactive",

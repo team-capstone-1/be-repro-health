@@ -50,17 +50,17 @@ func GetPatientIDsByDateAndSession(doctorID uuid.UUID, session string) ([]uuid.U
 	return patientIDs, nil
 }
 
-func DoctorInactiveSchedule(doctorID uuid.UUID, session string) (model.Consultation, error) {
+func DoctorInactiveSchedule(doctorID uuid.UUID, date string, session string) (model.Consultation, error) {
 	var doctorHoliday model.Consultation
 
 	// Cari jadwal dokter pada tanggal dan sesi tertentu
-	tx := database.DB.Where("doctor_id = ? AND session = ?", doctorID, session).Find(&doctorHoliday)
+	tx := database.DB.Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session)
 	if tx.Error != nil {
 		return doctorHoliday, tx.Error
 	}
 
 	// Ubah status doctor_available menjadi false
-	tx = database.DB.Model(&doctorHoliday).Where("doctor_id = ? AND session = ?", doctorID, session).Update("doctor_available", false)
+	tx = database.DB.Model(&doctorHoliday).Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session).Update("doctor_available", false).Find(&doctorHoliday)
 	if tx.Error != nil {
 		return doctorHoliday, tx.Error
 	}
