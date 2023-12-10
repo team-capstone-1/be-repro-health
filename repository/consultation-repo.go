@@ -41,6 +41,16 @@ func GetConsultationsByDoctorID(doctorID uuid.UUID) ([]model.Consultation, error
 	return dataConsultations, nil
 }
 
+func GetConsultationPatient(patientID uuid.UUID) ([]model.Consultation, error) {
+	var dataConsultations []model.Consultation
+
+	tx := database.DB.Where("patientID = ?", patientID).First(&dataConsultations)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return dataConsultations, nil
+}
+
 func GetConsultationByID(id uuid.UUID) (model.Consultation, error) {
 	var dataconsultation model.Consultation
 

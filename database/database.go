@@ -75,6 +75,7 @@ func InitialMigration() {
 		&model.Notification{},
 		&model.HealthRecommendation{},
 		&model.DoctorHealthRecommendation{},
+		&model.DoctorHoliday{},
 	)
 }
 func Seeders() {

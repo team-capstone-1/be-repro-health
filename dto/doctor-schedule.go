@@ -3,6 +3,7 @@ package dto
 import (
 	"capstone-project/model"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -109,4 +110,38 @@ func ConvertToAppointments(consultations []model.Consultation) []Appointment {
 	}
 
 	return appointments
+}
+
+// DOCTOR HOLIDAY
+
+type DoctorHolidayRequest struct {
+	ID       uuid.UUID `json:"id"`
+	DoctorID uuid.UUID `json:"doctor_id"`
+	Date     time.Time `json:"date"`
+	Session  string    `json:"session"`
+}
+
+func ConvertToModelDoctorHoliday(doctorHoliday DoctorHolidayRequest) model.DoctorHoliday {
+	return model.DoctorHoliday{
+		ID:       doctorHoliday.ID,
+		DoctorID: doctorHoliday.DoctorID,
+		Date:     doctorHoliday.Date,
+		Session:  doctorHoliday.Session,
+	}
+}
+
+type DoctorHolidayResponse struct {
+	ID       uuid.UUID `json:"id"`
+	DoctorID uuid.UUID `json:"doctor_id"`
+	Date     time.Time `json:"date"`
+	Session  string    `json:"session"`
+}
+
+func ConvertToDoctorHolidayResponse(doctorHoliday model.DoctorHoliday) DoctorHolidayResponse {
+	return DoctorHolidayResponse{
+		ID:       doctorHoliday.ID,
+		DoctorID: doctorHoliday.DoctorID,
+		Date:     doctorHoliday.Date,
+		Session:  doctorHoliday.Session,
+	}
 }
