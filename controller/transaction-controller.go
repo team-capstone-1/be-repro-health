@@ -203,6 +203,12 @@ func RescheduleController(c echo.Context) error {
 			"reponse": err.Error(),
 		})
 	}
+	if consultation.Rescheduled{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed rescheduled",
+			"reponse": errors.New("You can only reschedule once").Error(),
+		})
+	}
 
 	updateData := dto.ConsultationRescheduleRequest{}
 	errBind := c.Bind(&updateData)
