@@ -62,15 +62,6 @@ func DoctorInactiveScheduleController(c echo.Context) error {
 	dateString := c.QueryParam("date")
 	session := c.QueryParam("session")
 
-	// date, err := time.Parse("02-01-2006", dateString)
-	// if err != nil {
-	// 	return c.JSON(http.StatusBadRequest, map[string]any{
-	// 		"message":  "failed to parse date",
-	// 		"response": err.Error(),
-	// 	})
-
-	// }
-
 	if session != "pagi" && session != "siang" && session != "malam" {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "invalid session value",
@@ -78,9 +69,6 @@ func DoctorInactiveScheduleController(c echo.Context) error {
 		})
 	}
 
-	fmt.Printf("Doctor ID: %v\n", doctorID)
-	// fmt.Printf("Date: %v\n", date)
-	fmt.Printf("Session: %v\n", session)
 	doctorHoliday, err := repository.DoctorInactiveSchedule(doctorID, dateString, session)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
@@ -93,7 +81,7 @@ func DoctorInactiveScheduleController(c echo.Context) error {
 		patientIDs, err := repository.GetPatientIDsByDateAndSession(doctorID, session)
 		fmt.Println(patientIDs)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]any{
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
 				"message":  "failed to get patient IDs",
 				"response": err.Error(),
 			})
@@ -109,6 +97,15 @@ func DoctorInactiveScheduleController(c echo.Context) error {
 		}
 	}
 
+	// Update transaction status to "waiting"
+	err = repository.UpdateTransactionStatusToWaiting(doctorHoliday.ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message":  "failed to update transaction status",
+			"response": err.Error(),
+		})
+	}
+
 	doctorHolidayResponse := dto.ConvertToDoctorHolidayResponse(doctorHoliday)
 
 	return c.JSON(http.StatusOK, map[string]any{
@@ -116,3 +113,58 @@ func DoctorInactiveScheduleController(c echo.Context) error {
 		"response": doctorHolidayResponse,
 	})
 }
+
+// func DoctorInactiveScheduleController(c echo.Context) error {
+// 	doctorID := m.ExtractTokenUserId(c)
+// 	if doctorID == uuid.Nil {
+// 		return c.JSON(http.StatusUnauthorized, map[string]any{
+// 			"message":  "unauthorized",
+// 			"response": "Permission Denied: Doctor is not valid.",
+// 		})
+// 	}
+
+// 	dateString := c.QueryParam("date")
+// 	session := c.QueryParam("session")
+
+// 	if session != "pagi" && session != "siang" && session != "malam" {
+// 		return c.JSON(http.StatusBadRequest, map[string]any{
+// 			"message":  "invalid session value",
+// 			"response": "session must be 'pagi', 'siang', or 'malam'.",
+// 		})
+// 	}
+
+// 	doctorHoliday, err := repository.DoctorInactiveSchedule(doctorID, dateString, session)
+// 	if err != nil {
+// 		return c.JSON(http.StatusInternalServerError, map[string]any{
+// 			"message":  "failed to mark doctor as inactive",
+// 			"response": err.Error(),
+// 		})
+// 	}
+
+// 	if doctorHoliday.DoctorAvailable == false {
+// 		patientIDs, err := repository.GetPatientIDsByDateAndSession(doctorID, session)
+// 		fmt.Println(patientIDs)
+// 		if err != nil {
+// 			return c.JSON(http.StatusInternalServerError, map[string]any{
+// 				"message":  "failed to get patient IDs",
+// 				"response": err.Error(),
+// 			})
+// 		}
+
+// 		for _, patientID := range patientIDs {
+// 			CreateNotification(
+// 				patientID,
+// 				"Dokter Tidak Tersedia",
+// 				"Dokter tidak tersedia pada sesi ini. Silakan cek jadwal dokter untuk sesi atau hari lain.",
+// 				"doctor_schedule",
+// 			)
+// 		}
+// 	}
+
+// 	doctorHolidayResponse := dto.ConvertToDoctorHolidayResponse(doctorHoliday)
+
+// 	return c.JSON(http.StatusOK, map[string]any{
+// 		"message":  "success, doctor status updated",
+// 		"response": doctorHolidayResponse,
+// 	})
+// }

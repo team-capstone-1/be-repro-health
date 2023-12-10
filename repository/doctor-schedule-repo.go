@@ -67,3 +67,38 @@ func DoctorInactiveSchedule(doctorID uuid.UUID, date string, session string) (mo
 
 	return doctorHoliday, nil
 }
+
+func UpdateTransactionStatusToWaiting(consultationID uuid.UUID) error {
+	var consultations []model.Consultation
+
+	// Find consultations based on the consultation ID
+	tx := database.DB.Where("id = ?", consultationID).Find(&consultations)
+	if tx.Error != nil {
+		return tx.Error
+	}
+
+	// Update status to "waiting" for each associated transaction
+	for _, consultation := range consultations {
+		fmt.Printf("Processing Consultation ID: %s\n", consultation.ID)
+
+		var transactions []model.Transaction
+		tx := database.DB.Where("consultation_id = ?", consultation.ID).Find(&transactions)
+		if tx.Error != nil {
+			return tx.Error
+		}
+
+		for _, transaction := range transactions {
+			fmt.Printf("Processing Transaction ID: %s\n", transaction.ID)
+
+			tx := database.DB.Model(&model.Transaction{}).
+				Where("id = ?", transaction.ID).
+				Update("status", "waiting")
+
+			if tx.Error != nil {
+				return tx.Error
+			}
+		}
+	}
+
+	return nil
+}
