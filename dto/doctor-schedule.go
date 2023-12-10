@@ -25,8 +25,9 @@ type ListDetail struct {
 }
 
 type Appointment struct {
-	Patient string    `json:"patient"`
-	ID      uuid.UUID `json:"patient_id"`
+	ConsultationID uuid.UUID `json:"consultation_id"`
+	Patient        string    `json:"patient"`
+	PatientID      uuid.UUID `json:"patient_id"`
 }
 
 func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consultation) DoctorScheduleResponse {
@@ -64,8 +65,9 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 			for _, consultation := range consultations {
 				patientResponse := ConvertToPatientResponse(consultation.Patient)
 				appointment := Appointment{
-					Patient: patientResponse.Name,
-					ID:      consultation.PatientID,
+					ConsultationID: consultation.ID,
+					Patient:        patientResponse.Name,
+					PatientID:      consultation.PatientID,
 				}
 				fmt.Print(appointment)
 
@@ -102,8 +104,9 @@ func ConvertToAppointments(consultations []model.Consultation) []Appointment {
 	for _, consultation := range consultations {
 		patientResponse := ConvertToPatientResponse(consultation.Patient)
 		appointment := Appointment{
-			Patient: patientResponse.Name,
-			ID:      patientResponse.ID,
+			ConsultationID: consultation.ID,
+			Patient:        patientResponse.Name,
+			PatientID:      patientResponse.ID,
 		}
 
 		appointments = append(appointments, appointment)
@@ -115,33 +118,29 @@ func ConvertToAppointments(consultations []model.Consultation) []Appointment {
 // DOCTOR HOLIDAY
 
 type DoctorHolidayRequest struct {
-	ID       uuid.UUID `json:"id"`
-	DoctorID uuid.UUID `json:"doctor_id"`
-	Date     time.Time `json:"date"`
-	Session  string    `json:"session"`
+	DoctorAvailable bool `json:"doctor_available"`
 }
 
-func ConvertToModelDoctorHoliday(doctorHoliday DoctorHolidayRequest) model.DoctorHoliday {
-	return model.DoctorHoliday{
-		ID:       doctorHoliday.ID,
-		DoctorID: doctorHoliday.DoctorID,
-		Date:     doctorHoliday.Date,
-		Session:  doctorHoliday.Session,
+func ConvertToModelDoctorHoliday(doctorHoliday DoctorHolidayRequest) model.Consultation {
+	return model.Consultation{
+		DoctorAvailable: doctorHoliday.DoctorAvailable,
 	}
 }
 
 type DoctorHolidayResponse struct {
-	ID       uuid.UUID `json:"id"`
-	DoctorID uuid.UUID `json:"doctor_id"`
-	Date     time.Time `json:"date"`
-	Session  string    `json:"session"`
+	ID              uuid.UUID `json:"id"`
+	DoctorID        uuid.UUID `json:"doctor_id"`
+	Date            time.Time `json:"date"`
+	Session         string    `json:"session"`
+	DoctorAvailable bool      `json:"doctor_available"`
 }
 
-func ConvertToDoctorHolidayResponse(doctorHoliday model.DoctorHoliday) DoctorHolidayResponse {
+func ConvertToDoctorHolidayResponse(doctorHoliday model.Consultation) DoctorHolidayResponse {
 	return DoctorHolidayResponse{
-		ID:       doctorHoliday.ID,
-		DoctorID: doctorHoliday.DoctorID,
-		Date:     doctorHoliday.Date,
-		Session:  doctorHoliday.Session,
+		ID:              doctorHoliday.ID,
+		DoctorID:        doctorHoliday.DoctorID,
+		Date:            doctorHoliday.Date,
+		Session:         doctorHoliday.Session,
+		DoctorAvailable: doctorHoliday.DoctorAvailable,
 	}
 }

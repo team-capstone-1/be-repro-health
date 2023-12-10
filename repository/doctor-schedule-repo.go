@@ -3,7 +3,7 @@ package repository
 import (
 	"capstone-project/database"
 	"capstone-project/model"
-	"time"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -28,22 +28,42 @@ func DoctorGetAllSchedules(doctorID uuid.UUID, session string, date string) ([]m
 	return consultation, nil
 }
 
-func DoctorInactiveSchedule(doctorID uuid.UUID, data model.DoctorHoliday) (model.DoctorHoliday, error) {
-	tx := database.DB.Where("doctor_id = ?", doctorID).Save(&data)
-	if tx.Error != nil {
-		return model.DoctorHoliday{}, tx.Error
-	}
-	return data, nil
-}
-
-func GetDoctorHolidaysByDateAndSession(doctorID uuid.UUID, date time.Time, session string) ([]model.DoctorHoliday, error) {
-	var holidays []model.DoctorHoliday
-	err := database.DB.Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session).Find(&holidays).Error
-	return holidays, err
-}
-
-func GetConsultationsByDoctorSchedule(doctorID uuid.UUID, date time.Time, session string) ([]model.Consultation, error) {
+func GetPatientIDsByDateAndSession(doctorID uuid.UUID, session string) ([]uuid.UUID, error) {
 	var consultations []model.Consultation
-	err := database.DB.Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session).Find(&consultations).Error
-	return consultations, err
+
+	// Implementasikan query untuk mendapatkan konsultasi yang sesuai
+	err := database.DB.Where("doctor_id = ? AND session = ?", doctorID, session).
+		Find(&consultations).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Ekstrak ID pasien dari hasil konsultasi
+	var patientIDs []uuid.UUID
+	for _, consultation := range consultations {
+		patientIDs = append(patientIDs, consultation.PatientID)
+
+	}
+	fmt.Print("Ini adalah pasien id", patientIDs)
+
+	return patientIDs, nil
+}
+
+func DoctorInactiveSchedule(doctorID uuid.UUID, session string) (model.Consultation, error) {
+	var doctorHoliday model.Consultation
+
+	// Cari jadwal dokter pada tanggal dan sesi tertentu
+	tx := database.DB.Where("doctor_id = ? AND session = ?", doctorID, session).Find(&doctorHoliday)
+	if tx.Error != nil {
+		return doctorHoliday, tx.Error
+	}
+
+	// Ubah status doctor_available menjadi false
+	tx = database.DB.Model(&doctorHoliday).Where("doctor_id = ? AND session = ?", doctorID, session).Update("doctor_available", false)
+	if tx.Error != nil {
+		return doctorHoliday, tx.Error
+	}
+
+	return doctorHoliday, nil
 }

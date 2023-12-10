@@ -4,6 +4,7 @@ import (
 	"capstone-project/dto"
 	m "capstone-project/middleware"
 	"capstone-project/repository"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -50,120 +51,68 @@ func GetAllDoctorScheduleController(c echo.Context) error {
 }
 
 func DoctorInactiveScheduleController(c echo.Context) error {
-	doctor := m.ExtractTokenUserId(c)
-	if doctor == uuid.Nil {
+	doctorID := m.ExtractTokenUserId(c)
+	if doctorID == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
 			"message":  "unauthorized",
 			"response": "Permission Denied: Doctor is not valid.",
 		})
 	}
 
+	// dateString := c.QueryParam("date")
 	session := c.QueryParam("session")
-	dateString := c.FormValue("date")
 
-	var date time.Time
-	if dateString != "" {
-		parsedDate, err := time.Parse("02-01-2006", dateString)
-		if err != nil {
-			return c.JSON(http.StatusBadRequest, map[string]interface{}{
-				"message":  "failed to parse date",
-				"response": err.Error(),
-			})
-		}
-		date = parsedDate
-	}
+	// date, err := time.Parse("02-01-2006", dateString)
+	// if err != nil {
+	// 	return c.JSON(http.StatusBadRequest, map[string]any{
+	// 		"message":  "failed to parse date",
+	// 		"response": err.Error(),
+	// 	})
+
+	// }
 
 	if session != "pagi" && session != "siang" && session != "malam" {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "invalid session value",
-			"response": "Session must be 'pagi', 'siang', or 'malam'.",
+			"response": "session must be 'pagi', 'siang', or 'malam'.",
 		})
 	}
 
-	doctorHoliday := dto.DoctorHolidayRequest{
-		ID:       uuid.New(),
-		DoctorID: doctor,
-		Date:     date,
-	}
-	if err := c.Bind(&doctorHoliday); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]interface{}{
-			"message":  "failed to bind data",
-			"response": err.Error(),
-		})
-	}
-
-	modelDoctorHoliday := dto.ConvertToModelDoctorHoliday(doctorHoliday)
-
-	// Check if there are existing doctor holidays for the specified doctor, date, and session
-	existingHolidays, err := repository.GetDoctorHolidaysByDateAndSession(doctor, date, session)
+	// fmt.Printf("Doctor ID: %v\n", doctorID)
+	// fmt.Printf("Date: %v\n", date)
+	// fmt.Printf("Session: %v\n", session)
+	doctorHoliday, err := repository.DoctorInactiveSchedule(doctorID, session)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message":  "failed to check existing doctor holidays",
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "failed to mark doctor as inactive",
 			"response": err.Error(),
 		})
 	}
 
-	// Get consultations for the specified doctor, date, and session
-	consultations, err := repository.GetConsultationsByDoctorSchedule(doctor, date, session)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message":  "failed to get consultations",
-			"response": err.Error(),
-		})
-	}
-
-	// If there are existing doctor holidays, update the record
-	if len(existingHolidays) > 0 {
-		updatedDoctorHoliday, err := repository.DoctorInactiveSchedule(doctor, modelDoctorHoliday)
+	if doctorHoliday.DoctorAvailable == false {
+		patientIDs, err := repository.GetPatientIDsByDateAndSession(doctorID, session)
+		fmt.Println(patientIDs)
 		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-				"message":  "failed to mark doctor as inactive",
+			return c.JSON(http.StatusInternalServerError, map[string]any{
+				"message":  "failed to get patient IDs",
 				"response": err.Error(),
 			})
 		}
 
-		for _, consultation := range consultations {
-			// Send notification to each patient
+		for _, patientID := range patientIDs {
 			CreateNotification(
-				consultation.PatientID,
-				"Dokter Membatalkan Konsultasi!",
-				"Dokter membatalkan konsultasi karena urusan tertentu. Silakan daftar konsultasi di sesi atau hari lain.",
-				"janti_temu",
+				patientID,
+				"Dokter Tidak Tersedia",
+				"Dokter tidak tersedia pada sesi ini. Silakan cek jadwal dokter untuk sesi atau hari lain.",
+				"doctor_schedule",
 			)
 		}
-
-		// Convert the updatedDoctorHoliday to DTO response
-		doctorHolidayResponse := dto.ConvertToDoctorHolidayResponse(updatedDoctorHoliday)
-
-		return c.JSON(http.StatusOK, map[string]interface{}{
-			"message":  "success, doctor marked as inactive",
-			"response": doctorHolidayResponse,
-		})
-	}
-
-	// If there are no existing doctor holidays, create a new record
-	doctorHoliday, err = repository.DoctorInactiveSchedule(doctor, modelDoctorHoliday)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message":  "failed to create doctor holiday",
-			"response": err.Error(),
-		})
-	}
-
-	for _, consultation := range consultations {
-		// Send notification to each patient
-		CreateNotification(
-			consultation.PatientID,
-			"Dokter Membatalkan Konsultasi!",
-			"Dokter membatalkan konsultasi karena urusan tertentu. Silakan daftar konsultasi di sesi atau hari lain.",
-			"janti_temu",
-		)
 	}
 
 	doctorHolidayResponse := dto.ConvertToDoctorHolidayResponse(doctorHoliday)
 
-	return c.JSON(http.StatusOK, map[string]interface{}{
-		"message":  "success, doctor marked as inactive",
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success, doctor status updated",
 		"response": doctorHolidayResponse,
 	})
 }
