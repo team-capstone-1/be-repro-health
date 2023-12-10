@@ -4,8 +4,10 @@ import (
 	"capstone-project/database"
 	"capstone-project/model"
 	"fmt"
+	"time"
 
 	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 func DoctorGetAllSchedules(doctorID uuid.UUID, session string, date string) ([]model.Consultation, error) {
@@ -65,10 +67,17 @@ func DoctorInactiveSchedule(doctorID uuid.UUID, date string, session string) (mo
 		return doctorHoliday, tx.Error
 	}
 
+	// Create DoctorHoliday record
+	err := CreateDoctorHoliday(doctorID, date, session)
+	if err != nil {
+		return doctorHoliday, err
+	}
+
 	return doctorHoliday, nil
 }
 
 func UpdateTransactionStatusToWaiting(dateString, session string) error {
+
 	// Find consultations based on the date and session
 	var consultations []model.Consultation
 	tx := database.DB.
@@ -108,4 +117,44 @@ func UpdateTransactionStatusToWaiting(dateString, session string) error {
 	}
 
 	return nil
+}
+
+func CreateDoctorHoliday(doctorID uuid.UUID, date string, session string) error {
+	parsedDate, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		return err
+	}
+	doctorHoliday := model.DoctorHoliday{
+		ID:       uuid.New(),
+		DoctorID: doctorID,
+		Date:     parsedDate,
+		Session:  session,
+	}
+
+	if err := database.DB.Create(&doctorHoliday).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func IsDoctorOnHoliday(doctorID uuid.UUID, date string, session string) (bool, error) {
+	var doctorHoliday model.DoctorHoliday
+	err := database.DB.
+		Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session).
+		First(&doctorHoliday).Error
+
+	if err == gorm.ErrRecordNotFound {
+		// Record tidak ditemukan, artinya dokter tidak sedang libur
+		fmt.Println("Doctor is not on holiday.")
+		return false, nil
+	} else if err != nil {
+		// Terjadi kesalahan lain
+		fmt.Println("Error checking doctor's holiday:", err)
+		return false, err
+	}
+
+	// Dokter sedang libur
+	fmt.Println("Doctor is on holiday.")
+	return true, nil
 }
