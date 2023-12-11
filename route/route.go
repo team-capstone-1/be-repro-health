@@ -57,9 +57,11 @@ func New() *echo.Echo {
 	r.DELETE("/forums/:id", controller.DeleteForumController)
 
 	// user article
-	e.GET("/articles", controller.GetArticlesController)
-	e.GET("/articles/:id", controller.GetArticleController)
+	r.GET("/articles", controller.GetArticlesController)
+	r.GET("/articles/bookmarks", controller.GetBookmarkedArticlesController)
+	r.GET("/articles/:id", controller.GetArticleController)
 	r.POST("/articles/:id/comments", controller.CreateCommentController)
+	r.POST("/articles/:id/bookmarks", controller.BookmarkController)
 
 	// user ai
 	aiController := controller.NewUserAIController(repository.NewUserAIRepository())
@@ -68,10 +70,12 @@ func New() *echo.Echo {
 
 	// transaction
 	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole(constant.ROLE_USER))
+	r.GET("/transactions", controller.GetTransactionsController, m.CheckRole(constant.ROLE_USER))
 	r.GET("/transactions/patients/:id", controller.GetPatientTransactionsController, m.CheckRole(constant.ROLE_USER))
 	r.POST("/transactions/:id/payments", controller.CreatePaymentController, m.CheckRole(constant.ROLE_USER))
 	r.PUT("/transactions/:id/reschedule", controller.RescheduleController, m.CheckRole(constant.ROLE_USER))
 	r.POST("/transactions/:id/cancel", controller.CancelTransactionController, m.CheckRole(constant.ROLE_USER))
+	r.PUT("/transactions/:id/payment-timeout", controller.PaymentTimeOut, m.CheckRole(constant.ROLE_USER))
 	r.PUT("/refund/:id", controller.ValidateRefund, m.CheckRole(constant.ROLE_ADMIN))
 
 	r.GET("/notifications/patients/:id", controller.GetNotificationsController, m.CheckRole(constant.ROLE_USER))
@@ -151,6 +155,9 @@ func New() *echo.Echo {
 
 	// DOCTOR CHANGE PASSWORD
 	doctor.PUT("/change-password", controller.ChangeDoctorPasswordController)
+
+	// DOCTOR SCHEDULE
+	doctor.GET("/schedule", controller.GetAllDoctorScheduleController, m.CheckRole(constant.ROLE_DOCTOR))
 
 	return e
 }

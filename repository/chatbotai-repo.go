@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sashabaranov/go-openai"
+	"github.com/google/uuid"
 )
 
 type UserAIRepository interface {
@@ -155,12 +156,12 @@ func (ar *UserAIRepositoryImpl) UserGetHealthRecommendation(ctx context.Context,
 	return fmt.Sprintf("%s%s", tipsPrefix, resp.Choices[0].Message.Content), nil
 }
 
-func (ar *UserAIRepositoryImpl) StoreChatToDB(data model.HealthRecommendation) {
+func (ar *aiRepository) StoreChatToDB(data model.HealthRecommendation){
 	database.DB.Save(&data)
 }
 
-func (ar *UserAIRepositoryImpl) UserGetAllHealthRecommendations(UserID uuid.UUID) ([]model.HealthRecommendation, error) {
-	var userDataHealthRecommendations []model.HealthRecommendation
+func (ar *aiRepository)GetAllHealthRecommendations(patient_id uuid.UUID) ([]model.HealthRecommendation, error) {
+	var datahealthRecommendations []model.HealthRecommendation
 
 	tx := database.DB.Where("user_id = ?", UserID).Find(&userDataHealthRecommendations)
 	if tx.Error != nil {
@@ -168,3 +169,21 @@ func (ar *UserAIRepositoryImpl) UserGetAllHealthRecommendations(UserID uuid.UUID
 	}
 	return userDataHealthRecommendations, nil
 }
+
+func GetDoctorByIDForAI(doctorID uuid.UUID) *model.Doctor {
+	var doctor model.Doctor
+	result := database.DB.Where("id = ?", doctorID).First(&doctor)
+
+	if result.Error == gorm.ErrRecordNotFound {
+		// Doctor with the provided ID not found
+		return nil
+	}
+
+	if result.Error != nil {
+		// Handle other errors if needed
+		panic(result.Error)
+	}
+
+	return &doctor
+}
+

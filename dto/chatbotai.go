@@ -1,8 +1,8 @@
 package dto
 
 import (
-	d "capstone-project/database"
 	"capstone-project/model"
+	"capstone-project/repository"
 	"errors"
 	"strings"
 
@@ -153,7 +153,7 @@ func getDoctorName(doctorID uuid.UUID) (string, error) {
 }
 
 func getDoctorFromDatabase(doctorID uuid.UUID) *model.Doctor {
-	doctor := d.GetDoctorByID(doctorID)
+	doctor := repository.GetDoctorByIDForAI(doctorID)
 
 	if doctor != nil {
 		return doctor

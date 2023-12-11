@@ -96,7 +96,7 @@ func ConvertToDoctorGetAllConsultations(consultation model.Consultation) DoctorG
 	for i := range consultation.Transaction {
 
 		total = consultation.Transaction[i].Total
-		paymentMethod = consultation.Transaction[i].Payment.Method
+		paymentMethod = consultation.PaymentMethod
 		status = string(consultation.Transaction[i].Status)
 	}
 
@@ -121,7 +121,7 @@ func ConvertToDoctorGetDetailsPatientResponse(consultation model.Consultation) D
 
 	if len(consultation.Transaction) > 0 {
 		transactionID = consultation.Transaction[0].ID
-		paymentMethod = consultation.Transaction[0].Payment.Method
+		paymentMethod = consultation.PaymentMethod
 		total = consultation.Transaction[0].Total
 		status = string(consultation.Transaction[0].Status)
 	}
@@ -152,8 +152,8 @@ func ConvertToDoctorGetDetailsTransactionResponse(transaction model.Transaction)
 	return DoctorGetDetailsTransactionResponse{
 		ID:            transaction.ID,
 		Invoice:       transaction.Invoice,
-		Date:          transaction.Date,
-		PaymentMethod: transaction.Payment.Method,
+		Date:          transaction.CreatedAt,
+		PaymentMethod: transaction.Consultation.PaymentMethod,
 		Name:          transaction.Payment.Name,
 		Price:         transaction.Price,
 		AdminFee:      transaction.AdminPrice,

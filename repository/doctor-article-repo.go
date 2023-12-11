@@ -68,13 +68,18 @@ func GetArticleByID(id uuid.UUID) (model.Article, error) {
 	if tx.Error != nil {
 		return model.Article{}, tx.Error
 	}
+
+	if err := database.DB.Model(model.Article{}).Where("id = ?", id).Update("View", gorm.Expr("view + ?", 1)).Error; err != nil {
+		return dataarticle, err
+	}
+
 	return dataarticle, nil
 }
 
 func UserGetAllArticle() ([]model.Article, error) {
 	var dataarticlesdashboard []model.Article
 
-	tx := database.DB.Find(&dataarticlesdashboard)
+	tx := database.DB.Preload("Comment").Find(&dataarticlesdashboard)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
