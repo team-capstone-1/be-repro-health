@@ -10,7 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sashabaranov/go-openai"
-	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type UserAIRepository interface {
@@ -156,14 +156,14 @@ func (ar *UserAIRepositoryImpl) UserGetHealthRecommendation(ctx context.Context,
 	return fmt.Sprintf("%s%s", tipsPrefix, resp.Choices[0].Message.Content), nil
 }
 
-func (ar *aiRepository) StoreChatToDB(data model.HealthRecommendation){
+func (ar *UserAIRepositoryImpl) StoreChatToDB(data model.HealthRecommendation) {
 	database.DB.Save(&data)
 }
 
-func (ar *aiRepository)GetAllHealthRecommendations(patient_id uuid.UUID) ([]model.HealthRecommendation, error) {
-	var datahealthRecommendations []model.HealthRecommendation
+func (ar *UserAIRepositoryImpl) UserGetAllHealthRecommendations(userID uuid.UUID) ([]model.HealthRecommendation, error) {
+	var userDataHealthRecommendations []model.HealthRecommendation
 
-	tx := database.DB.Where("user_id = ?", UserID).Find(&userDataHealthRecommendations)
+	tx := database.DB.Where("user_id = ?", userID).Find(&userDataHealthRecommendations)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -186,4 +186,3 @@ func GetDoctorByIDForAI(doctorID uuid.UUID) *model.Doctor {
 
 	return &doctor
 }
-
