@@ -40,7 +40,7 @@ func InitDB() {
 		DB_Name:     config.DB_NAME,
 	}
 
-	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=Local",
+	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=UTC",
 		database.DB_Username,
 		database.DB_Password,
 		database.DB_Host,
