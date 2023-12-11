@@ -76,6 +76,16 @@ func (ac *DoctorAIController) DoctorGetHealthRecommendation(c echo.Context) erro
 			Status:    "success",
 			Data:      response,
 		}
+
+		doctorStoreDB := model.DoctorHealthRecommendation{
+			ID:        uuid.New(),
+			SessionID: sessionID,
+			DoctorID:  doctorID,
+			Question:  req.Message,
+			Answer:    response, 
+		}
+		ac.DoctorAIRepo.DoctorStoreChatToDB(doctorStoreDB)
+
 		return c.JSON(http.StatusOK, resp)
 	} else {
 		// Continue with the rest of the logic
