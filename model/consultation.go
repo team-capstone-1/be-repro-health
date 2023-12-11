@@ -17,6 +17,7 @@ type Consultation struct {
 	Session         string        `gorm:"type:enum('pagi', 'siang', 'malam')"`
 	QueueNumber     string        `gorm:"size:255"`
 	DoctorAvailable bool          `gorm:"default:true" json:"doctor_available"`
+	Rescheduled	    bool          `gorm:"default:false" json:"rescheduled"`
 	PaymentMethod   string        `gorm:"type:ENUM('manual_transfer', 'clinic_payment')"`
 	Patient         Patient       `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Clinic          Clinic        `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
