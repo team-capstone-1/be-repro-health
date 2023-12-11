@@ -158,6 +158,8 @@ func New() *echo.Echo {
 
 	// DOCTOR SCHEDULE
 	doctor.GET("/schedule", controller.GetAllDoctorScheduleController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/schedule/inactive", controller.DoctorInactiveScheduleController, m.CheckRole(constant.ROLE_DOCTOR))
+	doctor.PUT("/schedule/active", controller.DoctorActiveScheduleController, m.CheckRole(constant.ROLE_DOCTOR))
 
 	return e
 }

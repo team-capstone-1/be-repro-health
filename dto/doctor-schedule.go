@@ -2,7 +2,7 @@ package dto
 
 import (
 	"capstone-project/model"
-	"fmt"
+	"time"
 
 	"github.com/google/uuid"
 )
@@ -24,11 +24,13 @@ type ListDetail struct {
 }
 
 type Appointment struct {
-	Patient string    `json:"patient"`
-	ID      uuid.UUID `json:"patient_id"`
+	ConsultationID uuid.UUID `json:"consultation_id"`
+	Patient        string    `json:"patient"`
+	PatientID      uuid.UUID `json:"patient_id"`
 }
 
 func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consultation) DoctorScheduleResponse {
+	// Create a map to store consultations based on date and session
 	doctorSchedulesMap := make(map[string]map[string][]model.Consultation)
 
 	for _, schedule := range schedules {
@@ -52,41 +54,48 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 	}
 
 	var doctorSchedules []FrontendData
-	for date, consultationMap := range doctorSchedulesMap {
-		var listData []ListDetail
 
-		for _, session := range []string{"pagi", "siang", "malam"} {
-			consultations := consultationMap[session]
+	if len(doctorSchedulesMap) > 0 {
+		for date, consultationMap := range doctorSchedulesMap {
+			var listData []ListDetail
 
-			doctorAvailable := true
+			for _, session := range []string{"pagi", "siang", "malam"} {
+				consultations := consultationMap[session]
 
-			for _, consultation := range consultations {
-				patientResponse := ConvertToPatientResponse(consultation.Patient)
-				appointment := Appointment{
-					Patient: patientResponse.Name,
-					ID:      consultation.PatientID,
+				doctorAvailable := true
+
+				var appointments []Appointment // Declare appointments variable here
+
+				if len(consultations) > 0 {
+					for _, consultation := range consultations {
+						patientResponse := ConvertToPatientResponse(consultation.Patient)
+						appointment := Appointment{
+							ConsultationID: consultation.ID,
+							Patient:        patientResponse.Name,
+							PatientID:      consultation.PatientID,
+						}
+
+						appointments = append(appointments, appointment)
+
+						if !consultation.DoctorAvailable {
+							doctorAvailable = false
+						}
+					}
 				}
-				fmt.Print(appointment)
 
-				if !consultation.DoctorAvailable {
-					doctorAvailable = false
-					break
-				}
+				// Include a default entry even if there are no appointments
+				listData = append(listData, ListDetail{
+					DoctorAvailable: doctorAvailable,
+					Session:         session,
+					Appointments:    appointments,
+				})
 			}
 
-			appointments := ConvertToAppointments(consultations)
-
-			listData = append(listData, ListDetail{
-				DoctorAvailable: doctorAvailable,
-				Session:         session,
-				Appointments:    appointments,
+			doctorSchedules = append(doctorSchedules, FrontendData{
+				Date:     date,
+				ListData: listData,
 			})
 		}
-
-		doctorSchedules = append(doctorSchedules, FrontendData{
-			Date:     date,
-			ListData: listData,
-		})
 	}
 
 	return DoctorScheduleResponse{
@@ -101,12 +110,43 @@ func ConvertToAppointments(consultations []model.Consultation) []Appointment {
 	for _, consultation := range consultations {
 		patientResponse := ConvertToPatientResponse(consultation.Patient)
 		appointment := Appointment{
-			Patient: patientResponse.Name,
-			ID:      patientResponse.ID,
+			ConsultationID: consultation.ID,
+			Patient:        patientResponse.Name,
+			PatientID:      patientResponse.ID,
 		}
 
 		appointments = append(appointments, appointment)
 	}
 
 	return appointments
+}
+
+// DOCTOR HOLIDAY
+
+type DoctorHolidayRequest struct {
+	DoctorAvailable bool `json:"doctor_available"`
+}
+
+func ConvertToModelDoctorHoliday(doctorHoliday DoctorHolidayRequest) model.Consultation {
+	return model.Consultation{
+		DoctorAvailable: doctorHoliday.DoctorAvailable,
+	}
+}
+
+type DoctorHolidayResponse struct {
+	ID              uuid.UUID `json:"id"`
+	DoctorID        uuid.UUID `json:"doctor_id"`
+	Date            time.Time `json:"date"`
+	Session         string    `json:"session"`
+	DoctorAvailable bool      `json:"doctor_available"`
+}
+
+func ConvertToDoctorHolidayResponse(doctorHoliday model.Consultation) DoctorHolidayResponse {
+	return DoctorHolidayResponse{
+		ID:              doctorHoliday.ID,
+		DoctorID:        doctorHoliday.DoctorID,
+		Date:            doctorHoliday.Date,
+		Session:         doctorHoliday.Session,
+		DoctorAvailable: doctorHoliday.DoctorAvailable,
+	}
 }
