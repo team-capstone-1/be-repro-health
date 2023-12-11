@@ -2,7 +2,6 @@ package dto
 
 import (
 	"capstone-project/model"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -31,6 +30,7 @@ type Appointment struct {
 }
 
 func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consultation) DoctorScheduleResponse {
+	// Create a map to store consultations based on date and session
 	doctorSchedulesMap := make(map[string]map[string][]model.Consultation)
 
 	for _, schedule := range schedules {
@@ -54,42 +54,48 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 	}
 
 	var doctorSchedules []FrontendData
-	for date, consultationMap := range doctorSchedulesMap {
-		var listData []ListDetail
 
-		for _, session := range []string{"pagi", "siang", "malam"} {
-			consultations := consultationMap[session]
+	if len(doctorSchedulesMap) > 0 {
+		for date, consultationMap := range doctorSchedulesMap {
+			var listData []ListDetail
 
-			doctorAvailable := true
+			for _, session := range []string{"pagi", "siang", "malam"} {
+				consultations := consultationMap[session]
 
-			for _, consultation := range consultations {
-				patientResponse := ConvertToPatientResponse(consultation.Patient)
-				appointment := Appointment{
-					ConsultationID: consultation.ID,
-					Patient:        patientResponse.Name,
-					PatientID:      consultation.PatientID,
+				doctorAvailable := true
+
+				var appointments []Appointment // Declare appointments variable here
+
+				if len(consultations) > 0 {
+					for _, consultation := range consultations {
+						patientResponse := ConvertToPatientResponse(consultation.Patient)
+						appointment := Appointment{
+							ConsultationID: consultation.ID,
+							Patient:        patientResponse.Name,
+							PatientID:      consultation.PatientID,
+						}
+
+						appointments = append(appointments, appointment)
+
+						if !consultation.DoctorAvailable {
+							doctorAvailable = false
+						}
+					}
 				}
-				fmt.Print(appointment)
 
-				if !consultation.DoctorAvailable {
-					doctorAvailable = false
-					break
-				}
+				// Include a default entry even if there are no appointments
+				listData = append(listData, ListDetail{
+					DoctorAvailable: doctorAvailable,
+					Session:         session,
+					Appointments:    appointments,
+				})
 			}
 
-			appointments := ConvertToAppointments(consultations)
-
-			listData = append(listData, ListDetail{
-				DoctorAvailable: doctorAvailable,
-				Session:         session,
-				Appointments:    appointments,
+			doctorSchedules = append(doctorSchedules, FrontendData{
+				Date:     date,
+				ListData: listData,
 			})
 		}
-
-		doctorSchedules = append(doctorSchedules, FrontendData{
-			Date:     date,
-			ListData: listData,
-		})
 	}
 
 	return DoctorScheduleResponse{
