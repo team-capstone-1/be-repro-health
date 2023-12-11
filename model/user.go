@@ -13,5 +13,6 @@ type User struct {
 	Password string    `json:"password" form:"password"`
 	OTP 	 string    `json:"otp" form:"otp"`
 	Patients []Patient `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	HealthRecommendation []HealthRecommendation `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 	Bookmarks []Article `gorm:"many2many:article_bookmark"`
 }
