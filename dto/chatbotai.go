@@ -9,22 +9,25 @@ import (
 	"github.com/google/uuid"
 )
 
+// User
 type HealthRecommendationRequest struct {
-	PatientID        uuid.UUID `json:"patient_id"`
-	PatientSessionID uuid.UUID `json:"session_id"`
-	Message          string    `json:"message"`
+	UserID        uuid.UUID `json:"user_id"`
+	UserSessionID uuid.UUID `json:"user_session_id"`
+	Message       string    `json:"message"`
 }
 
+// Doctor
 type HealthRecommendationDoctorRequest struct {
 	DoctorID  uuid.UUID `json:"doctor_id"`
 	SessionID uuid.UUID `json:"session_id"`
 	Message   string    `json:"message"`
 }
 
+// User
 type HealthRecommendationResponse struct {
-	PatientSessionID uuid.UUID `json:"session_id"`
-	Status           string    `json:"status"`
-	Data             string    `json:"data"`
+	UserSessionID uuid.UUID `json:"user_session_id"`
+	Status        string    `json:"status"`
+	Data          string    `json:"data"`
 }
 
 type DoctorHealthRecommendationResponse struct {
@@ -34,21 +37,21 @@ type DoctorHealthRecommendationResponse struct {
 }
 
 type HealthRecommendationHistoryResponse struct {
-	ID               uuid.UUID `json:"id"`
-	PatientID        uuid.UUID `json:"patient_id"`
-	Question         string    `json:"question"`
-	Answer           string    `json:"answer"`
-	PatientSessionID uuid.UUID `json:"session_id"`
+	ID            uuid.UUID `json:"id"`
+	UserID        uuid.UUID `json:"user_id"`
+	Question      string    `json:"question"`
+	Answer        string    `json:"answer"`
+	UserSessionID uuid.UUID `json:"user_session_id"`
 }
 
 // User
 func ConvertToHealthRecommendationHistoryResponse(healthRecommendation model.HealthRecommendation) HealthRecommendationHistoryResponse {
 	return HealthRecommendationHistoryResponse{
-		ID:               healthRecommendation.ID,
-		PatientID:        healthRecommendation.PatientID,
-		Question:         healthRecommendation.Question,
-		Answer:           healthRecommendation.Answer,
-		PatientSessionID: healthRecommendation.PatientSessionID,
+		ID:            healthRecommendation.ID,
+		UserID:        healthRecommendation.UserID,
+		Question:      healthRecommendation.Question,
+		Answer:        healthRecommendation.Answer,
+		UserSessionID: healthRecommendation.UserSessionID,
 	}
 }
 
@@ -63,14 +66,26 @@ type HealthRecommendationMessage struct {
 type HealthRecommendationHistoryDoctorResponse struct {
 	Status string `json:"status"`
 	Data   struct {
-		ID         uuid.UUID                     `json:"id"`
-		DoctorID   uuid.UUID                     `json:"doctor_id"`
-		TitleChat  string                        `json:"titleChat"`
-		Tgl        string                        `json:"tgl"`
-		Pesan      []HealthRecommendationMessage `json:"pesan"`
+		ID        uuid.UUID                     `json:"id"`
+		DoctorID  uuid.UUID                     `json:"doctor_id"`
+		TitleChat string                        `json:"titleChat"`
+		Tgl       string                        `json:"tgl"`
+		Pesan     []HealthRecommendationMessage `json:"pesan"`
 	} `json:"data"`
 }
 
+type HealthRecommendationHistoryPatientResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ID        uuid.UUID                     `json:"id"`
+		PatientID uuid.UUID                     `json:"patient_id"`
+		TitleChat string                        `json:"titleChat"`
+		Tgl       string                        `json:"tgl"`
+		Pesan     []HealthRecommendationMessage `json:"pesan"`
+	} `json:"data"`
+}
+
+// Doctor
 func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendations []model.DoctorHealthRecommendation) []HealthRecommendationHistoryDoctorResponse {
 	// Create the final response slice
 	var response []HealthRecommendationHistoryDoctorResponse
@@ -103,17 +118,17 @@ func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendati
 		response = append(response, HealthRecommendationHistoryDoctorResponse{
 			Status: "success",
 			Data: struct {
-				ID         uuid.UUID                     `json:"id"`
-				DoctorID   uuid.UUID                     `json:"doctor_id"`
-				TitleChat  string                        `json:"titleChat"`
-				Tgl        string                        `json:"tgl"`
-				Pesan      []HealthRecommendationMessage `json:"pesan"`
+				ID        uuid.UUID                     `json:"id"`
+				DoctorID  uuid.UUID                     `json:"doctor_id"`
+				TitleChat string                        `json:"titleChat"`
+				Tgl       string                        `json:"tgl"`
+				Pesan     []HealthRecommendationMessage `json:"pesan"`
 			}{
-				ID:         sessionID,
-				DoctorID:   messages[0].ID,
-				TitleChat:  getChatTitle(messages[0].Pesan),
-				Tgl:        messages[0].Waktu,
-				Pesan:      messages,
+				ID:        sessionID,
+				DoctorID:  messages[0].ID,
+				TitleChat: getChatTitle(messages[0].Pesan),
+				Tgl:       messages[0].Waktu,
+				Pesan:     messages,
 			},
 		})
 	}
@@ -145,3 +160,5 @@ func getDoctorFromDatabase(doctorID uuid.UUID) *model.Doctor {
 	}
 	return nil
 }
+
+// User

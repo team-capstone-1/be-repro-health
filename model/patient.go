@@ -20,5 +20,4 @@ type Patient struct {
 	Weight               float64                `gorm:"type:decimal(5,2)"`
 	Height               float64                `gorm:"type:decimal(5,2)"`
 	Gender               string                 `gorm:"type:enum('male','female');default:'male'"`
-	HealthRecommendation []HealthRecommendation `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }

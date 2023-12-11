@@ -62,9 +62,9 @@ func New() *echo.Echo {
 	r.POST("/articles/:id/comments", controller.CreateCommentController)
 
 	// user ai
-	// aiController := controller.NewAIController(repository.NewAIRepository())
-	// r.POST("/chatbot/health-recommendation", aiController.GetHealthRecommendation, m.CheckRole(constant.ROLE_USER))
-	// r.GET("/chatbot/health-recommendation/patients/:id", aiController.GetHealthRecommendationHistory, m.CheckRole(constant.ROLE_USER))
+	aiController := controller.NewUserAIController(repository.NewUserAIRepository())
+	r.POST("/chatbot/users-health-recommendation", aiController.UserGetHealthRecommendation, m.CheckRole(constant.ROLE_USER))
+	r.GET("/chatbot/users/:id", aiController.GetHealthRecommendationHistory, m.CheckRole(constant.ROLE_USER))
 
 	// transaction
 	r.GET("/transactions/:id", controller.GetTransactionController, m.CheckRole(constant.ROLE_USER))
