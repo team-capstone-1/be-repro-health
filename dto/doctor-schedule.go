@@ -2,6 +2,8 @@ package dto
 
 import (
 	"capstone-project/model"
+	"capstone-project/repository"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,7 +36,7 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 	doctorSchedulesMap := make(map[string]map[string][]model.Consultation)
 
 	for _, schedule := range schedules {
-		date := schedule.Date.Format("02-01-2006")
+		date := schedule.Date.Format("2006-01-02")
 		session := schedule.Session
 
 		consultationMap, exists := doctorSchedulesMap[date]
@@ -81,6 +83,18 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 							doctorAvailable = false
 						}
 					}
+				}
+
+				// Check if Doctor is on holiday for the given date and session
+				isDoctorOnHoliday, err := repository.IsDoctorOnHoliday(doctorID, date, session)
+				if err != nil {
+					// Handle the error if needed
+					fmt.Println("Error checking doctor's holiday:", err)
+				}
+
+				// Update doctorAvailable based on DoctorHoliday table
+				if isDoctorOnHoliday {
+					doctorAvailable = false
 				}
 
 				// Include a default entry even if there are no appointments
