@@ -65,7 +65,6 @@ func (ac *UserAIController) UserGetHealthRecommendation(c echo.Context) error {
 			isAIAssistant = false
 			userSessionID = uuid.New()
 		} else if isAIAssistant {
-			fmt.Printf("userSessionID: %v\n", userSessionID)
 		} else {
 			userSessionID, userSessionExists = ac.getSessionUserIDFromDatabase(c, userID)
 		}
@@ -316,7 +315,6 @@ func isNonReproductiveHealthQuestion(question string) bool {
 
 func (ac *UserAIController) GetHealthRecommendationUserHistory(c echo.Context) error {
 	userIDParam := c.Param("user_id")
-	fmt.Println("User ID from URL:", userIDParam)
 	userID, err := uuid.Parse(userIDParam)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -343,7 +341,6 @@ func (ac *UserAIController) GetHealthRecommendationUserHistory(c echo.Context) e
 
 func (ac *UserAIController) GetHealthRecommendationUserHistoryFromSession(c echo.Context) error {
 	userSessionIDParam := c.Param("user_session_id")
-	fmt.Println("User ID from URL:", userSessionIDParam)
 	userSessionID, err := uuid.Parse(userSessionIDParam)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
