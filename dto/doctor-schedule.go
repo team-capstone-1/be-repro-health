@@ -66,7 +66,6 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 					Patient: patientResponse.Name,
 					ID:      consultation.PatientID,
 				}
-				fmt.Print(appointment)
 
 				if !consultation.DoctorAvailable {
 					doctorAvailable = false

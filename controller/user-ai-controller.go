@@ -73,15 +73,11 @@ func (ac *UserAIController) UserGetHealthRecommendation(c echo.Context) error {
 
 	var userSessionID uuid.UUID = req.UserSessionID
 	var userSessionExists bool
-	fmt.Printf("userSessionID: %v\n", userSessionID)
 
 	if isFirstQuestionUser(req.Message, userSessionID) {
-		fmt.Printf("userSessionID: %v\n", userSessionID)
 		userSessionExists = false
-		userSessionID = uuid.New()
 	} else {
 		userSessionID, userSessionExists = ac.getSessionUserIDFromDatabase(c, userID)
-		fmt.Printf("userSessionID: %v\n", userSessionID)
 	}
 
 	if isNonReproductiveHealthQuestion(req.Message) {
