@@ -2,7 +2,6 @@ package dto
 
 import (
 	"capstone-project/model"
-	"time"
 
 	"github.com/google/uuid"
 )
@@ -64,18 +63,12 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 
 				doctorAvailable := true
 
-				var appointments []Appointment // Declare appointments variable here
-
-				if len(consultations) > 0 {
-					for _, consultation := range consultations {
-						patientResponse := ConvertToPatientResponse(consultation.Patient)
-						appointment := Appointment{
-							ConsultationID: consultation.ID,
-							Patient:        patientResponse.Name,
-							PatientID:      consultation.PatientID,
-						}
-
-						appointments = append(appointments, appointment)
+			for _, consultation := range consultations {
+				// patientResponse := ConvertToPatientResponse(consultation.Patient)
+				// appointment := Appointment{
+				// 	Patient: patientResponse.Name,
+				// 	ID:      consultation.PatientID,
+				// }
 
 						if !consultation.DoctorAvailable {
 							doctorAvailable = false
