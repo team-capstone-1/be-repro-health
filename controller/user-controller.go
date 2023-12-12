@@ -13,6 +13,7 @@ import (
 
 	"github.com/labstack/echo/v4"
 	"github.com/google/uuid"
+	"github.com/asaskevich/govalidator"
 )
 
 func LoginUserController(c echo.Context) error {
@@ -51,6 +52,20 @@ func SignUpUserController(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error bind data",
 			"response": errBind.Error(),
+		})
+	}
+
+	validEmail := govalidator.IsEmail(payloads.Email)
+	if !validEmail{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "fail sign up",
+			"response": "email is not valid",
+		})
+	}
+	if len([]rune(payloads.Password)) < 8{
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "fail sign up",
+			"response": "password length must > 8",
 		})
 	}
 

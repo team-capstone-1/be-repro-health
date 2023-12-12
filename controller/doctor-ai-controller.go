@@ -8,7 +8,6 @@ import (
 	"capstone-project/model"
 	"capstone-project/repository"
 	"context"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -58,15 +57,12 @@ func (ac *DoctorAIController) DoctorGetHealthRecommendation(c echo.Context) erro
 
 	var sessionID uuid.UUID = req.SessionID
 	var sessionExists bool
-	fmt.Printf("sessionID: %v\n", sessionID)
 
 	if isFirstQuestion(req.Message, sessionID) {
-		fmt.Printf("sessionID: %v\n", sessionID)
 		sessionExists = false
 		sessionID = uuid.New()
 	} else {
 		sessionID, sessionExists = ac.getSessionIDFromDatabase(c, doctorID)
-		fmt.Printf("sessionID: %v\n", sessionID)
 	}
 
 	if isNonReproductiveHealthDoctorQuestion(req.Message) {
@@ -82,7 +78,7 @@ func (ac *DoctorAIController) DoctorGetHealthRecommendation(c echo.Context) erro
 			SessionID: sessionID,
 			DoctorID:  doctorID,
 			Question:  req.Message,
-			Answer:    response, 
+			Answer:    response,
 		}
 		ac.DoctorAIRepo.DoctorStoreChatToDB(doctorStoreDB)
 
@@ -270,7 +266,6 @@ func isNonReproductiveHealthDoctorQuestion(question string) bool {
 
 func (ac *DoctorAIController) GetHealthRecommendationDoctorHistory(c echo.Context) error {
 	doctorIDParam := c.Param("doctor_id")
-	fmt.Println("Doctor ID from URL:", doctorIDParam)
 	doctorID, err := uuid.Parse(doctorIDParam)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{
@@ -297,7 +292,6 @@ func (ac *DoctorAIController) GetHealthRecommendationDoctorHistory(c echo.Contex
 
 func (ac *DoctorAIController) GetHealthRecommendationDoctorHistoryFromSession(c echo.Context) error {
 	sessionIDParam := c.Param("session_id")
-	fmt.Println("Session ID from URL:", sessionIDParam)
 	sessionID, err := uuid.Parse(sessionIDParam)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]interface{}{

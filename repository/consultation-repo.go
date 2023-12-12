@@ -27,7 +27,6 @@ func GenerateQueueNumber(date time.Time, session string) (string, error) {
 	sequence++
 
 	formattedQueueNumber := fmt.Sprintf("%03d", sequence)
-	fmt.Println(formattedQueueNumber)
 	return formattedQueueNumber, nil
 }
 
