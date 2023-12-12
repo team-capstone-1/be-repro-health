@@ -3,6 +3,7 @@ package repository
 import (
 	"capstone-project/database"
 	"capstone-project/model"
+	"time"
 
 	"context"
 	"fmt"
@@ -19,6 +20,8 @@ type UserAIRepository interface {
 	UserGetHealthRecommendation(ctx context.Context, message, language string) (string, error)
 	StoreChatToDB(data model.HealthRecommendation)
 	UserGetAllHealthRecommendations(user_id uuid.UUID) ([]model.HealthRecommendation, error)
+	UserGetAllHealthRecommendationsBySessionID(UserSessionID uuid.UUID) ([]model.HealthRecommendation, error)
+	UserGetAllHealthRecommendationsByUserID(userID uuid.UUID) ([]model.HealthRecommendation, error)
 	GetSessionUserIDFromDatabase(ctx context.Context, userID uuid.UUID) (uuid.UUID, error)
 	UpdateSessionUserIDToDatabase(ctx context.Context, userID, UserSessionID uuid.UUID) error
 }
@@ -124,10 +127,10 @@ func (ar *UserAIRepositoryImpl) UserGetHealthRecommendation(ctx context.Context,
 
 	if language == "id" {
 		systemMessage = "Halo, saya Emilia, Asisten Kesehatan Anda. Saya akan membantu Anda menemukan rekomendasi kesehatan. Bagaimana saya bisa membantu Anda?"
-		tipsPrefix = "Tips menjaga kesehatan reproduksi: "
+		tipsPrefix = ""
 	} else {
 		systemMessage = "Hello, I'm Emilia, your Health Assistant. I will assist you in finding health recommendations. How can I help you?"
-		tipsPrefix = "Tips for maintaining reproductive health: "
+		tipsPrefix = ""
 	}
 
 	messages := []openai.ChatCompletionMessage{
@@ -170,19 +173,77 @@ func (ar *UserAIRepositoryImpl) UserGetAllHealthRecommendations(userID uuid.UUID
 	return userDataHealthRecommendations, nil
 }
 
-func GetDoctorByIDForAI(doctorID uuid.UUID) *model.Doctor {
-	var doctor model.Doctor
-	result := database.DB.Where("id = ?", doctorID).First(&doctor)
+func (ar *UserAIRepositoryImpl) UserGetAllHealthRecommendationsBySessionID(userSessionID uuid.UUID) ([]model.HealthRecommendation, error) {
+	var userDataHealthRecommendations []model.HealthRecommendation
+
+	tx := database.DB.Where("user_session_id = ?", userSessionID).Find(&userDataHealthRecommendations)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return userDataHealthRecommendations, nil
+}
+
+func (ar *UserAIRepositoryImpl) UserGetAllHealthRecommendationsByUserID(userID uuid.UUID) ([]model.HealthRecommendation, error) {
+	var userDataHealthRecommendations []model.HealthRecommendation
+
+	tx := database.DB.Where("user_id = ?", userID).Find(&userDataHealthRecommendations)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return userDataHealthRecommendations, nil
+}
+
+// User
+func GetUserByIDForAI(userID uuid.UUID) *model.User {
+	var user model.User
+	result := database.DB.Where("id = ?", userID).First(&user)
 
 	if result.Error == gorm.ErrRecordNotFound {
-		// Doctor with the provided ID not found
 		return nil
 	}
 
 	if result.Error != nil {
-		// Handle other errors if needed
-		panic(result.Error)
+		return nil
 	}
 
-	return &doctor
+	return &user
+}
+
+// GetCompletedAppointmentCount returns the count of completed appointments for a specific doctor and date range.
+func (ar *UserAIRepositoryImpl) GetCompletedAppointmentCount(userID uuid.UUID, startDate time.Time, endDate time.Time) (int, error) {
+	var count int64
+	err := database.DB.
+		Table("consultations").
+		Joins("JOIN transactions ON transactions.consultation_id = consultations.id").
+		Where("consultations.patient_id = ? AND consultations.date BETWEEN ? AND ? AND transactions.payment_status = 'done'", userID, startDate, endDate).
+		Count(&count).
+		Error
+
+	return int(count), err
+}
+
+// GetPendingAppointmentCount returns the count of pending appointments for a specific doctor and date range.
+func (ar *UserAIRepositoryImpl) GetPendingAppointmentCount(userID uuid.UUID, startDate time.Time, endDate time.Time) (int, error) {
+	var count int64
+	err := database.DB.
+		Table("consultations").
+		Joins("JOIN transactions ON transactions.consultation_id = consultations.id").
+		Where("consultations.patient_id = ? AND consultations.date BETWEEN ? AND ? AND transactions.payment_status = 'pending'", userID, startDate, endDate).
+		Count(&count).
+		Error
+
+	return int(count), err
+}
+
+// GetRefundAppointmentCount returns the count of refunded appointments for a specific doctor and date range.
+func (ar *UserAIRepositoryImpl) GetRefundAppointmentCount(userID uuid.UUID, startDate time.Time, endDate time.Time) (int, error) {
+	var count int64
+	err := database.DB.
+		Table("consultations").
+		Joins("JOIN transactions ON transactions.consultation_id = consultations.id").
+		Where("consultations.patient_id = ? AND consultations.date BETWEEN ? AND ? AND transactions.payment_status = 'refund'", userID, startDate, endDate).
+		Count(&count).
+		Error
+
+	return int(count), err
 }
