@@ -22,7 +22,6 @@ func CreateToken(userId uuid.UUID, role, name string, is_web bool) (string, erro
 	if is_web {
 		claims["exp"] = time.Now().Add(time.Hour * 24).Unix()
 	}
-	fmt.Println("claims", claims)
 	// token pertama (header)
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// return bersama token ketiga (dengan secret key)

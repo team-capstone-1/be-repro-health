@@ -138,8 +138,10 @@ func ConvertToHealthRecommendationHistoryDoctorResponse(doctorHealthRecommendati
 
 func getChatTitle(question string) string {
 	words := strings.Fields(question)
-	if len(words) > 0 {
+	if len(words) > 0 && len(words) >= 3 {
 		return strings.Join(words[:3], " ")
+	} else if len(words) > 0 && len(words) < 3{
+		return strings.Join(words[:len(words)], " ")
 	}
 	return "Default Title"
 }

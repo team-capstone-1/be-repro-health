@@ -30,7 +30,7 @@ func New() *echo.Echo {
 	e.POST("/users/login", controller.LoginUserController)
 	e.PUT("/users/send-otp", controller.SendOTP)
 	e.PUT("/users/validate-otp", controller.ValidateOTP)
-	r.PUT("/users/change-password", controller.ChangeUserPasswordController)
+	r.PUT("/users/change-password", controller.ChangeUserPasswordController, m.CheckRole(constant.ROLE_USER))
 
 	// user appointment route
 	e.GET("/specialists", controller.GetSpecialistsController)
@@ -41,27 +41,27 @@ func New() *echo.Echo {
 	e.GET("/clinics/:id/doctors", controller.GetDoctorsByClinicController)
 	e.GET("/doctors", controller.GetDoctorsController)
 	e.GET("/doctors/:id", controller.GetDoctorController)
-	r.POST("/consultations", controller.CreateConsultationController)
+	r.POST("/consultations", controller.CreateConsultationController, m.CheckRole(constant.ROLE_USER))
 
 	// patient route
-	r.GET("/patients", controller.GetPatientsController, m.CheckRole("user"))
-	r.GET("/patients/:id", controller.GetPatientController, m.CheckRole("user"))
-	r.POST("/patients", controller.CreatePatientController, m.CheckRole("user"))
-	r.PUT("/patients/:id", controller.UpdatePatientController, m.CheckRole("user"))
-	r.DELETE("/patients/:id", controller.DeletePatientController, m.CheckRole("user"))
+	r.GET("/patients", controller.GetPatientsController, m.CheckRole(constant.ROLE_USER))
+	r.GET("/patients/:id", controller.GetPatientController, m.CheckRole(constant.ROLE_USER))
+	r.POST("/patients", controller.CreatePatientController, m.CheckRole(constant.ROLE_USER))
+	r.PUT("/patients/:id", controller.UpdatePatientController, m.CheckRole(constant.ROLE_USER))
+	r.DELETE("/patients/:id", controller.DeletePatientController, m.CheckRole(constant.ROLE_USER))
 
 	// user forum
 	e.GET("/forums", controller.GetForumsController)
 	e.GET("/forums/:id", controller.GetForumController)
-	r.POST("/forums", controller.CreateForumController)
-	r.DELETE("/forums/:id", controller.DeleteForumController)
+	r.POST("/forums", controller.CreateForumController, m.CheckRole(constant.ROLE_USER))
+	r.DELETE("/forums/:id", controller.DeleteForumController, m.CheckRole(constant.ROLE_USER))
 
 	// user article
-	r.GET("/articles", controller.GetArticlesController)
-	r.GET("/articles/bookmarks", controller.GetBookmarkedArticlesController)
-	r.GET("/articles/:id", controller.GetArticleController)
-	r.POST("/articles/:id/comments", controller.CreateCommentController)
-	r.POST("/articles/:id/bookmarks", controller.BookmarkController)
+	r.GET("/articles", controller.GetArticlesController, m.CheckRole(constant.ROLE_USER))
+	r.GET("/articles/bookmarks", controller.GetBookmarkedArticlesController, m.CheckRole(constant.ROLE_USER))
+	r.GET("/articles/:id", controller.GetArticleController, m.CheckRole(constant.ROLE_USER))
+	r.POST("/articles/:id/comments", controller.CreateCommentController, m.CheckRole(constant.ROLE_USER))
+	r.POST("/articles/:id/bookmarks", controller.BookmarkController, m.CheckRole(constant.ROLE_USER))
 
 	// user ai
 	aiController := controller.NewUserAIController(repository.NewUserAIRepository())
