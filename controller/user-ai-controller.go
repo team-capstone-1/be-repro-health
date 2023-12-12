@@ -8,7 +8,6 @@ import (
 	"capstone-project/model"
 	"capstone-project/repository"
 	"context"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
