@@ -78,13 +78,12 @@ func (ac *DoctorAIController) DoctorGetHealthRecommendation(c echo.Context) erro
 			SessionID: sessionID,
 			DoctorID:  doctorID,
 			Question:  req.Message,
-			Answer:    response, 
+			Answer:    response,
 		}
 		ac.DoctorAIRepo.DoctorStoreChatToDB(doctorStoreDB)
 
 		return c.JSON(http.StatusOK, resp)
 	} else {
-		// Continue with the rest of the logic
 		if !sessionExists {
 			sessionID = uuid.New()
 		} else {
@@ -283,11 +282,6 @@ func (ac *DoctorAIController) GetHealthRecommendationDoctorHistory(c echo.Contex
 		})
 	}
 
-	// var healthRecommendationResponse []dto.HealthRecommendationHistoryDoctorResponse
-	// for _, healthRecommendation := range responseData {
-	// 	healthRecommendationResponse = append(healthRecommendationResponse, dto.ConvertToHealthRecommendationHistoryDoctorResponse(healthRecommendation))
-	// }
-
 	healthRecommendationResponse := dto.ConvertToHealthRecommendationHistoryDoctorResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]interface{}{
@@ -313,11 +307,6 @@ func (ac *DoctorAIController) GetHealthRecommendationDoctorHistoryFromSession(c 
 			"response": err.Error(),
 		})
 	}
-
-	// var healthRecommendationResponse []dto.HealthRecommendationHistoryDoctorResponse
-	// for _, healthRecommendation := range responseData {
-	// 	healthRecommendationResponse = append(healthRecommendationResponse, dto.ConvertToHealthRecommendationHistoryDoctorResponse(healthRecommendation))
-	// }
 
 	healthRecommendationResponse := dto.ConvertToHealthRecommendationHistoryDoctorResponse(responseData)
 
