@@ -176,7 +176,7 @@ func getChatTitle(question string) string {
 	if len(words) > 0 && len(words) >= 3 {
 		return strings.Join(words[:3], " ")
 	} else if len(words) > 0 && len(words) < 3 {
-		return strings.Join(words[:len(words)], " ")
+		return strings.Join(words, " ")
 	}
 	return "Default Title"
 }
