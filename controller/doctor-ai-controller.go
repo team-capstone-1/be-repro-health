@@ -26,7 +26,7 @@ func NewDoctorAIController(doctorAiRepo repository.DoctorAIRepository) *DoctorAI
 	}
 }
 
-func (ac *DoctorAIController) storeResultInDatabase(c echo.Context, doctorStoreDB model.DoctorHealthRecommendation) error {
+func (ac *DoctorAIController) StoreResultInDatabase(c echo.Context, doctorStoreDB model.DoctorHealthRecommendation) error {
 	ac.DoctorAIRepo.DoctorStoreChatToDB(doctorStoreDB)
 	return nil
 }
