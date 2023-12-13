@@ -1,7 +1,10 @@
 package dto
 
 import (
+	"capstone-project/database"
 	"capstone-project/model"
+	"capstone-project/repository"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,7 +37,7 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 	doctorSchedulesMap := make(map[string]map[string][]model.Consultation)
 
 	for _, schedule := range schedules {
-		date := schedule.Date.Format("02-01-2006")
+		date := schedule.Date.Format("2006-01-02")
 		session := schedule.Session
 
 		consultationMap, exists := doctorSchedulesMap[date]
@@ -83,6 +86,18 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 					}
 				}
 
+				// Check if Doctor is on holiday for the given date and session
+				isDoctorOnHoliday, err := repository.IsDoctorOnHoliday(doctorID, date, session)
+				if err != nil {
+					// Handle the error if needed
+					fmt.Println("Error checking doctor's holiday:", err)
+				}
+
+				// Update doctorAvailable based on DoctorHoliday table
+				if isDoctorOnHoliday {
+					doctorAvailable = false
+				}
+
 				// Include a default entry even if there are no appointments
 				listData = append(listData, ListDetail{
 					DoctorAvailable: doctorAvailable,
@@ -102,6 +117,75 @@ func ConvertToDoctorScheduleResponse(doctorID uuid.UUID, schedules []model.Consu
 		DoctorID: doctorID,
 		Data:     doctorSchedules,
 	}
+}
+
+func GetDoctorHolidayResponse(doctorID uuid.UUID, date string, sessions []string) (DoctorScheduleResponse, error) {
+	var doctorHolidays []model.DoctorHoliday
+
+	// Fetch DoctorHoliday data for the given date and sessions
+	err := database.DB.Where("doctor_id = ? AND date = ? AND session IN ?", doctorID, date, sessions).
+		Find(&doctorHolidays).Error
+
+	if err != nil {
+		return DoctorScheduleResponse{}, err
+	}
+
+	// Create a map to store doctor holidays based on date and session
+	doctorHolidaysMap := make(map[string]map[string][]model.DoctorHoliday)
+
+	for _, holiday := range doctorHolidays {
+		holidayDate := holiday.Date.Format("02-01-2006")
+		holidaySession := holiday.Session
+
+		holidayMap, exists := doctorHolidaysMap[holidayDate]
+		if !exists {
+			holidayMap = make(map[string][]model.DoctorHoliday)
+			doctorHolidaysMap[holidayDate] = holidayMap
+		}
+
+		holidays := holidayMap[holidaySession]
+		if holidays == nil {
+			holidays = make([]model.DoctorHoliday, 0)
+		}
+
+		holidays = append(holidays, holiday)
+
+		holidayMap[holidaySession] = holidays
+	}
+
+	// Format the response similar to DoctorScheduleResponse
+	var doctorSchedules []FrontendData
+
+	if len(doctorHolidaysMap) > 0 {
+		for holidayDate := range doctorHolidaysMap {
+			var listData []ListDetail
+
+			for _, session := range sessions {
+				// holidays := holidayMap[session]
+
+				doctorAvailable := false // Set to false since it's a doctor holiday
+
+				var appointments []Appointment // Appointments can be empty for holidays
+
+				// Include a default entry even if there are no appointments
+				listData = append(listData, ListDetail{
+					DoctorAvailable: doctorAvailable,
+					Session:         session,
+					Appointments:    appointments,
+				})
+			}
+
+			doctorSchedules = append(doctorSchedules, FrontendData{
+				Date:     holidayDate,
+				ListData: listData,
+			})
+		}
+	}
+
+	return DoctorScheduleResponse{
+		DoctorID: doctorID,
+		Data:     doctorSchedules,
+	}, nil
 }
 
 func ConvertToAppointments(consultations []model.Consultation) []Appointment {

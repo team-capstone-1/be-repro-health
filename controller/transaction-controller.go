@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"capstone-project/dto"
+	m "capstone-project/middleware"
 	"capstone-project/repository"
 	"capstone-project/util"
-	m "capstone-project/middleware"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -128,7 +128,7 @@ func CreatePaymentController(c echo.Context) error {
 		})
 	}
 
-	if transaction.PaymentStatus == "done"{
+	if transaction.PaymentStatus == "done" {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "transaction payment status is done",
 			"reponse": errors.New("Can't create Payment when Transaction Payment Status is done").Error(),
@@ -203,7 +203,8 @@ func RescheduleController(c echo.Context) error {
 			"reponse": err.Error(),
 		})
 	}
-	if consultation.Rescheduled{
+
+	if consultation.Rescheduled {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed rescheduled",
 			"reponse": errors.New("You can only reschedule once").Error(),
@@ -211,11 +212,30 @@ func RescheduleController(c echo.Context) error {
 	}
 
 	updateData := dto.ConsultationRescheduleRequest{}
+
 	errBind := c.Bind(&updateData)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message":  "error bind data",
 			"response": errBind.Error(),
+		})
+	}
+
+	doctorID := consultation.DoctorID
+	dateString := updateData.Date.Format("2006-01-02")
+	// Melakukan pengecekan apakah dokter sedang libur
+	isDoctorOnHoliday, err := repository.IsDoctorOnHoliday(doctorID, dateString, updateData.Session)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "failed to check doctor's holiday",
+			"response": err.Error(),
+		})
+	}
+
+	if isDoctorOnHoliday {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed to reschedule",
+			"response": "Doctor is on holiday on the selected date and session.",
 		})
 	}
 
@@ -232,6 +252,15 @@ func RescheduleController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message":  "failed update consultation",
+			"response": err.Error(),
+		})
+	}
+
+	// Setelah berhasil mereschedule, perbarui status ketersediaan dokter menjadi true
+	err = repository.UpdateDoctorAvailability(doctorID, true, dateString, updateData.Session)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+			"message":  "failed update doctor availability",
 			"response": err.Error(),
 		})
 	}
@@ -389,7 +418,7 @@ func PaymentTimeOut(c echo.Context) error {
 		})
 	}
 
-	if transaction.PaymentStatus != "pending"{
+	if transaction.PaymentStatus != "pending" {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed update transaction",
 			"reponse": errors.New("You can't time-out a transaction if the payment status is not pending").Error(),
