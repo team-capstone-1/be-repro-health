@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/sashabaranov/go-openai"
+	"gorm.io/gorm"
 )
 
 type DoctorAIRepository interface {
@@ -190,7 +191,22 @@ func (r *DoctorAIRepositoryImpl) DoctorGetAllHealthRecommendationsByDoctorID(doc
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
-	fmt.Println("fdsdfhkjdf", doctorDataHealthRecommendations)
-	fmt.Println("end")
 	return doctorDataHealthRecommendations, nil
+}
+
+func GetDoctorByIDForAI(doctorID uuid.UUID) *model.Doctor {
+	var doctor model.Doctor
+	result := database.DB.Where("id = ?", doctorID).First(&doctor)
+
+	if result.Error == gorm.ErrRecordNotFound {
+		// Doctor with the provided ID not found
+		return nil
+	}
+
+	if result.Error != nil {
+		// Handle other errors if needed
+		panic(result.Error)
+	}
+
+	return &doctor
 }

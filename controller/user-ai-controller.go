@@ -8,7 +8,6 @@ import (
 	"capstone-project/model"
 	"capstone-project/repository"
 	"context"
-	"fmt"
 	"net/http"
 	"regexp"
 	"strings"
@@ -30,21 +29,6 @@ func NewUserAIController(userAIRepo repository.UserAIRepository) *UserAIControll
 func (ac *UserAIController) storeResultInDatabase(c echo.Context, userStoreDB model.HealthRecommendation) error {
 	ac.UserAIRepo.StoreChatToDB(userStoreDB)
 	return nil
-}
-
-func getCategoryFromQuestion(question string) string {
-	if strings.Contains(strings.ToLower(question), "janji temu") {
-		return "janji temu"
-	} else if strings.Contains(strings.ToLower(question), "artikel") {
-		return "artikel"
-	} else if strings.Contains(strings.ToLower(question), "forum") {
-		return "forum"
-	} else if strings.Contains(strings.ToLower(question), "riwayat") {
-		return "riwayat"
-	} else if strings.Contains(strings.ToLower(question), "profile") {
-		return "profile"
-	}
-	return "lainnya"
 }
 
 func (ac *UserAIController) UserGetHealthRecommendation(c echo.Context) error {
@@ -71,45 +55,42 @@ func (ac *UserAIController) UserGetHealthRecommendation(c echo.Context) error {
 		language = "en"
 	}
 
-	var userSessionID uuid.UUID = req.UserSessionID
+	var userSessionID uuid.UUID
 	var userSessionExists bool
-	fmt.Printf("userSessionID: %v\n", userSessionID)
+	var isAIAssistant bool
 
 	if isFirstQuestionUser(req.Message, userSessionID) {
-		fmt.Printf("userSessionID: %v\n", userSessionID)
-		userSessionExists = false
-		userSessionID = uuid.New()
-	} else {
-		userSessionID, userSessionExists = ac.getSessionUserIDFromDatabase(c, userID)
-		fmt.Printf("userSessionID: %v\n", userSessionID)
-	}
-
-	if isNonReproductiveHealthQuestion(req.Message) {
-		response := "Saya Emilia tidak bisa menjawab seputar hal diluar kesehatan reproduksi. Apakah ada pertanyaan lain yang berkaitan dengan kesehatan reproduksi?"
-		resp := dto.HealthRecommendationResponse{
-			UserSessionID: userSessionID,
-			Status:        "success",
-			Data:          response,
-		}
-		return c.JSON(http.StatusOK, resp)
-	} else {
-		if !userSessionExists {
+		if isFirstQuestionUser(req.Message, req.UserSessionID) {
+			userSessionExists = false
+			isAIAssistant = false
 			userSessionID = uuid.New()
+		} else if isAIAssistant {
 		} else {
-			previousQuestion, err := ac.UserAIRepo.GetPreviousQuestionUser(context.Background(), userSessionID)
-			if err != nil {
-				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-					"message":  "error getting previous question",
-					"response": err.Error(),
-				})
-			}
+			userSessionID, userSessionExists = ac.getSessionUserIDFromDatabase(c, userID)
+		}
 
-			result, err := ac.UserAIRepo.UserGetHealthRecommendationWithContext(context.Background(), req.Message, previousQuestion, req.Message, language)
-			if err != nil {
-				return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-					"message":  "error getting health recommendations from AI",
-					"response": err.Error(),
-				})
+		// Predefined Questions and Answers
+		predefinedQuestions := map[string]string{
+			"janji temu":                               "Kamu bisa membuah jadwal temu dengan dokter yang kamu butuhkan melalui aplikasi ini, jika kamu berada di halaman utama, silakan buat janji temu di menu janji temu",
+			"cara membuat janji temu":                  "Cara membuat janji temu:\n1. Jika kamu berada di halaman utama, masuk ke menu janji temu.\n2. Pilih spesialis yang sesuai dengan keluhan yang kamu alami.\n3. Setelah memilih spesialis, pilih dokter yang ingin kamu konsultasikan.\n4. Buka halaman detail dokter dan klik tombol 'Jadwalkan'.\n5. Pilih tanggal dan sesi konsultasi yang sesuai dengan ketersediaan dan waktu yang kamu inginkan.\n6. Pilih profile pasien yang ingin melakukan konsultasi dan tambahkan anggota keluarga jika perlu.\n7. Pilih metode pembayaran yang diinginkan.\n8. Lanjutkan untuk melakukan pembayaran agar janji temu dapat segera diproses dan dikonfirmasi.",
+			"cara membatalkan janji temu":              "Untuk membatalkan janji temu:\n1. Pilih 'Riwayat Transaksi' pada menu bagian bawah layar.\n2. Pilih janji yang ingin dibatalkan\n3. Pilih 'Batalkan'.",
+			"artikel":                                  "Untuk membaca artikel silakan Anda kembali ke halaman utama, lalu di bagian bawah ada menu artikel jika Anda ingin membaca artikel",
+			"siapa yang bisa membuat artikel":          "Hanya dokter yang bisa membuat artikel, user hanya bisa membaca dan berkomentar seputar hal itu",
+			"forum":                                    "Untuk membuat forum silakan Anda kembali ke halaman utama, lalu pilih di bagian forum",
+			"apakah pengguna bisa membuat forum":       "Ya, pengguna bisa membuat forum dan forum ini diperuntukkan untuk pengguna yang nanti akan dijawab oleh dokter yang berkompeten di bidangnya",
+			"riwayat transaksi":                        "Untuk melihat riwayat transaksi anda bisa pergi ke halaman utama, lalu di bagian bawah klik menu riwayat. Menu tersebut memuat transaksi anda selama di aplikasi ini",
+			"bagaimana cara melihat riwayat transaksi": "Anda bisa kembali ke halaman utama, lalu masuk ke dalam menu riwayat transaksi jika Anda ingin melihat riwayat transaksi Anda",
+			"profile":                                  "Anda bisa masuk ke dalam profile dari halaman utama, lalu masuk di bawah ada menu profile",
+			"apa saja yang bisa di edit di dalam menu profile": "Anda bisa mengedit tanggal lahir, jenis kelamin, berat dan tinggi. Lalu bisa ubah data pribadi lainnya secara lengkap mulai dari nama lengkap, nomor ponsel, tanggal lahir, jenis kelamin, berat badan, dan tinggi badan",
+		}
+
+		// Check if the user's question matches any predefined question
+		if predefinedAnswer, ok := predefinedQuestions[req.Message]; ok {
+			// If there is a match, respond with the predefined answer
+			resp := dto.HealthRecommendationResponse{
+				UserSessionID: userSessionID,
+				Status:        "success",
+				Data:          predefinedAnswer,
 			}
 
 			storeDB := model.HealthRecommendation{
@@ -117,44 +98,98 @@ func (ac *UserAIController) UserGetHealthRecommendation(c echo.Context) error {
 				UserSessionID: userSessionID,
 				UserID:        userID,
 				Question:      req.Message,
-				Answer:        result,
+				Answer:        predefinedAnswer,
+				IsAIAssistant: false,
 			}
 			ac.UserAIRepo.StoreChatToDB(storeDB)
 
+			return c.JSON(http.StatusOK, resp)
+		}
+
+		if isNonReproductiveHealthQuestion(req.Message) {
+			response := "Saya Emilia tidak bisa menjawab seputar hal diluar kesehatan reproduksi. Apakah ada pertanyaan lain yang berkaitan dengan kesehatan reproduksi? Atau mungkin anda bisa memakai kalimat dengan satu atau lebih kata kunci yang membuat saya bisa memahami pertanyaan anda hehehe..."
 			resp := dto.HealthRecommendationResponse{
 				UserSessionID: userSessionID,
 				Status:        "success",
-				Data:          result,
+				Data:          response,
 			}
 
+			storeDB := model.HealthRecommendation{
+				ID:            uuid.New(),
+				UserSessionID: userSessionID,
+				UserID:        userID,
+				Question:      req.Message,
+				Answer:        response,
+				IsAIAssistant: false,
+			}
+			ac.UserAIRepo.StoreChatToDB(storeDB)
+
 			return c.JSON(http.StatusOK, resp)
+		} else {
+			if !userSessionExists {
+				userSessionID = uuid.New()
+			} else {
+				previousQuestion, err := ac.UserAIRepo.GetPreviousQuestionUser(context.Background(), userSessionID)
+				if err != nil {
+					return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+						"message":  "error getting previous question",
+						"response": err.Error(),
+					})
+				}
+
+				result, err := ac.UserAIRepo.UserGetHealthRecommendationWithContext(context.Background(), req.Message, previousQuestion, req.Message, language)
+				if err != nil {
+					return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+						"message":  "error getting health recommendations from AI",
+						"response": err.Error(),
+					})
+				}
+
+				storeDB := model.HealthRecommendation{
+					ID:            uuid.New(),
+					UserSessionID: userSessionID,
+					UserID:        userID,
+					Question:      req.Message,
+					Answer:        result,
+					IsAIAssistant: true,
+				}
+				ac.UserAIRepo.StoreChatToDB(storeDB)
+
+				resp := dto.HealthRecommendationResponse{
+					UserSessionID: userSessionID,
+					Status:        "success",
+					Data:          result,
+				}
+				return c.JSON(http.StatusOK, resp)
+			}
 		}
-	}
 
-	result, err := ac.UserAIRepo.UserGetHealthRecommendation(context.Background(), req.Message, language)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"message":  "error getting health recommendations from AI",
-			"response": err.Error(),
-		})
-	}
+		result, err := ac.UserAIRepo.UserGetHealthRecommendation(context.Background(), req.Message, language)
+		if err != nil {
+			return c.JSON(http.StatusInternalServerError, map[string]interface{}{
+				"message":  "error getting health recommendations from AI",
+				"response": err.Error(),
+			})
+		}
 
-	storeDB := model.HealthRecommendation{
-		ID:            uuid.New(),
-		UserSessionID: userSessionID,
-		UserID:        userID,
-		Question:      req.Message,
-		Answer:        result,
-	}
-	ac.UserAIRepo.StoreChatToDB(storeDB)
+		storeDB := model.HealthRecommendation{
+			ID:            uuid.New(),
+			UserSessionID: userSessionID,
+			UserID:        userID,
+			Question:      req.Message,
+			Answer:        result,
+			IsAIAssistant: true,
+		}
+		ac.UserAIRepo.StoreChatToDB(storeDB)
 
-	resp := dto.HealthRecommendationResponse{
-		UserSessionID: userSessionID,
-		Status:        "success",
-		Data:          result,
+		resp := dto.HealthRecommendationResponse{
+			UserSessionID: userSessionID,
+			Status:        "success",
+			Data:          result,
+		}
+		return c.JSON(http.StatusOK, resp)
 	}
-
-	return c.JSON(http.StatusOK, resp)
+	return nil
 }
 
 func (ac *UserAIController) getSessionUserIDFromDatabase(c echo.Context, userID uuid.UUID) (uuid.UUID, bool) {
@@ -278,30 +313,54 @@ func isNonReproductiveHealthQuestion(question string) bool {
 	return true
 }
 
-func (ac *UserAIController) GetHealthRecommendationHistory(c echo.Context) error {
-	uuid, err := uuid.Parse(c.Param("id"))
+func (ac *UserAIController) GetHealthRecommendationUserHistory(c echo.Context) error {
+	userIDParam := c.Param("user_id")
+	userID, err := uuid.Parse(userIDParam)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message":  "error parse id",
 			"response": err.Error(),
 		})
 	}
 
-	responseData, err := ac.UserAIRepo.UserGetAllHealthRecommendations(uuid)
+	responseData, err := ac.UserAIRepo.UserGetAllHealthRecommendationsByUserID(userID)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
 			"message":  "failed get healthRecommendations",
 			"response": err.Error(),
 		})
 	}
 
-	var healthRecommendationResponse []dto.HealthRecommendationHistoryResponse
-	for _, healthRecommendation := range responseData {
-		healthRecommendationResponse = append(healthRecommendationResponse, dto.ConvertToHealthRecommendationHistoryResponse(healthRecommendation))
-	}
+	userHealthRecommendationResponse := dto.ConvertToHealthRecommendationHistoryUserResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
 		"message":  "success get healthRecommendations",
-		"response": healthRecommendationResponse,
+		"response": userHealthRecommendationResponse,
+	})
+}
+
+func (ac *UserAIController) GetHealthRecommendationUserHistoryFromSession(c echo.Context) error {
+	userSessionIDParam := c.Param("user_session_id")
+	userSessionID, err := uuid.Parse(userSessionIDParam)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err := ac.UserAIRepo.UserGetAllHealthRecommendationsBySessionID(userSessionID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]interface{}{
+			"message":  "failed get healthRecommendations",
+			"response": err.Error(),
+		})
+	}
+
+	userHealthRecommendationResponse := dto.ConvertToHealthRecommendationHistoryUserResponse(responseData)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get healthRecommendations",
+		"response": userHealthRecommendationResponse,
 	})
 }
