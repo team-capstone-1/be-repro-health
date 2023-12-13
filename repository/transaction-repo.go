@@ -1,9 +1,10 @@
 package repository
 
 import (
-	"gorm.io/gorm"
 	"fmt"
 	"time"
+
+	"gorm.io/gorm"
 
 	"capstone-project/database"
 	"capstone-project/model"
@@ -143,51 +144,51 @@ func InsertTransaction(data model.Transaction) (model.Transaction, error) {
 }
 
 func GenerateNextInvoice() (string, error) {
-    now := time.Now()
-    year, month, day := now.Year(), now.Month(), now.Day()
+	now := time.Now()
+	year, month, day := now.Year(), now.Month(), now.Day()
 
-    formattedInvoice := fmt.Sprintf("INV/%d/%02d/%02d/", year, month, day)
+	formattedInvoice := fmt.Sprintf("INV/%d/%02d/%02d/", year, month, day)
 
-    var lastInvoice model.Transaction
-    if err := database.DB.Where("invoice LIKE ?", formattedInvoice+"%").Order("invoice DESC").First(&lastInvoice).Error; err != nil {
-        if err == gorm.ErrRecordNotFound {
-            formattedInvoice += "0001"
-        } else {
-            return "", err
-        }
-    } else {
-        var sequence int
-        _, err := fmt.Sscanf(lastInvoice.Invoice, formattedInvoice+"%04d", &sequence)
-        if err != nil {
-            return "", err
-        }
+	var lastInvoice model.Transaction
+	if err := database.DB.Where("invoice LIKE ?", formattedInvoice+"%").Order("invoice DESC").First(&lastInvoice).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			formattedInvoice += "0001"
+		} else {
+			return "", err
+		}
+	} else {
+		var sequence int
+		_, err := fmt.Sscanf(lastInvoice.Invoice, formattedInvoice+"%04d", &sequence)
+		if err != nil {
+			return "", err
+		}
 
-        formattedInvoice += fmt.Sprintf("%04d", sequence+1)
-    }
+		formattedInvoice += fmt.Sprintf("%04d", sequence+1)
+	}
 
-    return formattedInvoice, nil
+	return formattedInvoice, nil
 }
 
 func UpdateTransactionStatus(id uuid.UUID, status string) error {
 	var datatransaction model.Transaction
-    tx := database.DB.Model(&datatransaction).Where("id = ?", id).Update("status", status)
+	tx := database.DB.Model(&datatransaction).Where("id = ?", id).Update("status", status)
 
-    if tx.Error != nil {
-        return tx.Error
-    }
+	if tx.Error != nil {
+		return tx.Error
+	}
 
-    return nil
+	return nil
 }
 
 func UpdateTransactionPaymentStatus(id uuid.UUID, status string) error {
 	var datatransaction model.Transaction
-    tx := database.DB.Model(&datatransaction).Where("id = ?", id).Update("payment_status", status)
+	tx := database.DB.Model(&datatransaction).Where("id = ?", id).Update("payment_status", status)
 
-    if tx.Error != nil {
-        return tx.Error
-    }
+	if tx.Error != nil {
+		return tx.Error
+	}
 
-    return nil
+	return nil
 }
 
 func GetIncomeByDoctorID(doctorID uuid.UUID) ([]map[string]interface{}, error) {
@@ -209,4 +210,11 @@ func GetIncomeByDoctorID(doctorID uuid.UUID) ([]map[string]interface{}, error) {
 	return result, nil
 }
 
+func UpdateDoctorAvailability(doctorID uuid.UUID, available bool, date string, session string) error {
+	var doctor model.Consultation
+	if err := database.DB.Model(&doctor).Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session).Update("doctor_available", available).Error; err != nil {
+		return err
+	}
 
+	return nil
+}

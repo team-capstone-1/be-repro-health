@@ -42,6 +42,19 @@ func DoctorGetAllSchedules(doctorID uuid.UUID, session string, date string) ([]m
 	return consultations, nil
 }
 
+func GetAppointmentsByDateAndSession(doctorID uuid.UUID, date, session string) ([]model.Consultation, error) {
+	var consultations []model.Consultation
+
+	err := database.DB.Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session).
+		Find(&consultations).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return consultations, nil
+}
+
 func GetPatientIDsByDateAndSession(doctorID uuid.UUID, date string, session string) ([]uuid.UUID, error) {
 	var consultations []model.Consultation
 

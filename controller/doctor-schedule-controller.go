@@ -5,6 +5,7 @@ import (
 	m "capstone-project/middleware"
 	"capstone-project/model"
 	"capstone-project/repository"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -141,62 +142,59 @@ func HandleDoctorAction(doctorHoliday model.Consultation, err error, doctorID uu
 	// Convert fetched schedules to the desired response format
 	doctorSchedules := dto.ConvertToDoctorScheduleResponse(doctorID, responseData)
 
-	// Find the date and session in the fetched schedules
+	// Find the date in the fetched schedules
 	var foundDate bool
-	var foundSession bool
 
 	for i, data := range doctorSchedules.Data {
 		if data.Date == date {
 			foundDate = true
 
+			// Update doctor availability based on DoctorHoliday status
 			for j, listData := range data.ListData {
 				if listData.Session == session {
-					foundSession = true
-
 					// Update doctor availability based on DoctorHoliday status
 					doctorSchedules.Data[i].ListData[j].DoctorAvailable = !doctorHoliday.DoctorAvailable
 
-					// Set appointments to nil since doctor is not available
-					doctorSchedules.Data[i].ListData[j].Appointments = nil
-					break
+					// Fetch appointments for the specified date, session, and doctor
+					appointments, err := repository.GetAppointmentsByDateAndSession(doctorID, date, session)
+					if err != nil {
+						// Handle the error if needed
+						fmt.Println("Error fetching appointments:", err)
+						break
+					}
+
+					// Set appointments in the response
+					doctorSchedules.Data[i].ListData[j].Appointments = dto.ConvertToAppointments(appointments)
 				}
 			}
-
-			break
 		}
 	}
 
-	// If the date or session is not found, add a new entry
+	// If the date is not found, add a new entry for the specified date and session
 	if !foundDate {
-		// Create a new entry for the specified date
+		// Create a new entry for the specified date and session
+		newListData := dto.ListDetail{
+			DoctorAvailable: !doctorHoliday.DoctorAvailable,
+			Session:         session,
+		}
+
+		// Fetch appointments for the specified date, session, and doctor
+		appointments, err := repository.GetAppointmentsByDateAndSession(doctorID, date, session)
+		if err != nil {
+			// Handle the error if needed
+			fmt.Println("Error fetching appointments:", err)
+		} else {
+			// Set appointments in the response
+			newListData.Appointments = dto.ConvertToAppointments(appointments)
+		}
+
 		newEntry := dto.FrontendData{
-			Date: date,
-			ListData: []dto.ListDetail{
-				{
-					DoctorAvailable: !doctorHoliday.DoctorAvailable,
-					Session:         session,
-					Appointments:    nil,
-				},
-			},
+			Date:     date,
+			ListData: []dto.ListDetail{newListData},
 		}
 
 		doctorSchedules.Data = append(doctorSchedules.Data, newEntry)
-	} else if !foundSession {
-		// Create a new entry for the specified session within the found date
-		for i, data := range doctorSchedules.Data {
-			if data.Date == date {
-				newListData := dto.ListDetail{
-					DoctorAvailable: !doctorHoliday.DoctorAvailable,
-					Session:         session,
-					Appointments:    nil,
-				}
-
-				doctorSchedules.Data[i].ListData = append(doctorSchedules.Data[i].ListData, newListData)
-				break
-			}
-		}
 	}
 
 	return doctorSchedules
 }
-
