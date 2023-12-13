@@ -79,7 +79,7 @@ func GetArticleByID(id uuid.UUID) (model.Article, error) {
 func UserGetAllArticle() ([]model.Article, error) {
 	var dataarticlesdashboard []model.Article
 
-	tx := database.DB.Preload("Comment").Find(&dataarticlesdashboard)
+	tx := database.DB.Preload("Comment").Where("published = ?", true).Find(&dataarticlesdashboard)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
