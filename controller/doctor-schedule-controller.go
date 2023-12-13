@@ -3,6 +3,7 @@ package controller
 import (
 	"capstone-project/dto"
 	m "capstone-project/middleware"
+	"capstone-project/model"
 	"capstone-project/repository"
 	"net/http"
 	"time"
@@ -76,47 +77,10 @@ func DoctorInactiveScheduleController(c echo.Context) error {
 		})
 	}
 
-	if doctorHoliday.DoctorAvailable == false {
-		patientIDs, err := repository.GetPatientIDsByDateAndSession(doctorID, dateString, session)
-
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]any{
-				"message":  "failed to get patient IDs",
-				"response": err.Error(),
-			})
-		}
-
-		for _, patientID := range patientIDs {
-			CreateNotification(
-				patientID,
-				"Dokter Tidak Tersedia",
-				"Dokter tidak tersedia pada sesi ini. Silakan cek jadwal dokter untuk sesi atau hari lain.",
-				"janji_temu",
-			)
-		}
-	}
-
-	// Update transaction status to "waiting"
-	err = repository.UpdateTransactionStatusToWaiting(dateString, session)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]any{
-			"message":  "failed to update transaction status",
-			"response": err.Error(),
-		})
-	}
-
-	responseData, err := repository.DoctorGetAllSchedules(doctorID, session, dateString)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]any{
-			"message":  "failed get schedules data",
-			"response": err.Error(),
-		})
-	}
-
-	doctorHolidayResponse := dto.ConvertToDoctorScheduleResponse(doctorID, responseData)
+	doctorHolidayResponse := HandleDoctorAction(doctorHoliday, err, doctorID, dateString, session)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success, doctor status updated",
+		"message":  "success, doctor now not available",
 		"response": doctorHolidayResponse,
 	})
 }
@@ -140,6 +104,7 @@ func DoctorActiveScheduleController(c echo.Context) error {
 		})
 	}
 
+	// Activate the doctor's schedule
 	doctorHoliday, err := repository.DoctorActiveSchedule(doctorID, dateString, session)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
@@ -147,39 +112,91 @@ func DoctorActiveScheduleController(c echo.Context) error {
 			"response": err.Error(),
 		})
 	}
-
-	if doctorHoliday.DoctorAvailable == true {
-		patientIDs, err := repository.GetPatientIDsByDateAndSession(doctorID, dateString, session)
-
-		if err != nil {
-			return c.JSON(http.StatusInternalServerError, map[string]any{
-				"message":  "failed to get patient IDs",
-				"response": err.Error(),
-			})
-		}
-
-		for _, patientID := range patientIDs {
-			CreateNotification(
-				patientID,
-				"Dokter Ada!",
-				"Dokter bersedia pada sesi ini. Silakan tunggu konfirmasi dari dokter yaa",
-				"janji_temu",
-			)
-		}
-	}
-
-	responseData, err := repository.DoctorGetAllSchedules(doctorID, session, dateString)
-	if err != nil {
-		return c.JSON(http.StatusNotFound, map[string]any{
-			"message":  "failed get schedules data",
-			"response": err.Error(),
-		})
-	}
-
-	doctorHolidayResponse := dto.ConvertToDoctorScheduleResponse(doctorID, responseData)
+	// Convert the updated schedule to the response format
+	doctorHolidayResponse := HandleDoctorAction(doctorHoliday, err, doctorID, dateString, session)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message":  "success, doctor status updated",
+		"message":  "success, doctor now available",
 		"response": doctorHolidayResponse,
 	})
 }
+
+func HandleDoctorAction(doctorHoliday model.Consultation, err error, doctorID uuid.UUID, date, session string) dto.DoctorScheduleResponse {
+	if err != nil {
+		return dto.DoctorScheduleResponse{
+			DoctorID: doctorID,
+			Data:     nil,
+		}
+	}
+
+	// Fetch all schedules for the doctor
+	responseData, err := repository.DoctorGetAllSchedules(doctorID, session, date)
+	if err != nil {
+		return dto.DoctorScheduleResponse{
+			DoctorID: doctorID,
+			Data:     nil,
+		}
+	}
+
+	// Convert fetched schedules to the desired response format
+	doctorSchedules := dto.ConvertToDoctorScheduleResponse(doctorID, responseData)
+
+	// Find the date and session in the fetched schedules
+	var foundDate bool
+	var foundSession bool
+
+	for i, data := range doctorSchedules.Data {
+		if data.Date == date {
+			foundDate = true
+
+			for j, listData := range data.ListData {
+				if listData.Session == session {
+					foundSession = true
+
+					// Update doctor availability based on DoctorHoliday status
+					doctorSchedules.Data[i].ListData[j].DoctorAvailable = !doctorHoliday.DoctorAvailable
+
+					// Set appointments to nil since doctor is not available
+					doctorSchedules.Data[i].ListData[j].Appointments = nil
+					break
+				}
+			}
+
+			break
+		}
+	}
+
+	// If the date or session is not found, add a new entry
+	if !foundDate {
+		// Create a new entry for the specified date
+		newEntry := dto.FrontendData{
+			Date: date,
+			ListData: []dto.ListDetail{
+				{
+					DoctorAvailable: !doctorHoliday.DoctorAvailable,
+					Session:         session,
+					Appointments:    nil,
+				},
+			},
+		}
+
+		doctorSchedules.Data = append(doctorSchedules.Data, newEntry)
+	} else if !foundSession {
+		// Create a new entry for the specified session within the found date
+		for i, data := range doctorSchedules.Data {
+			if data.Date == date {
+				newListData := dto.ListDetail{
+					DoctorAvailable: !doctorHoliday.DoctorAvailable,
+					Session:         session,
+					Appointments:    nil,
+				}
+
+				doctorSchedules.Data[i].ListData = append(doctorSchedules.Data[i].ListData, newListData)
+				break
+			}
+		}
+	}
+
+	return doctorSchedules
+}
+

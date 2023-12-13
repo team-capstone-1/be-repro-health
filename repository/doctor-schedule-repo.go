@@ -204,20 +204,18 @@ func DoctorActiveSchedule(doctorID uuid.UUID, date string, session string) (mode
 		return doctorHoliday, tx.Error
 	}
 
-	// Ubah status doctor_available menjadi false
-	tx = database.DB.Model(&doctorHoliday).Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session).Update("doctor_available", true).Find(&doctorHoliday)
+	// Ubah status doctor_available menjadi true
+	tx = database.DB.Model(&model.Consultation{}).
+		Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session).
+		Update("doctor_available", true).
+		Find(&doctorHoliday)
+
 	if tx.Error != nil {
 		return doctorHoliday, tx.Error
 	}
 
-	// Delete Record sebelumnya
-	// tx = database.DB.Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session).Delete(&model.Consultation{})
-	// if tx.Error != nil {
-	// 	return doctorHoliday, tx.Error
-	// }
-
 	// Delete DoctorHoliday record
-	err := DeleteDoctorHoliday(doctorID)
+	err := DeleteDoctorHoliday(doctorID, date, session)
 	if err != nil {
 		return doctorHoliday, err
 	}
@@ -225,9 +223,9 @@ func DoctorActiveSchedule(doctorID uuid.UUID, date string, session string) (mode
 	return doctorHoliday, nil
 }
 
-func DeleteDoctorHoliday(doctorID uuid.UUID) error {
+func DeleteDoctorHoliday(doctorID uuid.UUID, date string, session string) error {
 	var doctorHoliday model.DoctorHoliday
-	if err := database.DB.Where("doctor_id = ?", doctorID).Unscoped().Delete(&doctorHoliday).Error; err != nil {
+	if err := database.DB.Where("doctor_id = ? AND date = ? AND session = ?", doctorID, date, session).Unscoped().Delete(&doctorHoliday).Error; err != nil {
 		return err
 	}
 
