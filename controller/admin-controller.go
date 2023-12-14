@@ -43,5 +43,4 @@ func AdminLoginController(c echo.Context) error {
 		"message":  "success login admin account",
 		"response": response,
 	})
-
 }
