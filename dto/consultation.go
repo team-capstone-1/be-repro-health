@@ -31,6 +31,7 @@ type UserConsultationResponse struct {
 	QueueNumber   string                    `json:"queue_number"`
 	PaymentMethod string                    `json:"payment_method"`
 	Rescheduled   bool                      `json:"rescheduled"`
+	DoctorAvailable bool					`json:"doctor_available"`
 	Clinic        ClinicResponse            `json:"clinic"`
 	Doctor        TransactionDoctorResponse `json:"doctor"`
 }
@@ -45,6 +46,7 @@ type ConsultationResponse struct {
 	QueueNumber   string                    `json:"queue_number"`
 	PaymentMethod string                    `json:"payment_method"`
 	Rescheduled   bool                      `json:"rescheduled"`
+	DoctorAvailable bool					`json:"doctor_available"`
 	Patient       PatientResponse           `json:"patient"`
 	Clinic        ClinicResponse            `json:"clinic"`
 	Doctor        TransactionDoctorResponse `json:"doctor"`
@@ -83,6 +85,7 @@ func ConvertToUserConsultationResponse(consultation model.Consultation) UserCons
 		PaymentMethod: consultation.PaymentMethod,
 		Session:       consultation.Session,
 		Rescheduled:   consultation.Rescheduled,
+		DoctorAvailable: consultation.DoctorAvailable,
 		Clinic:        ConvertToClinicResponse(consultation.Clinic),
 		Doctor:        ConvertToTransactionDoctorResponse(consultation.Doctor),
 	}
@@ -99,6 +102,7 @@ func ConvertToConsultationResponse(consultation model.Consultation) Consultation
 		PaymentMethod: consultation.PaymentMethod,
 		Session:       consultation.Session,
 		Rescheduled:   consultation.Rescheduled,
+		DoctorAvailable: consultation.DoctorAvailable,
 		Patient:       ConvertToPatientResponse(consultation.Patient),
 		Clinic:        ConvertToClinicResponse(consultation.Clinic),
 		Doctor:        ConvertToTransactionDoctorResponse(consultation.Doctor),
