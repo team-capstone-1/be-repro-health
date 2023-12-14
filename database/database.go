@@ -321,3 +321,57 @@ func Seeders() {
 		}
 	}
 }
+
+func InitTest() {
+	InitDBTest()
+	InitialMigrationTest()
+	Seeders()
+}
+
+func InitDBTest() {
+	database := DbSetup{
+		DB_Username: config.DB_USERNAME,
+		DB_Password: config.DB_PASSWORD,
+		DB_Port:     config.DB_PORT,
+		DB_Host:     config.DB_HOST,
+		DB_Name:     "reproduction-health-testing",
+	}
+
+	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=UTC",
+		database.DB_Username,
+		database.DB_Password,
+		database.DB_Host,
+		database.DB_Port,
+		database.DB_Name,
+	)
+
+	var err error
+	DB, err = gorm.Open(mysql.Open(connectionString), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+}
+
+func InitialMigrationTest() {
+	DB.AutoMigrate(
+		&model.User{},
+		&model.Doctor{},
+		&model.DoctorWorkHistory{},
+		&model.DoctorEducation{},
+		&model.DoctorCertification{},
+		&model.Patient{},
+		&model.Article{},
+		&model.Specialist{},
+		&model.Consultation{},
+		&model.Transaction{},
+		&model.Payment{},
+		&model.Refund{},
+		&model.Forum{},
+		&model.ForumReply{},
+		&model.Comment{},
+		&model.Notification{},
+		&model.HealthRecommendation{},
+		&model.DoctorHealthRecommendation{},
+		&model.DoctorHoliday{},
+	)
+}
