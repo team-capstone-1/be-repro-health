@@ -2,13 +2,15 @@ package controller
 
 import (
 	"net/http"
+	"sort"
 
-	"capstone-project/repository"
 	"capstone-project/dto"
 	m "capstone-project/middleware"
+	"capstone-project/repository"
+	"capstone-project/util"
 
-	"github.com/labstack/echo/v4"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 func GetPatientsController(c echo.Context) error {
@@ -19,12 +21,12 @@ func GetPatientsController(c echo.Context) error {
 			"response": "Permission Denied: Permission Denied: User is not valid.",
 		})
 	}
-	
+
 	responseData, err := repository.GetAllPatients(user)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get patients",
-			"response":   err.Error(),
+			"message":  "failed get patients",
+			"response": err.Error(),
 		})
 	}
 
@@ -33,9 +35,13 @@ func GetPatientsController(c echo.Context) error {
 		patientResponse = append(patientResponse, dto.ConvertToPatientResponse(patient))
 	}
 
+	sort.Slice(patientResponse, func(i, j int) bool {
+		return patientResponse[i].CreatedAt.Before(patientResponse[j].CreatedAt)
+	})
+
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get patients",
-		"response":   patientResponse,
+		"message":  "success get patients",
+		"response": patientResponse,
 	})
 }
 
@@ -51,8 +57,8 @@ func GetPatientController(c echo.Context) error {
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
@@ -60,11 +66,11 @@ func GetPatientController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
-	if responseData.UserID != user{
+	if responseData.UserID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
 			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
@@ -74,8 +80,8 @@ func GetPatientController(c echo.Context) error {
 	patientResponse := dto.ConvertToPatientResponse(responseData)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get patient",
-		"response":    patientResponse,
+		"message":  "success get patient",
+		"response": patientResponse,
 	})
 }
 
@@ -84,7 +90,7 @@ func CreatePatientController(c echo.Context) error {
 	errBind := c.Bind(&patient)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
+			"message":  "error bind data",
 			"response": errBind.Error(),
 		})
 	}
@@ -96,23 +102,48 @@ func CreatePatientController(c echo.Context) error {
 			"response": "Permission Denied: Permission Denied: User is not valid.",
 		})
 	}
-
 	patientData := dto.ConvertToPatientModel(patient)
-	patientData.UserID = user
+
+	profileImage, err := c.FormFile("profile_image")
+	if err != http.ErrMissingFile{
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload profile image",
+				"response": err.Error(),
+			})
+		}
 	
+		profileURL, err := util.UploadToCloudinary(profileImage)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload profile image to Cloudinary",
+				"response": err.Error(),
+			})
+		}
+		patientData.ProfileImage = profileURL
+	}
+	
+	patientData.UserID = user
+
 	responseData, err := repository.InsertPatient(patientData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create patient",
-			"response":  err.Error(),
+			"message":  "failed create patient",
+			"response": err.Error(),
 		})
 	}
 
 	patientResponse := dto.ConvertToPatientResponse(responseData)
+	CreateNotification(
+		patientResponse.ID,
+		"Profil Baru Dibuat!",
+		"Profil baru Anda telah berhasil dibuat. Sesuaikan profil Anda dan nikmati pengalaman kesehatan reproduksi yang lebih personal",
+		"info",
+	)
 
-	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success create new patient",
-		"response":    patientResponse,
+	return c.JSON(http.StatusCreated, map[string]any{
+		"message":  "success create new patient",
+		"response": patientResponse,
 	})
 }
 
@@ -128,8 +159,8 @@ func UpdatePatientController(c echo.Context) error {
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
@@ -137,10 +168,10 @@ func UpdatePatientController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
-	if checkPatient.UserID != user{
+	if checkPatient.UserID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
 			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
@@ -151,19 +182,39 @@ func UpdatePatientController(c echo.Context) error {
 	errBind := c.Bind(&updateData)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
+			"message":  "error bind data",
 			"response": errBind.Error(),
 		})
 	}
 
 	patientData := dto.ConvertToPatientModel(updateData)
+
+	profileImage, err := c.FormFile("profile_image")
+	if err != http.ErrMissingFile{
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload profile image",
+				"response": err.Error(),
+			})
+		}
+	
+		profileURL, err := util.UploadToCloudinary(profileImage)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]any{
+				"message":  "error upload profile image to Cloudinary",
+				"response": err.Error(),
+			})
+		}
+		patientData.ProfileImage = profileURL
+	}
+	
 	patientData.ID = uuid
 
 	responseData, err := repository.UpdatePatientByID(uuid, patientData)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
-			"message": "failed update patient",
-			"response":   err.Error(),
+			"message":  "failed update patient",
+			"response": err.Error(),
 		})
 	}
 
@@ -172,15 +223,21 @@ func UpdatePatientController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed get patient",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
 	patientResponse := dto.ConvertToPatientResponse(responseData)
+	CreateNotification(
+		patientResponse.ID,
+		"Perubahan Profil",
+		"Profil Anda telah diperbarui. Pastikan semua informasi terkini dan sesuai dengan kebutuhan Anda",
+		"info",
+	)
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success update patient",
-		"response":    patientResponse,
+		"message":  "success update patient",
+		"response": patientResponse,
 	})
 }
 
@@ -192,12 +249,12 @@ func DeletePatientController(c echo.Context) error {
 			"response": "Permission Denied: Permission Denied: User is not valid.",
 		})
 	}
-	
+
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
@@ -205,10 +262,10 @@ func DeletePatientController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed delete patient",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
-	if checkPatient.UserID != user{
+	if checkPatient.UserID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
 			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
@@ -219,12 +276,12 @@ func DeletePatientController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message": "failed delete patient",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success delete patient",
+		"message":  "success delete patient",
 		"response": "success delete patient with id " + uuid.String(),
 	})
 }

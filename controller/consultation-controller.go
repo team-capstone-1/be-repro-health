@@ -1,10 +1,13 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
+	"capstone-project/constant"
 	"capstone-project/dto"
 	m "capstone-project/middleware"
+	"capstone-project/model"
 	"capstone-project/repository"
 
 	"github.com/google/uuid"
@@ -32,7 +35,7 @@ func CreateConsultationController(c echo.Context) error {
 	checkPatient, err := repository.GetPatientByID(consultation.PatientID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed delete forum",
+			"message": "failed get patient",
 			"reponse": err.Error(),
 		})
 	}
@@ -44,6 +47,13 @@ func CreateConsultationController(c echo.Context) error {
 	}
 
 	consultationData := dto.ConvertToConsultationModel(consultation)
+	consultationData.QueueNumber, err = repository.GenerateQueueNumber(consultationData.Date, consultationData.Session)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed generate queue number",
+			"response": err.Error(),
+		})
+	}
 
 	clinicData, err := repository.GetClinicByDoctorID(consultationData.DoctorID)
 	if err != nil {
@@ -55,6 +65,25 @@ func CreateConsultationController(c echo.Context) error {
 
 	consultationData.ClinicID = clinicData.ID
 
+	dateString := consultationData.Date.Format("2006-01-02")
+
+	isDoctorOnHoliday, err := repository.IsDoctorOnHoliday(consultationData.DoctorID, dateString, consultationData.Session)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "failed to check doctor's holiday",
+			"response": err.Error(),
+		})
+	}
+
+	fmt.Println("Is Doctor On Holiday:", isDoctorOnHoliday)
+
+	if isDoctorOnHoliday {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "doctor is on holiday",
+			"response": "Doctor is not available on the specified date and session.",
+		})
+	}
+
 	responseData, err := repository.InsertConsultation(consultationData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
@@ -63,10 +92,51 @@ func CreateConsultationController(c echo.Context) error {
 		})
 	}
 
-	consultationResponse := dto.ConvertToConsultationResponse(responseData)
+	responseData, _ = repository.GetConsultationByID(responseData.ID)
 
-	return c.JSON(http.StatusOK, map[string]any{
+	consultationResponse := dto.ConvertToUserConsultationResponse(responseData)
+
+	transaction, err := generateTransaction(consultationResponse)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]any{
+			"message":  "failed create transaction",
+			"response": err.Error(),
+		})
+	}
+
+	consultationResponse.TransactionID = transaction.ID
+
+	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create new consultation",
 		"response": consultationResponse,
 	})
+}
+
+func generateTransaction(consultation dto.UserConsultationResponse) (model.Transaction, error) {
+	invoice, err := repository.GenerateNextInvoice()
+	if err != nil {
+		return model.Transaction{}, err
+	}
+
+	var payment_method = "done"
+	if consultation.PaymentMethod != "clinic_payment" {
+		payment_method = "pending"
+	}
+
+	transaction := model.Transaction{
+		ID:             uuid.New(),
+		ConsultationID: consultation.ID,
+		Invoice:        invoice,
+		Price:          consultation.Doctor.Price,
+		AdminPrice:     constant.ADMIN_FEE,
+		Total:          consultation.Doctor.Price + constant.ADMIN_FEE,
+		Status:         model.Waiting,
+		PaymentStatus:  payment_method,
+	}
+
+	transaction, err = repository.InsertTransaction(transaction)
+	if err != nil {
+		return model.Transaction{}, err
+	}
+	return transaction, nil
 }

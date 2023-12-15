@@ -28,9 +28,39 @@ func GetForumsController(c echo.Context) error {
 		forumResponse = append(forumResponse, dto.ConvertToForumResponse(forum))
 	}
 
+	for _, forumRes := range forumResponse{
+		forumRes.Profile = repository.GetProfileByPatientID(forumRes.PatientID)
+	}
+
 	return c.JSON(http.StatusOK, map[string]any{
 		"message": "success get forums",
 		"response":   forumResponse,
+	})
+}
+
+func GetForumController(c echo.Context) error {
+	uuid, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message":  "error parse id",
+			"response": err.Error(),
+		})
+	}
+
+	responseData, err := repository.GetForumByID(uuid)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]any{
+			"message": "failed get forum",
+			"reponse": err.Error(),
+		})
+	}
+
+	forumResponse := dto.ConvertToForumResponse(responseData)
+	forumResponse.Profile = repository.GetProfileByPatientID(forumResponse.PatientID)
+
+	return c.JSON(http.StatusOK, map[string]any{
+		"message":  "success get forum",
+		"response": forumResponse,
 	})
 }
 
@@ -77,8 +107,9 @@ func CreateForumController(c echo.Context) error {
 	}
 
 	forumResponse := dto.ConvertToForumResponse(responseData)
+	forumResponse.Profile = repository.GetProfileByPatientID(forumResponse.PatientID)
 
-	return c.JSON(http.StatusOK, map[string]any{
+	return c.JSON(http.StatusCreated, map[string]any{
 		"message": "success create new forum",
 		"response":    forumResponse,
 	})

@@ -38,14 +38,49 @@ type DoctorSignUpResponse struct {
 }
 
 type DoctorResponse struct {
+	ID                  uuid.UUID                   `json:"id"`
+	Name                string                      `json:"name"`
+	Email               string                      `json:"email"`
+	Price               float64                     `json:"price"`
+	Address             string                      `json:"address"`
+	Phone               string                      `json:"phone"`
+	ProfileImage        string                      `json:"profile_image"`
+	Specialist          SpecialistResponse          `json:"specialist"`
+	Clinic              ClinicResponse              `json:"clinic"`
+	DoctorWorkHistories []DoctorWorkHistoryResponse `json:"work_histories"`
+	DoctorEducations    []DoctorEducationResponse   `json:"educations"`
+}
+
+type DoctorOTPRequest struct {
+	Email string `json:"email" form:"email"`
+}
+
+type DoctorValidateOTPRequest struct {
+	Email string `json:"email" form:"email"`
+	OTP   string `json:"otp" form:"otp"`
+}
+
+type ChangeDoctorPasswordRequest struct {
+	ID       uuid.UUID `json:"id" form:"id"`
+	Password string    `json:"password" form:"password"`
+}
+
+type TransactionDoctorResponse struct {
 	ID           uuid.UUID `json:"id"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
 	Price        float64   `json:"price"`
 	Address      string    `json:"address"`
+	Specialist   string    `json:"specialist"`
 	Phone        string    `json:"phone"`
-	SpecialistID uuid.UUID `json:"specialist_id"`
-	ClinicID     uuid.UUID `json:"clinic_id"`
+	ProfileImage string    `json:"profile_image"`
+}
+
+func ConvertToChangeDoctorPasswordModel(doctor ChangeDoctorPasswordRequest) model.Doctor {
+	return model.Doctor{
+		ID:       doctor.ID,
+		Password: doctor.Password,
+	}
 }
 
 func ConvertToDoctorSignUpResponse(doctor model.Doctor) DoctorSignUpResponse {
@@ -81,14 +116,41 @@ func ConvertToDoctorModel(doctor DoctorSignUpRequest) model.Doctor {
 }
 
 func ConvertToDoctorResponse(doctor model.Doctor) DoctorResponse {
+	var workHistories []DoctorWorkHistoryResponse
+	var educations []DoctorEducationResponse
+
+	for _, history := range doctor.DoctorWorkHistories {
+		workHistories = append(workHistories, ConvertToDoctorWorkHistoriesResponse(history))
+	}
+
+	for _, education := range doctor.DoctorEducations {
+		educations = append(educations, ConvertToDoctorEducationResponse(education))
+	}
+
 	return DoctorResponse{
+		ID:                  doctor.ID,
+		Name:                doctor.Name,
+		Email:               doctor.Email,
+		Price:               doctor.Price,
+		Address:             doctor.Address,
+		Phone:               doctor.Phone,
+		ProfileImage:        doctor.ProfileImage,
+		Specialist:          ConvertToSpecialistResponse(doctor.Specialist),
+		Clinic:              ConvertToClinicResponse(doctor.Clinic),
+		DoctorWorkHistories: workHistories,
+		DoctorEducations:    educations,
+	}
+}
+
+func ConvertToTransactionDoctorResponse(doctor model.Doctor) TransactionDoctorResponse {
+	return TransactionDoctorResponse{
 		ID:           doctor.ID,
 		Name:         doctor.Name,
+		Specialist:   doctor.Specialist.Name,
 		Email:        doctor.Email,
 		Price:        doctor.Price,
 		Address:      doctor.Address,
 		Phone:        doctor.Phone,
-		SpecialistID: doctor.SpecialistID,
-		ClinicID:     doctor.ClinicID,
+		ProfileImage: doctor.ProfileImage,
 	}
 }

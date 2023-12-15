@@ -7,6 +7,33 @@ import (
 	"github.com/google/uuid"
 )
 
+type DoctorWorkHistoryRequest struct {
+	DoctorID     uuid.UUID `json:"doctor_id"`
+	StartingDate time.Time `json:"start_date"`
+	EndingDate   time.Time `json:"end_date"`
+	Job          string    `json:"job"`
+	Workplace    string    `json:"workplace"`
+	Position     string    `json:"position"`
+}
+
+type DoctorEducationRequest struct {
+	DoctorID         uuid.UUID `json:"doctor_id"`
+	StartingDate     time.Time `json:"start_date"`
+	EndingDate       time.Time `json:"end_date"`
+	EducationProgram string    `json:"education_program"`
+	University       string    `json:"university"`
+}
+
+type DoctorCertificationRequest struct {
+	DoctorID        uuid.UUID `json:"doctor_id" form:"doctor_id"`
+	StartingDate    time.Time `json:"start_date" form:"start_date"`
+	EndingDate      time.Time `json:"end_date" form:"end_date"`
+	Description     string    `json:"description" form:"description"`
+	CertificateType string    `json:"certificate_type" form:"certificate_type"`
+	// FileSize        int64     `json:"file_size" form:"file_size"`
+	Details string `json:"details" form:"details"`
+}
+
 type DoctorProfileResponse struct {
 	ID           uuid.UUID                       `json:"id"`
 	Name         string                          `json:"name"`
@@ -33,18 +60,18 @@ type DoctorProfileSpecialistResponse struct {
 }
 
 type DoctorWorkHistoryResponse struct {
-	ID              uuid.UUID `json:"id"`
-	DoctorProfileID uuid.UUID `json:"doctor_profile_id"`
-	StartingDate    time.Time `json:"start_date"`
-	EndingDate      time.Time `json:"end_date"`
-	Job             string    `json:"job"`
-	Workplace       string    `json:"workplace"`
-	Position        string    `json:"position"`
+	ID           uuid.UUID `json:"id"`
+	DoctorID     uuid.UUID `json:"doctor_id"`
+	StartingDate time.Time `json:"start_date"`
+	EndingDate   time.Time `json:"end_date"`
+	Job          string    `json:"job"`
+	Workplace    string    `json:"workplace"`
+	Position     string    `json:"position"`
 }
 
 type DoctorEducationResponse struct {
 	ID               uuid.UUID `json:"id"`
-	DoctorProfileID  uuid.UUID `json:"doctor_profile_id"`
+	DoctorID         uuid.UUID `json:"doctor_id"`
 	StartingDate     time.Time `json:"start_date"`
 	EndingDate       time.Time `json:"end_date"`
 	EducationProgram string    `json:"education_program"`
@@ -53,7 +80,7 @@ type DoctorEducationResponse struct {
 
 type DoctorCertificationResponse struct {
 	ID              uuid.UUID `json:"id"`
-	DoctorProfileID uuid.UUID `json:"doctor_profile_id"`
+	DoctorID        uuid.UUID `json:"doctor_id"`
 	StartingDate    time.Time `json:"start_date"`
 	EndingDate      time.Time `json:"end_date"`
 	Description     string    `json:"description"`
@@ -77,22 +104,58 @@ func ConvertToDoctorProfileResponse(doctor model.Doctor) DoctorProfileResponse {
 	}
 }
 
+func ConvertToDoctorWorkHistoryModel(workHistory DoctorWorkHistoryRequest) model.DoctorWorkHistory {
+	return model.DoctorWorkHistory{
+		ID:           uuid.New(),
+		DoctorID:     workHistory.DoctorID,
+		StartingDate: workHistory.StartingDate,
+		EndingDate:   workHistory.EndingDate,
+		Job:          workHistory.Job,
+		Workplace:    workHistory.Workplace,
+		Position:     workHistory.Position,
+	}
+}
+
+func ConvertToDoctorEducationModel(education DoctorEducationRequest) model.DoctorEducation {
+	return model.DoctorEducation{
+		ID:               uuid.New(),
+		DoctorID:         education.DoctorID,
+		StartingDate:     education.StartingDate,
+		EndingDate:       education.EndingDate,
+		EducationProgram: education.EducationProgram,
+		University:       education.University,
+	}
+}
+
+func ConvertToDoctorCertificationModel(certification DoctorCertificationRequest) model.DoctorCertification {
+	return model.DoctorCertification{
+		ID:              uuid.New(),
+		DoctorID:        certification.DoctorID,
+		StartingDate:    certification.StartingDate,
+		EndingDate:      certification.EndingDate,
+		Description:     certification.Description,
+		CertificateType: certification.CertificateType,
+		// FileSize:        certification.FileSize,
+		Details: certification.Details,
+	}
+}
+
 func ConvertToDoctorWorkHistoriesResponse(workHistory model.DoctorWorkHistory) DoctorWorkHistoryResponse {
 	return DoctorWorkHistoryResponse{
-		ID:              workHistory.ID,
-		DoctorProfileID: workHistory.DoctorProfileID,
-		StartingDate:    workHistory.StartingDate,
-		EndingDate:      workHistory.EndingDate,
-		Job:             workHistory.Job,
-		Workplace:       workHistory.Workplace,
-		Position:        workHistory.Position,
+		ID:           workHistory.ID,
+		DoctorID:     workHistory.DoctorID,
+		StartingDate: workHistory.StartingDate,
+		EndingDate:   workHistory.EndingDate,
+		Job:          workHistory.Job,
+		Workplace:    workHistory.Workplace,
+		Position:     workHistory.Position,
 	}
 }
 
 func ConvertToDoctorEducationResponse(doctorEducation model.DoctorEducation) DoctorEducationResponse {
 	return DoctorEducationResponse{
 		ID:               doctorEducation.ID,
-		DoctorProfileID:  doctorEducation.ID,
+		DoctorID:         doctorEducation.DoctorID,
 		StartingDate:     doctorEducation.StartingDate,
 		EndingDate:       doctorEducation.EndingDate,
 		EducationProgram: doctorEducation.EducationProgram,
@@ -103,12 +166,12 @@ func ConvertToDoctorEducationResponse(doctorEducation model.DoctorEducation) Doc
 func ConvertToDoctorCertificationResponse(certification model.DoctorCertification) DoctorCertificationResponse {
 	return DoctorCertificationResponse{
 		ID:              certification.ID,
-		DoctorProfileID: certification.DoctorProfileID,
+		DoctorID:        certification.DoctorID,
 		StartingDate:    certification.StartingDate,
 		EndingDate:      certification.EndingDate,
 		Description:     certification.Description,
 		CertificateType: certification.CertificateType,
-		FileSize:        certification.FileSize,
+		FileSize:        string(certification.FileSize),
 		Details:         certification.Details,
 	}
 }

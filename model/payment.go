@@ -5,7 +5,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type PaymentMethods struct {
+type Payment struct {
 	gorm.Model
 	ID            uuid.UUID `json:"id" form:"id"`
 	TransactionID uuid.UUID `gorm:"index" json:"transaction_id"`

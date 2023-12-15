@@ -8,6 +8,7 @@ import (
 type TransactionStatus string
 
 const (
+	Waiting   TransactionStatus = "waiting"
 	Processed TransactionStatus = "processed"
 	Done      TransactionStatus = "done"
 	Cancelled TransactionStatus = "cancelled"
@@ -21,8 +22,9 @@ type Transaction struct {
 	Price          float64           `gorm:"type:decimal(15,2)"`
 	AdminPrice     float64           `gorm:"type:decimal(15,2)"`
 	Total          float64           `gorm:"type:decimal(15,2)"`
-	Status         TransactionStatus `gorm:"type:ENUM('processed', 'done', 'cancelled')"`
-	PaymentStatus  TransactionStatus `gorm:"type:ENUM('processed', 'done', 'cancelled')"`
-	Refunds        Refunds           `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	PaymentMethods PaymentMethods    `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Status         TransactionStatus `gorm:"type:ENUM('waiting', 'processed', 'done', 'cancelled')"`
+	PaymentStatus  string            `gorm:"type:ENUM('pending', 'done', 'refund')"`
+	Refund         Refund            `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Payment        Payment           `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	Consultation   Consultation      `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
