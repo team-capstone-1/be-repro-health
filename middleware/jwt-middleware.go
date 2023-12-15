@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/mock"
 
 	"capstone-project/config"
 )
@@ -62,4 +63,25 @@ func ExtractTokenUserId(e echo.Context) uuid.UUID {
 		return uuid
 	}
 	return uuid.Nil
+}
+
+// MiddlewareMock is a mock implementation for middleware testing
+type MiddlewareMock struct {
+	mock.Mock
+}
+
+// CheckRole mocks the behavior of the CheckRole middleware
+func (m *MiddlewareMock) CheckRole(role string) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			args := m.Called(role, c)
+			return args.Error(0)
+		}
+	}
+}
+
+// ExtractTokenUserId mocks the behavior of the ExtractTokenUserId middleware
+func (m *MiddlewareMock) ExtractTokenUserId(c echo.Context) uuid.UUID {
+	args := m.Called(c)
+	return args.Get(0).(uuid.UUID)
 }
