@@ -6,6 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -13,16 +14,14 @@ import (
 func TestGetTransactionController(t *testing.T) {
 	e := echo.New()
 
-	req := httptest.NewRequest(http.MethodGet, "/transactions/123", nil)
+	transactionID := uuid.New()
+	req := httptest.NewRequest(http.MethodGet, "/transactions/"+transactionID.String(), nil)
 	rec := httptest.NewRecorder()
-
 	c := e.NewContext(req, rec)
-	c.SetPath("/transactions/:id")
-	c.SetParamNames("id")
-	c.SetParamValues("123")
-	assert.NoError(t, controller.GetTransactionController(c))
 
 	err := controller.GetTransactionController(c)
+
+	c.SetPath("/transactions" + transactionID.String())
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)

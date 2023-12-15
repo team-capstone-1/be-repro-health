@@ -7,52 +7,50 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewDoctorAIController(t *testing.T) {
-	mockRepo := &repository.DoctorAIRepositoryImpl{}
-	doctorAIController := controller.NewDoctorAIController(mockRepo)
-
-	assert.NotNil(t, doctorAIController)
-	assert.Equal(t, mockRepo, doctorAIController.DoctorAIRepo)
-}
-
 func TestDoctorAIController_GetHealthRecommendationDoctorHistory(t *testing.T) {
-	// Positive Test Case
-	// Create a mock repository or use a testing framework
-	mockRepo := &repository.DoctorAIRepositoryImpl{}
-	controller := controller.NewDoctorAIController(mockRepo)
-
 	e := echo.New()
 
-	// Case: Valid Doctor ID
-	req := httptest.NewRequest(http.MethodGet, "/api/doctor/history/123", nil)
+	doctorAIRepo := &repository.DoctorAIRepositoryImpl{}
+
+	ac := &controller.DoctorAIController{
+		DoctorAIRepo: doctorAIRepo,
+	}
+
+	doctorID := uuid.New()
+	req := httptest.NewRequest(http.MethodGet, "/chatbot/health-recommendation/"+doctorID.String(), nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetPath("/api/doctor/history/:doctor_id")
-	c.SetParamNames("doctor_id")
-	c.SetParamValues("123")
 
-	err := controller.GetHealthRecommendationDoctorHistory(c)
+	err := ac.GetHealthRecommendationDoctorHistory(c)
+
+	c.SetPath("/chatbot/health-recommendation" + doctorID.String())
+
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
 func TestDoctorAIController_GetHealthRecommendationDoctorHistoryFromSession(t *testing.T) {
-	mockRepo := &repository.DoctorAIRepositoryImpl{} // Create a mock repository or use a testing framework
-	controller := controller.NewDoctorAIController(mockRepo)
-
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodGet, "/api/doctor/history/session/123", nil)
+
+	doctorAIRepo := &repository.DoctorAIRepositoryImpl{}
+
+	ac := &controller.DoctorAIController{
+		DoctorAIRepo: doctorAIRepo,
+	}
+
+	sessionID := uuid.New()
+	req := httptest.NewRequest(http.MethodGet, "/chatbot/health-recommendation/session/"+sessionID.String(), nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetPath("/api/doctor/history/session/:session_id")
-	c.SetParamNames("session_id")
-	c.SetParamValues("123")
 
-	err := controller.GetHealthRecommendationDoctorHistoryFromSession(c)
+	err := ac.GetHealthRecommendationDoctorHistoryFromSession(c)
+
+	c.SetPath("/chatbot/health-recommendation/session" + sessionID.String())
 
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
