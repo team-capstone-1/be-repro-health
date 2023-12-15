@@ -139,3 +139,10 @@ func GetProfileByPatientID(id uuid.UUID) string {
 
 	return data.ProfileImage
 }
+
+func GetNameByPatientID(id uuid.UUID) string {
+	var data model.Patient
+	database.DB.Where("id = ?", id).First(&data)
+
+	return data.Name
+}
