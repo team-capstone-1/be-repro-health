@@ -328,8 +328,16 @@ func InitTest() {
 	Seeders()
 }
 
+type DbSetupTest struct {
+	DB_Username string
+	DB_Password string
+	DB_Port     string
+	DB_Host     string
+	DB_Name     string
+}
+
 func InitDBTest() {
-	database := DbSetup{
+	database := DbSetupTest{
 		DB_Username: config.DB_USERNAME,
 		DB_Password: config.DB_PASSWORD,
 		DB_Port:     config.DB_PORT,
@@ -345,11 +353,11 @@ func InitDBTest() {
 		database.DB_Name,
 	)
 
-	var err error
-	DB, err = gorm.Open(mysql.Open(connectionString), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
+	// var err error
+	DB, _ = gorm.Open(mysql.Open(connectionString), &gorm.Config{})
+	// if err != nil {
+	// 	panic(err)
+	// }
 }
 
 func InitialMigrationTest() {
