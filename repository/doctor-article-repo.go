@@ -15,7 +15,7 @@ import (
 func DoctorGetAllArticles(doctorID uuid.UUID) ([]model.Article, error) {
 	var dataarticles []model.Article
 
-	tx := database.DB.Where("doctor_id = ?", doctorID).Find(&dataarticles)
+	tx := database.DB.Where("doctor_id = ?", doctorID).Preload("Comment").Find(&dataarticles)
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
@@ -64,7 +64,7 @@ func DoctorGetAllArticlesByDay(doctorID uuid.UUID, day time.Time) ([]model.Artic
 func GetArticleByID(id uuid.UUID) (model.Article, error) {
 	var dataarticle model.Article
 
-	tx := database.DB.First(&dataarticle, id)
+	tx := database.DB.Preload("Comment").First(&dataarticle, id)
 	if tx.Error != nil {
 		return model.Article{}, tx.Error
 	}
