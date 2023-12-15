@@ -2,6 +2,7 @@ package dto
 
 import (
 	"capstone-project/model"
+	"capstone-project/repository"
 	"time"
 
 	"github.com/google/uuid"
@@ -48,6 +49,12 @@ func ConvertToDoctorArticleModel(doctor DoctorArticleRequest) model.Article {
 }
 
 func ConvertToDoctorArticleResponse(article model.Article) DoctorArticleResponse {
+	var articleCommentResponses []CommentResponse
+
+	for _, reply := range article.Comment {
+		articleCommentResponses = append(articleCommentResponses, ConvertToCommentResponse(reply, repository.GetProfileByPatientID(reply.PatientID)))
+	}
+
 	return DoctorArticleResponse{
 		ID:        article.ID,
 		DoctorID:  article.DoctorID,
@@ -60,7 +67,7 @@ func ConvertToDoctorArticleResponse(article model.Article) DoctorArticleResponse
 		Content:   article.Content,
 		Published: article.Published,
 		View:      article.View,
-		Comment:   []CommentResponse{},
+		Comment:   articleCommentResponses,
 	}
 }
 
