@@ -38,41 +38,6 @@ func TestDoctorAIController_GetHealthRecommendationDoctorHistory(t *testing.T) {
 	err := controller.GetHealthRecommendationDoctorHistory(c)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
-
-	// Negative Test Cases
-	// Case: Invalid Doctor ID (non-numeric)
-	// req = httptest.NewRequest(http.MethodGet, "/api/doctor/history/abc", nil)
-	// rec = httptest.NewRecorder()
-	// c = e.NewContext(req, rec)
-	// c.SetPath("/api/doctor/history/:doctor_id")
-	// c.SetParamNames("doctor_id")
-	// c.SetParamValues("abc")
-
-	// err = controller.GetHealthRecommendationDoctorHistory(c)
-	// assert.Error(t, err)
-	// assert.Equal(t, http.StatusBadRequest, rec.Code)
-
-	// Case: Missing Doctor ID
-	// req = httptest.NewRequest(http.MethodGet, "/api/doctor/history/", nil)
-	// rec = httptest.NewRecorder()
-	// c = e.NewContext(req, rec)
-	// c.SetPath("/api/doctor/history/:doctor_id")
-
-	// err = controller.GetHealthRecommendationDoctorHistory(c)
-	// assert.Error(t, err)
-	// assert.Equal(t, http.StatusBadRequest, rec.Code)
-
-	// // Case: Nonexistent Doctor ID
-	// req = httptest.NewRequest(http.MethodGet, "/api/doctor/history/999", nil)
-	// rec = httptest.NewRecorder()
-	// c = e.NewContext(req, rec)
-	// c.SetPath("/api/doctor/history/:doctor_id")
-	// c.SetParamNames("doctor_id")
-	// c.SetParamValues("999")
-
-	// err = controller.GetHealthRecommendationDoctorHistory(c)
-	// assert.Error(t, err)
-	// assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
 func TestDoctorAIController_GetHealthRecommendationDoctorHistoryFromSession(t *testing.T) {
