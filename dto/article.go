@@ -20,6 +20,7 @@ type CommentResponse struct {
 	Comment		   string     `json:"comment"`
 	Profile		   string     `json:"patient_profile"`
 	Date  		   time.Time  `json:"date"`
+	PatientName	   string 	  `json:"patient_name"`
 }
 
 type UserArticleResponse struct {
@@ -55,6 +56,7 @@ func ConvertToCommentResponse(comment model.Comment, profile string) CommentResp
 		Comment:    comment.Comment,
 		Date: 		comment.Date,
 		Profile: 	profile,
+		PatientName:repository.GetNameByPatientID(comment.PatientID),
 	}
 }
 
