@@ -325,7 +325,6 @@ func Seeders() {
 func InitTest() {
 	InitDBTest()
 	InitialMigrationTest()
-	Seeders()
 }
 
 type DbSetupTest struct {
@@ -333,16 +332,17 @@ type DbSetupTest struct {
 	DB_Password string
 	DB_Port     string
 	DB_Host     string
-	DB_Name     string
+	DB_Name_Test string
 }
 
 func InitDBTest() {
+	config.Init()
 	database := DbSetupTest{
 		DB_Username: config.DB_USERNAME,
 		DB_Password: config.DB_PASSWORD,
 		DB_Port:     config.DB_PORT,
 		DB_Host:     config.DB_HOST,
-		DB_Name:     "reproduction-health-testing",
+		DB_Name_Test: config.DB_NAME_TEST,
 	}
 
 	connectionString := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8&parseTime=True&loc=UTC",
@@ -350,17 +350,38 @@ func InitDBTest() {
 		database.DB_Password,
 		database.DB_Host,
 		database.DB_Port,
-		database.DB_Name,
+		database.DB_Name_Test,
 	)
 
-	// var err error
-	DB, _ = gorm.Open(mysql.Open(connectionString), &gorm.Config{})
-	// if err != nil {
-	// 	panic(err)
-	// }
+	var err error
+	DB, err = gorm.Open(mysql.Open(connectionString), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
 }
 
 func InitialMigrationTest() {
+	DB.Migrator().DropTable(
+		&model.User{},
+		&model.Doctor{},
+		&model.DoctorWorkHistory{},
+		&model.DoctorEducation{},
+		&model.DoctorCertification{},
+		&model.Patient{},
+		&model.Article{},
+		&model.Specialist{},
+		&model.Consultation{},
+		&model.Transaction{},
+		&model.Payment{},
+		&model.Refund{},
+		&model.Forum{},
+		&model.ForumReply{},
+		&model.Comment{},
+		&model.Notification{},
+		&model.HealthRecommendation{},
+		&model.DoctorHealthRecommendation{},
+		&model.DoctorHoliday{},
+	)
 	DB.AutoMigrate(
 		&model.User{},
 		&model.Doctor{},
