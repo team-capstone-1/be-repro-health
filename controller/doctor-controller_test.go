@@ -401,7 +401,7 @@ func TestGetDoctorByIDController(t *testing.T) {
 
 	for _, testCase := range testCases {
 
-		req := httptest.NewRequest(http.MethodPost, testCase.path+"f7613c10-29fd-4b82-bfea-1649ae41af98", nil)
+		req := httptest.NewRequest(http.MethodGet, testCase.path+"f7613c10-29fd-4b82-bfea-1649ae41af98", nil)
 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
@@ -427,4 +427,211 @@ func TestGetDoctorByIDController(t *testing.T) {
 
 		}
 	}
+}
+
+func TestGetDoctorsBySpecialistController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		// {
+		// 	name:       "success get specialist",
+		// 	path:       "/specialists/:id",
+		// 	expectCode: http.StatusOK,
+		// },
+		{
+			name:       "failed get specialist",
+			path:       "/specialists/:id",
+			expectCode: http.StatusBadRequest,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	InsertDataDoctor()
+	InsertDataSpecialist()
+
+	for _, testCase := range testCases {
+
+		req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		if assert.NoError(t, controller.GetDoctorsBySpecialistController(c)) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+			body := rec.Body.String()
+
+			// open file
+			// convert struct
+			type Response struct {
+				Message  string           `json:"message"`
+				Response dto.UserResponse `json:"response"`
+			}
+			var responseData Response
+			err := json.Unmarshal([]byte(body), &responseData)
+
+			if err != nil {
+				assert.Error(t, err, "error")
+			}
+
+		}
+	}
+}
+
+func TestGetDoctorsByClinicController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		// {
+		// 	name:       "success get clinics",
+		// 	path:       "/clinics/:id",
+		// 	expectCode: http.StatusOK,
+		// },
+		{
+			name:       "failed get clinics",
+			path:       "/clinics/:id",
+			expectCode: http.StatusBadRequest,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	InsertDataDoctor()
+	InsertDataClinics()
+
+	for _, testCase := range testCases {
+
+		req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		if assert.NoError(t, controller.GetDoctorsByClinicController(c)) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+			body := rec.Body.String()
+
+			// open file
+			// convert struct
+			type Response struct {
+				Message  string           `json:"message"`
+				Response dto.UserResponse `json:"response"`
+			}
+			var responseData Response
+			err := json.Unmarshal([]byte(body), &responseData)
+
+			if err != nil {
+				assert.Error(t, err, "error")
+			}
+
+		}
+	}
+}
+
+func TestGetDoctorsBySpecialistAndClinicController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		// {
+		// 	name:       "success get doctor by clinics and specialist",
+		// 	path:       "/clinics/:id/specialists/:id",
+		// 	expectCode: http.StatusOK,
+		// },
+		{
+			name:       "failed get doctor by clinics and specialist",
+			path:       "/clinics/:id/specialists/:id",
+			expectCode: http.StatusBadRequest,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	InsertDataDoctor()
+	InsertDataClinics()
+	InsertDataSpecialist()
+
+	for _, testCase := range testCases {
+
+		req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		if assert.NoError(t, controller.GetDoctorsBySpecialistAndClinicController(c)) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+			body := rec.Body.String()
+
+			// open file
+			// convert struct
+			type Response struct {
+				Message  string           `json:"message"`
+				Response dto.UserResponse `json:"response"`
+			}
+			var responseData Response
+			err := json.Unmarshal([]byte(body), &responseData)
+
+			if err != nil {
+				assert.Error(t, err, "error")
+			}
+
+		}
+	}
+}
+
+func TestChangeDoctorPasswordController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		doctor     dto.ChangeDoctorPasswordRequest
+		expectCode int
+	}{
+		{
+			name: "success update password",
+			path: "/doctors/change-password",
+			doctor: dto.ChangeDoctorPasswordRequest{
+				Password: "Rizki@123",
+			},
+			expectCode: http.StatusBadRequest,
+		},
+		{
+			name: "failed update password",
+			path: "/doctors/change-passwords",
+			doctor: dto.ChangeDoctorPasswordRequest{
+				Password: "Rizki@123",
+			},
+			expectCode: http.StatusBadRequest,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	token := InsertDataDoctor()
+
+	for _, testCase := range testCases {
+		userJSON, _ := json.Marshal(testCase.doctor)
+
+		req := httptest.NewRequest(http.MethodPut, testCase.path, strings.NewReader(string(userJSON)))
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues("1")
+		middleware.JWT([]byte(config.JWT_KEY))(controller.ChangeDoctorPasswordControllerTesting())(context)
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		t.Run(fmt.Sprintf("POST %s", testCase.path), func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+
 }

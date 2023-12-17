@@ -337,3 +337,7 @@ func SignUpDoctorControllerTesting() echo.HandlerFunc {
 func GetDoctorControllerTesting() echo.HandlerFunc {
 	return GetDoctorController
 }
+
+func ChangeDoctorPasswordControllerTesting() echo.HandlerFunc {
+	return ChangeDoctorPasswordController
+}
