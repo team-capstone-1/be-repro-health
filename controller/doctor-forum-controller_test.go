@@ -1,10 +1,15 @@
 package controller_test
 
 import (
+	"capstone-project/config"
 	"capstone-project/controller"
+	"capstone-project/database"
+	"capstone-project/dto"
+	"capstone-project/model"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"strings"
 	"testing"
 	"time"
@@ -12,58 +17,70 @@ import (
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
 )
 
-// func TestGetDoctorAllForumsController(t *testing.T) {
-// 	// Setup Echo instance
-// 	e := echo.New()
-// 	req := httptest.NewRequest(http.MethodGet, "/forums", nil)
-// 	rec := httptest.NewRecorder()
-// 	c := e.NewContext(req, rec)
-
-// 	// Set up your database for testing
-// 	database.InitTest()
-
-// 	// Call the controller function
-// 	err := controller.GetDoctorAllForumsController(c)
-
-// 	// Assertions
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusOK, rec.Code)
-// 	// Add more assertions as needed
-// }
-
-func TestFailedGetDoctorForumDetails(t *testing.T) {
-	e := echo.New()
-
-	forumID := uuid.New()
-
-	jwtKey := os.Getenv("JWT_KEY")
-
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["user"] = "doctor_id"
-	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
-
-	tokenString, err := token.SignedString([]byte(jwtKey))
-	if err != nil {
-		t.Fatalf("Error creating JWT token: %v", err)
+func InsertDataForums() {
+	forumID, _ := uuid.Parse("f1c11001-e254-40a9-8929-22e5bf660d1c")
+	// CLINIC SEEDERS
+	forum := []model.Forum{
+		{
+			ID:        forumID,
+			PatientID: uuid.New(),
+			Title:     "Test Forum",
+			Content:   "Test Forum Content",
+			Date:      time.Now(),
+		},
 	}
 
-	req := httptest.NewRequest(http.MethodGet, "/forums/details/"+forumID.String(), nil)
-	req.Header.Set("Authorization", "Bearer "+tokenString)
+	for _, v := range forum {
+		var exist model.Forum
 
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-	c.SetPath("/forums/details/" + forumID.String())
+		errCheck := database.DB.Where("id = ?", v.ID).First(&exist).Error
 
-	c.Set("doctor", token)
+		if errCheck != nil {
+			database.DB.Create(&v)
+		}
+	}
+	return
+}
 
-	err = controller.GetDoctorForumDetails(c)
+func TestGetDoctorAllForumsController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		{
+			name:       "get doctor all forums",
+			path:       "/doctors/forums",
+			expectCode: http.StatusOK,
+		},
+	}
 
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusBadRequest, rec.Code)
+	e := InitEchoTestAPI()
+	token := InsertDataDoctor()
+
+	for _, testCase := range testCases {
+
+		req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
+
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues("1")
+		middleware.JWT([]byte(config.JWT_KEY))(controller.GetDoctorAllForumsControllerTesting())(context)
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		t.Run(fmt.Sprintf("GET %s", testCase.path), func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
 }
 
 func TestCreateDoctorReplyForumUnauthorized(t *testing.T) {
@@ -100,66 +117,230 @@ func TestCreateDoctorReplyForumUnauthorized(t *testing.T) {
 	// Additional assertions based on the response if needed
 }
 
-// func TestCreateDoctorReplyForum(t *testing.T) {
-// 	e := echo.New()
+func TestCreateDoctorReplyForum(t *testing.T) {
+	forumID, _ := uuid.Parse("f1c11001-e254-40a9-8929-22e5bf660d1c")
+	doctorID, _ := uuid.Parse("f7613c10-29fd-4b82-bfea-1649ae41af98")
 
-// 	// ...
-// 	jwtKey := os.Getenv("JWT_KEY")
-// 	doctorID := uuid.MustParse("f7613c10-29fd-4b82-bfea-1649ae41af98")
-// 	// Create a JWT token
-// 	token := jwt.New(jwt.SigningMethodHS256)
-// 	claims := token.Claims.(jwt.MapClaims)
-// 	claims["authorized"] = true
-// 	claims["user_id"] = doctorID
-// 	claims["name"] = "Rizki"
-// 	claims["role"] = "doctor"
-// 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+	var testCases = []struct {
+		name       string
+		path       string
+		reply      dto.DoctorForumReplyRequest
+		expectCode int
+	}{
+		{
+			name: "success create forum reply",
+			path: "/doctors/forum-replies",
+			reply: dto.DoctorForumReplyRequest{
+				ForumsID: forumID,
+				DoctorID: doctorID,
+				Content:  "Test forum reply",
+				Date:     time.Now(),
+			},
+			expectCode: http.StatusCreated,
+		},
+		{
+			name: "success create forum reply",
+			path: "/doctors/forum-repliess",
+			reply: dto.DoctorForumReplyRequest{
+				ForumsID: forumID,
+				DoctorID: doctorID,
+				Content:  "Test forum reply",
+				Date:     time.Now(),
+			},
+			expectCode: http.StatusNotFound,
+		},
+	}
 
-// 	tokenString, err := token.SignedString([]byte(jwtKey))
-// 	if err != nil {
-// 		t.Fatalf("Error creating JWT token: %v", err)
-// 	}
+	e := InitEchoTestAPI()
+	token := InsertDataDoctor()
+	InsertDataUser()
+	InsertDataPatient()
+	InsertDataForums()
 
-// 	// Prepare the request body
-// 	requestObject := dto.DoctorForumReplyRequest{
-// 		ForumsID: uuid.MustParse("3b1d0a0f-7b0b-4c0d-8e1e-2e1e1e1e1e1e"),
-// 		DoctorID: doctorID,
-// 		Content:  "Test",
-// 	}
+	for _, testCase := range testCases {
+		userJSON, _ := json.Marshal(testCase.reply)
+		req := httptest.NewRequest(http.MethodPost, testCase.path, strings.NewReader(string(userJSON)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues("1")
+		middleware.JWT([]byte(config.JWT_KEY))(controller.CreateDoctorReplyForumTesting())(context)
+		c := e.NewContext(req, rec)
 
-// 	// fmt.Printf("Token: %s\n", tokenString)
+		c.SetPath(testCase.path)
 
-// 	requestBody, err := json.Marshal(requestObject)
-// 	if err != nil {
-// 		// Handle error jika terjadi kesalahan dalam marshalling
-// 		panic(err)
-// 	}
+		t.Run(fmt.Sprintf("POST %s", testCase.path), func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+}
 
-// 	req := httptest.NewRequest(http.MethodPost, "/doctors/forum-replies", strings.NewReader(string(requestBody)))
-// 	req.Header.Set("Authorization", "Bearer "+tokenString)
-// 	req.Header.Set("Content-Type", "application/json")
+func TestGetForumDetailsController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		{
+			name:       "get details forum",
+			path:       "/doctors/forums/details/:id",
+			expectCode: http.StatusOK,
+		},
+		{
+			name:       "get details forum",
+			path:       "/doctors/forums/detailss/:id",
+			expectCode: http.StatusBadRequest,
+		},
+	}
 
-// 	rec := httptest.NewRecorder()
-// 	c := e.NewContext(req, rec)
+	e := InitEchoTestAPI()
+	token := InsertDataDoctor()
+	InsertDataUser()
+	InsertDataPatient()
+	InsertDataForums()
 
-// 	// Set the JWT token directly in the context
-// 	c.Set("user", tokenString)
+	for _, testCase := range testCases {
 
-// 	// Set the path and method for the context
-// 	c.SetPath("/doctors/forum-replies")
+		req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
 
-// 	// Apply CheckRole middleware
-// 	role := "doctor"
-// 	checkRoleMiddleware := middleware.CheckRole(role)
-// 	handler := checkRoleMiddleware(controller.CreateDoctorReplyForum)
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues("1")
+		middleware.JWT([]byte(config.JWT_KEY))(controller.GetDoctorForumDetailsTesting())(context)
+		c := e.NewContext(req, rec)
 
-// 	// Execute the correct controller for creating a doctor reply to a forum
-// 	err = handler(c)
+		c.SetPath(testCase.path)
 
-// 	// Assertions
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusCreated, rec.Code)
-// 	// Tambahkan setelah pengujian assertions
-// 	// fmt.Println("RESPONSE BODY:", rec.Body.String())
+		t.Run(fmt.Sprintf("GET %s", testCase.path), func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+}
 
-// }
+func TestDeleteForumReplyController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		{
+			name:       "success delete forum reply",
+			path:       "/doctors/forum-replies/:id",
+			expectCode: http.StatusOK,
+		},
+		{
+			name:       "failed delete forum reply invalid endpoint",
+			path:       "/doctors/forum-repliess/:id",
+			expectCode: http.StatusBadRequest,
+		},
+		{
+			name:       "failed delete forum reply invalid endpoint",
+			path:       "/doctors/forum-replies/",
+			expectCode: http.StatusNotFound,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	token := InsertDataDoctor()
+	InsertDataUser()
+	InsertDataPatient()
+	InsertDataForums()
+
+	for _, testCase := range testCases {
+
+		req := httptest.NewRequest(http.MethodDelete, testCase.path, nil)
+
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues("1")
+		middleware.JWT([]byte(config.JWT_KEY))(controller.DeleteDoctorForumReplyControllerTesting())(context)
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		t.Run(fmt.Sprintf("DELETE %s", testCase.path), func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+}
+
+func TestUpdateDoctorReplyForum(t *testing.T) {
+	forumID, _ := uuid.Parse("f1c11001-e254-40a9-8929-22e5bf660d1c")
+	doctorID, _ := uuid.Parse("f7613c10-29fd-4b82-bfea-1649ae41af98")
+
+	var testCases = []struct {
+		name       string
+		path       string
+		reply      dto.DoctorForumReplyRequest
+		expectCode int
+	}{
+		{
+			name: "success create forum reply",
+			path: "/doctors/forum-replies/:id",
+			reply: dto.DoctorForumReplyRequest{
+				ForumsID: forumID,
+				DoctorID: doctorID,
+				Content:  "Test forum reply",
+				Date:     time.Now(),
+			},
+			expectCode: http.StatusOK,
+		},
+		{
+			name: "success create forum reply",
+			path: "/doctors/forum-repliess/:id",
+			reply: dto.DoctorForumReplyRequest{
+				ForumsID: forumID,
+				DoctorID: doctorID,
+				Content:  "Test forum reply",
+				Date:     time.Now(),
+			},
+			expectCode: http.StatusNotFound,
+		},
+		{
+			name: "success create forum reply",
+			path: "/doctors/forum-replies/",
+			reply: dto.DoctorForumReplyRequest{
+				ForumsID: forumID,
+				DoctorID: doctorID,
+				Content:  "Test forum reply",
+				Date:     time.Now(),
+			},
+			expectCode: http.StatusBadRequest,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	token := InsertDataDoctor()
+	InsertDataUser()
+	InsertDataPatient()
+	InsertDataForums()
+
+	for _, testCase := range testCases {
+		userJSON, _ := json.Marshal(testCase.reply)
+		req := httptest.NewRequest(http.MethodPut, testCase.path, strings.NewReader(string(userJSON)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues("1")
+		middleware.JWT([]byte(config.JWT_KEY))(controller.UpdateDoctorReplyForumTesting())(context)
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		t.Run(fmt.Sprintf("PUT %s", testCase.path), func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+}
