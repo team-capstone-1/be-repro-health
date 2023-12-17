@@ -205,3 +205,175 @@ func TestCreateDoctorController(t *testing.T) {
 	}
 
 }
+
+func TestDoctorLoginController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		user       model.User
+		expectCode int
+	}{
+		{
+			name: "Doctor Login",
+			path: "/doctors/login",
+			user: model.User{
+				Email:    "andicahyo@gmail.com",
+				Password: "Doctor@123",
+			},
+			expectCode: http.StatusOK,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	InsertDataDoctor()
+
+	for _, testCase := range testCases {
+		userJSON, _ := json.Marshal(testCase.user)
+
+		req := httptest.NewRequest(http.MethodPost, testCase.path, strings.NewReader(string(userJSON)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		if assert.NoError(t, controller.DoctorLoginController(c)) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+			body := rec.Body.String()
+
+			type LoginResponse struct {
+				UserID string `json:"user_id"`
+				Email  string `json:"email"`
+				Name   string `json:"name"`
+				Token  string `json:"token"`
+			}
+			type Response struct {
+				Message  string        `json:"message"`
+				Response LoginResponse `json:"response"`
+			}
+			var responseData Response
+			err := json.Unmarshal([]byte(body), &responseData)
+
+			if err != nil {
+				assert.Error(t, err, "error")
+			}
+			if rec.Code == 200 {
+				assert.Equal(t, responseData.Response.Email, testCase.user.Email)
+			}
+		}
+	}
+}
+
+func TestDoctorSendOTPController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		user       model.User
+		expectCode int
+	}{
+		{
+			name: "Doctor Success Send OTP",
+			path: "/doctors/send-otp",
+			user: model.User{
+				Email: "andicahyo@gmail.com",
+			},
+			expectCode: http.StatusOK,
+		},
+		{
+			name: "Doctor Failed Send OTP",
+			path: "/doctors/send-otp",
+			user: model.User{
+				Email: "andicahyo1@gmail.com",
+			},
+			expectCode: http.StatusBadRequest,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	InsertDataDoctor()
+
+	for _, testCase := range testCases {
+		userJSON, _ := json.Marshal(testCase.user)
+
+		req := httptest.NewRequest(http.MethodPut, testCase.path, strings.NewReader(string(userJSON)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		if assert.NoError(t, controller.DoctorSendOTPController(c)) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+			body := rec.Body.String()
+
+			type Response struct {
+				Message  string         `json:"message"`
+				Response map[string]any `json:"response"`
+			}
+			var responseData Response
+			err := json.Unmarshal([]byte(body), &responseData)
+
+			if err != nil {
+				assert.Error(t, err, "error")
+			}
+		}
+	}
+}
+
+func TestDoctorValidateOTPController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		user       model.User
+		expectCode int
+	}{
+		{
+			name: "Doctor Validate OTP",
+			path: "/doctors/validate-otp",
+			user: model.User{
+				Email: "andicahyo@gmail.com",
+				OTP:   "",
+			},
+			expectCode: http.StatusOK,
+		},
+		{
+			name: "Doctor Validate OTP Invalid OTP",
+			path: "/doctors/validate-otp",
+			user: model.User{
+				Email: "andicahyo@gmail.com",
+				OTP:   "1",
+			},
+			expectCode: http.StatusBadRequest,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	InsertDataDoctor()
+
+	for _, testCase := range testCases {
+		userJSON, _ := json.Marshal(testCase.user)
+
+		req := httptest.NewRequest(http.MethodPut, testCase.path, strings.NewReader(string(userJSON)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		if assert.NoError(t, controller.DoctorValidateOTPController(c)) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+			body := rec.Body.String()
+
+			type Response struct {
+				Message  string         `json:"message"`
+				Response map[string]any `json:"response"`
+			}
+			var responseData Response
+			err := json.Unmarshal([]byte(body), &responseData)
+
+			if err != nil {
+				assert.Error(t, err, "error")
+			}
+		}
+	}
+}
