@@ -289,3 +289,15 @@ func DeletePatientController(c echo.Context) error {
 func CreatePatientControllerTesting() echo.HandlerFunc {
 	return CreatePatientController
 }
+
+func UpdatePatientControllerTesting() echo.HandlerFunc {
+	return UpdatePatientController
+}
+
+func GetPatientsControllerTesting() echo.HandlerFunc {
+	return GetPatientsController
+}
+
+func GetPatientControllerTesting() echo.HandlerFunc {
+	return GetPatientController
+}
