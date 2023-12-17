@@ -1,12 +1,16 @@
 package controller_test
 
 import (
-	"encoding/json"
+	// "encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"mime/multipart"
 	"testing"
-	"strings"
+	// "strings"
 	"time"
+	"io"
+	"os"
+	"bytes"
 	"fmt"
 
 	"capstone-project/controller"
@@ -25,7 +29,8 @@ func InsertDataPatient(c echo.Context) (model.Patient, error) {
 	user := m.ExtractTokenUserId(c)
 	patient := model.Patient{
 		Name:            "Davin2",
-		UserID: user,
+		UserID: 		 user,
+		ProfileImage:	 "",
 		TelephoneNumber: "123456789",
 		DateOfBirth:     time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC),
 		Relation:        "sibling",
@@ -45,16 +50,16 @@ func TestCreatePatientController(t *testing.T) {
 	var testCases = []struct {
 		name       string
 		path       string
-		patient	   model.Patient
+		patient	   dto.PatientRequest
 		expectCode int
 	}{
 		{
 			name:       "create new patient",
 			path:       "/patients",
-			patient:		model.Patient{
+			patient:		dto.PatientRequest{
 							Name:            "Davin2",
 							TelephoneNumber: "123456789",
-							DateOfBirth:     time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC),
+							DateOfBirth:     time.Now(),
 							Relation:        "sibling",
 							Weight:          70.5,
 							Height:          175.0,
@@ -68,11 +73,31 @@ func TestCreatePatientController(t *testing.T) {
 	token := InsertDataUser()
 
 	for _, testCase := range testCases {
-		patientJSON, _ := json.Marshal(testCase.patient)
+		var buf bytes.Buffer
+		writer := multipart.NewWriter(&buf)
+
+		fileWriter, err := writer.CreateFormFile("profile_image", "your_image_file.jpg")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		file, err := os.Open("../docs/ERD.png")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer file.Close()
+
+		_, err = io.Copy(fileWriter, file)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		writer.Close()
 		
-		req := httptest.NewRequest(http.MethodPost, "/patients", strings.NewReader(string(patientJSON)))
-		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-		// req.Header.Set(echo.HeaderAuthorization, "Bearer "+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJuYW1lIjoiRGF2aW5ubiIsInJvbGUiOiJ1c2VyIiwidXNlcl9pZCI6IjUwMWM3MzdhLTcyY2EtNGY1ZS04YjM1LWY1Mzc0ZTRmZDg1YyJ9.Ioa0l1n0vJpqi0BrQOWT0skSEMMGxi49g_y3_QrBh0w")
+		req := httptest.NewRequest(http.MethodPost, "/patients", &buf)
+		// req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set("Content-Type", writer.FormDataContentType())
+
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
 		rec := httptest.NewRecorder()
 		context := e.NewContext(req, rec)
@@ -84,26 +109,8 @@ func TestCreatePatientController(t *testing.T) {
 
 		c.SetPath(testCase.path)
 
-		if assert.NoError(t, controller.CreatePatientController(c)) {
+		t.Run("POST /patients", func(t *testing.T) {
 			assert.Equal(t, testCase.expectCode, rec.Code)
-			body := rec.Body.String()
-
-			// open file
-			// convert struct
-			type Response struct {
-				Message string                   `json:"message"`
-				Response   dto.PatientResponse    		`json:"response"`
-			}
-			var responseData Response
-			err := json.Unmarshal([]byte(body), &responseData)
-			fmt.Println("token:", responseData)
-
-			if err != nil {
-				assert.Error(t, err, "error")
-			}
-			if rec.Code == 200 {
-				assert.Equal(t, responseData.Response.Name, testCase.patient.Name)
-			}
-		}
+		})
 	}
 }

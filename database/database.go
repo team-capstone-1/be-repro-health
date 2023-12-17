@@ -377,6 +377,7 @@ func InitialMigrationTest() {
 		&model.Forum{},
 		&model.ForumReply{},
 		&model.Comment{},
+		&model.Clinic{},
 		&model.Notification{},
 		&model.HealthRecommendation{},
 		&model.DoctorHealthRecommendation{},

@@ -3,7 +3,6 @@ package middleware
 import (
 	"net/http"
 	"time"
-	"fmt"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
@@ -56,10 +55,8 @@ func CheckRole(role string) echo.MiddlewareFunc {
 }
 
 func ExtractTokenUserId(e echo.Context) uuid.UUID {
-	fmt.Println("Headers in ExtractTokenUserId:", e.Request().Header)
 	user := e.Get("user").(*jwt.Token)
 	if user.Valid {
-		fmt.Println("user:", user)
 		claims := user.Claims.(jwt.MapClaims)
 		userId := claims["user_id"].(string)
 		uuid, _ := uuid.Parse(userId)

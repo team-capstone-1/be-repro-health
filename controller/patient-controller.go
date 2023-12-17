@@ -3,7 +3,6 @@ package controller
 import (
 	"net/http"
 	"sort"
-	"fmt"
 
 	"capstone-project/dto"
 	m "capstone-project/middleware"
@@ -95,7 +94,7 @@ func CreatePatientController(c echo.Context) error {
 			"response": errBind.Error(),
 		})
 	}
-
+	
 	user := m.ExtractTokenUserId(c)
 	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
@@ -133,7 +132,6 @@ func CreatePatientController(c echo.Context) error {
 			"response": err.Error(),
 		})
 	}
-	fmt.Println("bbbbbbbbbb")
 
 	patientResponse := dto.ConvertToPatientResponse(responseData)
 	CreateNotification(
@@ -145,7 +143,7 @@ func CreatePatientController(c echo.Context) error {
 
 	return c.JSON(http.StatusCreated, map[string]any{
 		"message":  "success create new patient",
-		"response": patientResponse,
+		"response": responseData,
 	})
 }
 
