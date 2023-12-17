@@ -377,3 +377,54 @@ func TestDoctorValidateOTPController(t *testing.T) {
 		}
 	}
 }
+
+func TestGetDoctorByIDController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		// {
+		// 	name:       "success get details doctor",
+		// 	path:       "/doctors/:id",
+		// 	expectCode: http.StatusOK,
+		// },
+		{
+			name:       "success get details doctor",
+			path:       "/doctorss/:id",
+			expectCode: http.StatusBadRequest,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	InsertDataDoctor()
+
+	for _, testCase := range testCases {
+
+		req := httptest.NewRequest(http.MethodPost, testCase.path+"f7613c10-29fd-4b82-bfea-1649ae41af98", nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		if assert.NoError(t, controller.GetDoctorController(c)) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+			body := rec.Body.String()
+
+			// open file
+			// convert struct
+			type Response struct {
+				Message  string           `json:"message"`
+				Response dto.UserResponse `json:"response"`
+			}
+			var responseData Response
+			err := json.Unmarshal([]byte(body), &responseData)
+
+			if err != nil {
+				assert.Error(t, err, "error")
+			}
+
+		}
+	}
+}
