@@ -11,14 +11,18 @@ import (
 	"capstone-project/database"
 	"capstone-project/dto"
 	"capstone-project/model"
+	"capstone-project/middleware"
+	"capstone-project/constant"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
-func InsertDataUser() (model.User, error) {
+func InsertDataUser() (string) {
 	user := model.User{
+		ID: uuid.New(),
 		Name:         "Davin2",
 		Email:        "davin2@gmail.com",
 		Password:     "12345678",
@@ -26,11 +30,10 @@ func InsertDataUser() (model.User, error) {
 	hashPassword, _ := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
 	user.Password = string(hashPassword)
 
-	var err error
-	if err = database.DB.Create(&user).Error; err != nil {
-		return model.User{}, err
-	}
-	return user, nil
+	database.DB.Create(&user)
+
+	token, _ := middleware.CreateToken(user.ID, constant.ROLE_USER, user.Name, false)
+	return token
 }
 
 func TestSignUpController(t *testing.T) {
@@ -185,50 +188,116 @@ func TestLoginController(t *testing.T) {
 	}
 }
 
-// func TestSendOTPController(t *testing.T) {
-// 	var testCases = []struct {
-// 		name       string
-// 		path       string
-// 		user	   model.User
-// 		expectCode int
-// 	}{
-// 		{
-// 			name:       "Send OTP",
-// 			path:       "/users/send-otp",
-// 			user:		model.User{
-// 							Email:    "davin2@gmail.com",
-// 						},
-// 			expectCode: http.StatusOK,
-// 		},
-// 	}
+func TestSendOTPController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		user	   model.User
+		expectCode int
+	}{
+		{
+			name:       "Send OTP",
+			path:       "/users/send-otp",
+			user:		model.User{
+							Email:    "davin2@gmail.com",
+						},
+			expectCode: http.StatusOK,
+		},
+		{
+			name:       "Send OTP",
+			path:       "/users/send-otp",
+			user:		model.User{
+							Email:    "davin@gmail.com",
+						},
+			expectCode: http.StatusBadRequest,
+		},
+	}
 
-// 	e := InitEchoTestAPI()
-// 	InsertDataUser()
+	e := InitEchoTestAPI()
+	InsertDataUser()
 
-// 	for _, testCase := range testCases {
-// 		userJSON, _ := json.Marshal(testCase.user)
+	for _, testCase := range testCases {
+		userJSON, _ := json.Marshal(testCase.user)
 		
-// 		req := httptest.NewRequest(http.MethodPut, "/users/send-otp", strings.NewReader(string(userJSON)))
-// 		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-// 		rec := httptest.NewRecorder()
-// 		c := e.NewContext(req, rec)
+		req := httptest.NewRequest(http.MethodPut, "/users/send-otp", strings.NewReader(string(userJSON)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
 
-// 		c.SetPath(testCase.path)
+		c.SetPath(testCase.path)
 
-// 		if assert.NoError(t, controller.LoginUserController(c)) {
-// 			assert.Equal(t, testCase.expectCode, rec.Code)
-// 			body := rec.Body.String()
+		if assert.NoError(t, controller.SendOTP(c)) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+			body := rec.Body.String()
 
-// 			type Response struct {
-// 				Message string           `json:"message"`
-// 				Response   map[string]any `json:"response"`
-// 			}
-// 			var responseData Response
-// 			err := json.Unmarshal([]byte(body), &responseData)
+			type Response struct {
+				Message string           `json:"message"`
+				Response   map[string]any `json:"response"`
+			}
+			var responseData Response
+			err := json.Unmarshal([]byte(body), &responseData)
 
-// 			if err != nil {
-// 				assert.Error(t, err, "error")
-// 			}
-// 		}
-// 	}
-// }
+			if err != nil {
+				assert.Error(t, err, "error")
+			}
+		}
+	}
+}
+
+func TestValidateOTPController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		user	   model.User
+		expectCode int
+	}{
+		{
+			name:       "Validate OTP",
+			path:       "/users/validate-otp",
+			user:		model.User{
+							Email:    "davin2@gmail.com",
+							OTP:    "",
+						},
+			expectCode: http.StatusOK,
+		},
+		{
+			name:       "Validate OTP Wrong OTP",
+			path:       "/users/validate-otp",
+			user:		model.User{
+							Email:    "davin2@gmail.com",
+							OTP:    "1",
+						},
+			expectCode: http.StatusBadRequest,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	InsertDataUser()
+
+	for _, testCase := range testCases {
+		userJSON, _ := json.Marshal(testCase.user)
+		
+		req := httptest.NewRequest(http.MethodPut, "/users/validate-otp", strings.NewReader(string(userJSON)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		rec := httptest.NewRecorder()
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		if assert.NoError(t, controller.ValidateOTP(c)) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+			body := rec.Body.String()
+
+			type Response struct {
+				Message string           `json:"message"`
+				Response   map[string]any `json:"response"`
+			}
+			var responseData Response
+			err := json.Unmarshal([]byte(body), &responseData)
+
+			if err != nil {
+				assert.Error(t, err, "error")
+			}
+		}
+	}
+}

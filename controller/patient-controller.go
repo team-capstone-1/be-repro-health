@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 	"sort"
+	"fmt"
 
 	"capstone-project/dto"
 	m "capstone-project/middleware"
@@ -132,6 +133,7 @@ func CreatePatientController(c echo.Context) error {
 			"response": err.Error(),
 		})
 	}
+	fmt.Println("bbbbbbbbbb")
 
 	patientResponse := dto.ConvertToPatientResponse(responseData)
 	CreateNotification(
@@ -284,4 +286,8 @@ func DeletePatientController(c echo.Context) error {
 		"message":  "success delete patient",
 		"response": "success delete patient with id " + uuid.String(),
 	})
+}
+
+func CreatePatientControllerTesting() echo.HandlerFunc {
+	return CreatePatientController
 }
