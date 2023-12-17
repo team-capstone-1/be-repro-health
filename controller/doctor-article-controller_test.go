@@ -27,14 +27,14 @@ func init() {
 	}
 }
 
-func TestGetAllArticleDoctorsController(t *testing.T) {
+func TestGetAllArticleDoctorsController_invalid(t *testing.T) {
 	e := echo.New()
 
 	jwtKey := os.Getenv("JWT_KEY")
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "doctor_id"
+	claims["sub"] = "invalid_doctor_id"
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtKey))
@@ -56,7 +56,7 @@ func TestGetAllArticleDoctorsController(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
-func TestGetDoctorArticleByIDController(t *testing.T) {
+func TestGetDoctorArticleByIDController_invalid(t *testing.T) {
 	e := echo.New()
 
 	articleID := uuid.New()
@@ -65,7 +65,7 @@ func TestGetDoctorArticleByIDController(t *testing.T) {
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "doctor_id"
+	claims["sub"] = "invalid_doctor_id"
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtKey))
@@ -88,14 +88,14 @@ func TestGetDoctorArticleByIDController(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
-func TestCreateDoctorArticleController(t *testing.T) {
+func TestCreateDoctorArticleController_invalid(t *testing.T) {
 	e := echo.New()
 
 	jwtKey := os.Getenv("JWT_KEY")
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "valid_doctor_id"
+	claims["sub"] = "invalid_doctor_id"
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtKey))
@@ -128,15 +128,14 @@ func TestCreateDoctorArticleController(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
-func TestUpdateDoctorArticleController(t *testing.T) {
+func TestUpdateDoctorArticleController_invalid(t *testing.T) {
 	e := echo.New()
 
 	jwtKey := os.Getenv("JWT_KEY")
 
-	// Create a valid JWT token with a valid doctor ID
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "valid_doctor_id" // Replace with a valid doctor ID
+	claims["sub"] = "invalid_doctor_id" 
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtKey))
@@ -144,14 +143,12 @@ func TestUpdateDoctorArticleController(t *testing.T) {
 		t.Fatalf("Error creating JWT token: %v", err)
 	}
 
-	// Create a sample article DTO for updating
-	articleID := "some_article_id" // Replace with a valid article ID
+	articleID := "some_article_id" 
 	updateArticleDTO := dto.DoctorArticleRequest{
 		Title:   "Updated Test Article",
 		Content: "Updated content goes here.",
 	}
 
-	// Convert the update article DTO to JSON
 	jsonUpdateArticleDTO, err := json.Marshal(updateArticleDTO)
 	if err != nil {
 		t.Fatalf("Error marshalling JSON: %v", err)
@@ -173,14 +170,14 @@ func TestUpdateDoctorArticleController(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
-func TestUpdateArticlePublishedStatusController(t *testing.T) {
+func TestUpdateArticlePublishedStatusController_invalid(t *testing.T) {
 	e := echo.New()
 
 	jwtKey := os.Getenv("JWT_KEY")
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "valid_doctor_id"
+	claims["sub"] = "invalid_doctor_id"
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtKey))

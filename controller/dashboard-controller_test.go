@@ -13,14 +13,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetDataCountForDoctorControllerOneMonth(t *testing.T) {
+func TestGetDataCountForDoctorControllerOneMonth_invalid(t *testing.T) {
 	e := echo.New()
 
 	jwtKey := os.Getenv("JWT_KEY")
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "valid_doctor_id"
+	claims["sub"] = "invalid_doctor_id"
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtKey))
@@ -43,14 +43,14 @@ func TestGetDataCountForDoctorControllerOneMonth(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
-func TestGetDataCountForDoctorControllerOneWeek(t *testing.T) {
+func TestGetDataCountForDoctorControllerOneWeek_invalid(t *testing.T) {
 	e := echo.New()
 
 	jwtKey := os.Getenv("JWT_KEY")
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "valid_doctor_id"
+	claims["sub"] = "invalid_doctor_id"
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtKey))
@@ -73,14 +73,14 @@ func TestGetDataCountForDoctorControllerOneWeek(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
-func TestGetDataCountForDoctorControllerOneDay(t *testing.T) {
+func TestGetDataCountForDoctorControllerOneDay_invalid(t *testing.T) {
 	e := echo.New()
 
 	jwtKey := os.Getenv("JWT_KEY")
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "valid_doctor_id"
+	claims["sub"] = "invalid_doctor_id"
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtKey))

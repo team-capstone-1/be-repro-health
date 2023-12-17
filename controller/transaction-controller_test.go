@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"capstone-project/controller"
 	"capstone-project/dto"
-	"capstone-project/model"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
@@ -18,7 +17,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetTransactionController(t *testing.T) {
+func TestGetTransactionController_invalid(t *testing.T) {
 	e := echo.New()
 
 	transactionID := uuid.New()
@@ -34,7 +33,7 @@ func TestGetTransactionController(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
-func TestGetTransactionsController(t *testing.T) {
+func TestGetTransactionsController_invalid(t *testing.T) {
 	e := echo.New()
 
 	jwtKey := os.Getenv("JWT_KEY")
@@ -64,7 +63,7 @@ func TestGetTransactionsController(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
-func TestGetPatientTransactionsController(t *testing.T) {
+func TestGetPatientTransactionsController_invalid(t *testing.T) {
 	e := echo.New()
 
 	jwtKey := os.Getenv("JWT_KEY")
@@ -88,13 +87,13 @@ func TestGetPatientTransactionsController(t *testing.T) {
 
 	c.Set("user", token)
 
-	err = controller.GetTransactionsController(c)
+	err = controller.GetPatientTransactionsController(c)
 
 	assert.Nil(t, err, "Expected an error but got nil")
-	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
-func TestCreatePaymentController(t *testing.T) {
+func TestCreatePaymentController_invalid(t *testing.T) {
 	e := echo.New()
 
 	transactionID := uuid.New()
