@@ -1,7 +1,10 @@
 package controller_test
 
 import (
+	"bytes"
 	"capstone-project/controller"
+	"capstone-project/dto"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -24,14 +27,14 @@ func init() {
 	}
 }
 
-func TestGetAllArticleDoctorsController_Unauthorized(t *testing.T) {
+func TestGetAllArticleDoctorsController(t *testing.T) {
 	e := echo.New()
 
 	jwtKey := os.Getenv("JWT_KEY")
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "invalid_doctor_id"
+	claims["sub"] = "doctor_id"
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtKey))
@@ -51,8 +54,6 @@ func TestGetAllArticleDoctorsController_Unauthorized(t *testing.T) {
 
 	assert.Nil(t, err, "Expected an error but got nil")
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
-
-	fmt.Println("Response Body:", rec.Body.String())
 }
 
 func TestGetDoctorArticleByIDController(t *testing.T) {
@@ -87,50 +88,128 @@ func TestGetDoctorArticleByIDController(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
-// func TestCreateDoctorArticleController(t *testing.T) {
-// 	e := echo.New()
+func TestCreateDoctorArticleController(t *testing.T) {
+	e := echo.New()
 
-// 	// Set up test JWT key
-// 	jwtKey := os.Getenv("JWT_KEY")
+	jwtKey := os.Getenv("JWT_KEY")
 
-// 	// Create a JWT token with a valid doctor ID
-// 	token := createTestToken(jwtKey)
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "valid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
-// 	// Create a request body for the article creation
-// 	articleRequest := dto.DoctorArticleRequest{
-// 		Title:       "Test Article",
-// 		Description: "This is a test article.",
-// 	}
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
 
-// 	// Convert the article request to JSON
-// 	articleJSON, err := util.ConvertToJSON(articleRequest)
-// 	assert.NoError(t, err)
+	articleDTO := dto.DoctorArticleRequest{
+		Title:   "Test Article",
+		Content: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+	}
 
-// 	// Create a multipart/form-data request with the token and article JSON
-// 	req := httptest.NewRequest(http.MethodPost, "/articles", bytes.NewReader(articleJSON))
-// 	req.Header.Set("Authorization", "Bearer "+token)
-// 	req.Header.Set("Content-Type", "multipart/form-data")
+	jsonArticleDTO, err := json.Marshal(articleDTO)
+	if err != nil {
+		t.Fatalf("Error marshalling JSON: %v", err)
+	}
 
-// 	// Create an HTTP recorder and an Echo context
-// 	rec := httptest.NewRecorder()
-// 	c := e.NewContext(req, rec)
+	req := httptest.NewRequest(http.MethodPost, "/articles", bytes.NewBuffer(jsonArticleDTO))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenString)
 
-// 	// Call the controller function
-// 	err = controller.CreateDoctorArticleController(c)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
 
-// 	// Assert that there is no error (indicating success) and the response code is StatusCreated
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusCreated, rec.Code)
+	c.Set("user", token)
 
-// 	// Optionally, you can inspect the response body for more details
-// 	fmt.Println("Response Body:", rec.Body.String())
-// }
+	err = controller.CreateDoctorArticleController(c)
 
-// func createTestToken(jwtKey string) string {
-// 	token := util.CreateTestToken(jwtKey, "valid_doctor_id")
-// 	tokenString, err := token.SignedString([]byte(jwtKey))
-// 	if err != nil {
-// 		panic(fmt.Sprintf("Error creating test JWT token: %v", err))
-// 	}
-// 	return tokenString
-// }
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
+func TestUpdateDoctorArticleController(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	// Create a valid JWT token with a valid doctor ID
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "valid_doctor_id" // Replace with a valid doctor ID
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	// Create a sample article DTO for updating
+	articleID := "some_article_id" // Replace with a valid article ID
+	updateArticleDTO := dto.DoctorArticleRequest{
+		Title:   "Updated Test Article",
+		Content: "Updated content goes here.",
+	}
+
+	// Convert the update article DTO to JSON
+	jsonUpdateArticleDTO, err := json.Marshal(updateArticleDTO)
+	if err != nil {
+		t.Fatalf("Error marshalling JSON: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPut, "/articles/"+articleID, bytes.NewBuffer(jsonUpdateArticleDTO))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/articles/" + articleID)
+
+	c.Set("user", token)
+
+	err = controller.UpdateDoctorArticleController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
+
+func TestUpdateArticlePublishedStatusController(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "valid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	articleID := "some_article_id"
+	updateStatusDTO := dto.DoctorArticleResponse{
+		Published: true,
+	}
+
+	jsonUpdateStatusDTO, err := json.Marshal(updateStatusDTO)
+	if err != nil {
+		t.Fatalf("Error marshalling JSON: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPut, "/articles/"+articleID+"/publish", bytes.NewBuffer(jsonUpdateStatusDTO))
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/articles/" + articleID + "/publish")
+
+	c.Set("user", token)
+
+	err = controller.UpdateArticlePublishedStatusController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusBadRequest, rec.Code) 
+}

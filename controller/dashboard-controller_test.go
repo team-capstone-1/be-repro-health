@@ -1,61 +1,104 @@
 package controller_test
 
-// import (
-// 	"capstone-project/controller"
-// 	"capstone-project/middleware"
-// 	"capstone-project/model"
-// 	"capstone-project/repository"
-// 	"net/http"
-// 	"net/http/httptest"
-// 	"testing"
+import (
+	"capstone-project/controller"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+	"time"
 
-// 	"github.com/google/uuid"
-// 	"github.com/labstack/echo/v4"
-// 	"github.com/stretchr/testify/assert"
-// 	"github.com/stretchr/testify/mock"
-// )
+	"github.com/golang-jwt/jwt"
+	"github.com/labstack/echo/v4"
+	"github.com/stretchr/testify/assert"
+)
 
-// func TestGetDataCountForDoctorControllerOneMonth(t *testing.T) {
-// 	// Create a mock repository or use a testing framework
-// 	mockRepo := &repository.DoctorAIRepositoryImpl{} // Replace with your actual mock repository
+func TestGetDataCountForDoctorControllerOneMonth(t *testing.T) {
+	e := echo.New()
 
-// 	// Mock middleware
-// 	mockMiddleware := &middleware.MiddlewareMock{}
+	jwtKey := os.Getenv("JWT_KEY")
 
-// 	// Create a new Echo instance
-// 	e := echo.New()
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "valid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
-// 	// Create a request
-// 	req := httptest.NewRequest(http.MethodGet, "/api/doctor/dashboard/month", nil)
-// 	rec := httptest.NewRecorder()
-// 	c := e.NewContext(req, rec)
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
 
-// 	// Set the doctor ID in the context
-// 	doctorID := uuid.New()
-// 	mockMiddleware.On("ExtractTokenUserId", c).Return(doctorID).Once()
+	req := httptest.NewRequest(http.MethodGet, "/dashboard/data-count-one-month"+tokenString, nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
 
-// 	// Set the mock repository in the controller
-// 	controller := controller.GetDataCountForDoctorControllerOneMonth
-// 	controller. = mockRepo
-// 	controller.Middleware = mockMiddleware
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/dashboard/data-count-one-month" + tokenString)
 
-// 	// Mock repository responses
-// 	mockRepo.On("GetConsultationByDoctorAndMonth", doctorID, mock.AnythingOfType("time.Time")).Return([]model.Consultation{}, nil)
-// 	mockRepo.On("GetPatientByDoctorAndMonth", doctorID, mock.AnythingOfType("time.Time")).Return([]model.Patient{}, nil)
-// 	mockRepo.On("GetAllTransactionsByDoctorID", doctorID).Return([]model.Transaction{}, nil)
-// 	mockRepo.On("DoctorGetAllArticlesByMonth", doctorID, mock.AnythingOfType("time.Time")).Return([]model.Article{}, nil)
+	c.Set("user", token)
 
-// 	// Call the controller function
-// 	err := controller.GetDataCountForDoctorControllerOneMonth(c)
+	err = controller.GetDataCountForDoctorControllerOneMonth(c)
 
-// 	// Assertions
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusOK, rec.Code)
-// 	// Add more assertions based on your response payload
-// 	// ...
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
 
-// 	// Verify that the mock repository methods were called
-// 	mockRepo.AssertExpectations(t)
-// }
+func TestGetDataCountForDoctorControllerOneWeek(t *testing.T) {
+	e := echo.New()
 
-// // Similar tests for GetDataCountForDoctorControllerOneWeek and GetDataCountForDoctorControllerOneDay...
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "valid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/dashboard/data-count-one-month"+tokenString, nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/dashboard/data-count-one-month" + tokenString)
+
+	c.Set("user", token)
+
+	err = controller.GetDataCountForDoctorControllerOneWeek(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
+func TestGetDataCountForDoctorControllerOneDay(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "valid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/dashboard/data-count-one-month"+tokenString, nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/dashboard/data-count-one-month" + tokenString)
+
+	c.Set("user", token)
+
+	err = controller.GetDataCountForDoctorControllerOneDay(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
