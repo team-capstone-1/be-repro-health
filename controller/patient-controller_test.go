@@ -1,13 +1,11 @@
 package controller_test
 
 import (
-	// "encoding/json"
 	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	// "strings"
 	"bytes"
 	"fmt"
 	"io"
@@ -18,7 +16,6 @@ import (
 	"capstone-project/controller"
 	"capstone-project/database"
 	"capstone-project/dto"
-	// m "capstone-project/middleware"
 	"capstone-project/model"
 
 	"github.com/google/uuid"
@@ -27,12 +24,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func InsertDataPatient() (model.Patient, error) {
+func InsertDataPatient(userid uuid.UUID) (model.Patient, error) {
 	// user := m.ExtractTokenUserId(c)
 	patient := model.Patient{
 		ID: uuid.New(),
 		Name:            "Davin2",
-		// UserID: 		 user,
+		UserID: 		 userid,
 		ProfileImage:	 "",
 		TelephoneNumber: "123456789",
 		DateOfBirth:     time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC),
@@ -73,7 +70,7 @@ func TestCreatePatientController(t *testing.T) {
 	}
 
 	e := InitEchoTestAPI()
-	token := InsertDataUser()
+	token,_ := InsertDataUser()
 
 	for _, testCase := range testCases {
 		var buf bytes.Buffer
@@ -132,8 +129,8 @@ func TestGetAllPatientsController(t *testing.T) {
 	}
 
 	e := InitEchoTestAPI()
-	InsertDataPatient()
-	token := InsertDataUser()
+	token, user := InsertDataUser()
+	InsertDataPatient(user.ID)
 
 	for _, testCase := range testCases {
 		
@@ -165,7 +162,7 @@ func TestUpdatePatientController(t *testing.T) {
 	}{
 		{
 			name:       "update patient",
-			path:       "/patients",
+			path:       "/patients/:id",
 			patient:		dto.PatientRequest{
 							Name:            "Davin2",
 							TelephoneNumber: "123456789",
@@ -175,13 +172,13 @@ func TestUpdatePatientController(t *testing.T) {
 							Height:          175.0,
 							Gender:          "male",
 						},
-			expectCode: http.StatusBadRequest,
+			expectCode: http.StatusOK,
 		},
 	}
 
 	e := InitEchoTestAPI()
-	InsertDataPatient()
-	token := InsertDataUser()
+	token, user := InsertDataUser()
+	patient,_ := InsertDataPatient(user.ID)
 
 	for _, testCase := range testCases {
 		var buf bytes.Buffer
@@ -214,7 +211,7 @@ func TestUpdatePatientController(t *testing.T) {
 		context := e.NewContext(req, rec)
 		context.SetPath(testCase.path)
 		context.SetParamNames("id")
-		context.SetParamValues("1")
+		context.SetParamValues(patient.ID.String())
 		middleware.JWT([]byte(config.JWT_KEY))(controller.UpdatePatientControllerTesting())(context)
 		c := e.NewContext(req, rec)
 
@@ -226,8 +223,45 @@ func TestUpdatePatientController(t *testing.T) {
 	}
 }
 
-
 func TestGetPatientByIDController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		{
+			name:       "get patient",
+			path:       "/patients/:id",
+			expectCode: http.StatusOK,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	token, user := InsertDataUser()
+	patient,_ := InsertDataPatient(user.ID)
+
+	for _, testCase := range testCases {
+		
+		req := httptest.NewRequest(http.MethodGet, "/patients/:id", nil)
+
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues(patient.ID.String())
+		middleware.JWT([]byte(config.JWT_KEY))(controller.GetPatientControllerTesting())(context)
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		t.Run("GET /patients/:id", func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+}
+
+func TestGetPatientByIDControllerInvalid(t *testing.T) {
 	var testCases = []struct {
 		name       string
 		path       string
@@ -241,8 +275,8 @@ func TestGetPatientByIDController(t *testing.T) {
 	}
 
 	e := InitEchoTestAPI()
-	InsertDataPatient()
-	token := InsertDataUser()
+	token, user := InsertDataUser()
+	InsertDataPatient(user.ID)
 
 	for _, testCase := range testCases {
 		
@@ -260,6 +294,44 @@ func TestGetPatientByIDController(t *testing.T) {
 		c.SetPath(testCase.path)
 
 		t.Run("GET /patients/:id", func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+}
+
+func TestDeletePatientByIDController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		{
+			name:       "get patient",
+			path:       "/patients/:id",
+			expectCode: http.StatusOK,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	token, user := InsertDataUser()
+	patient,_ := InsertDataPatient(user.ID)
+
+	for _, testCase := range testCases {
+		
+		req := httptest.NewRequest(http.MethodDelete, "/patients/:id", nil)
+
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues(patient.ID.String())
+		middleware.JWT([]byte(config.JWT_KEY))(controller.DeletePatientControllerTesting())(context)
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		t.Run("DELETE /patients/:id", func(t *testing.T) {
 			assert.Equal(t, testCase.expectCode, rec.Code)
 		})
 	}
