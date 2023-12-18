@@ -11,6 +11,7 @@ import (
 	"capstone-project/dto"
 	"capstone-project/model"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
@@ -23,6 +24,7 @@ func InitEchoTestAPI() *echo.Echo {
 
 func InsertDataClinicForGetClinics() (model.Clinic, error) {
 	clinic := model.Clinic{
+		ID: uuid.New(),
 		Name:         "Sample Clinic",
 		Image:        "sample_image.jpg",
 		City:         "Sample City",
