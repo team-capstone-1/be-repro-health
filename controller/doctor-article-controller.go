@@ -313,3 +313,7 @@ func DeleteDoctorArticleController(c echo.Context) error {
 		"response": "success delete article with id " + articleID.String(),
 	})
 }
+
+func CreateDoctorArticleControllerTesting() echo.HandlerFunc {
+	return CreateDoctorArticleController
+}

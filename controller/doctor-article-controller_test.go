@@ -2,13 +2,16 @@ package controller_test
 
 import (
 	"bytes"
+	"capstone-project/config"
 	"capstone-project/controller"
 	"capstone-project/dto"
+	"capstone-project/model"
 	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -16,6 +19,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -88,6 +92,76 @@ func TestGetDoctorArticleByIDController_invalid(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
+func TestCreateDoctorArticleController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		article    model.Article
+		expertCode int
+	}{
+		{
+			name: "create new article",
+			path: "/articles",
+			article: model.Article{
+				Title:     "Test Article",
+				Tags:      "Test, Article, Tag",
+				Reference: "Test Reference",
+				Image:     "test_image_url.jpg",
+				ImageDesc: "Test Image Description",
+				Content:   "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+			},
+			expertCode: http.StatusCreated,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	token := InsertDataArticle
+
+	for _, testCase := range testCases {
+		articleJson, _ := json.Marshal(testCase.article)
+
+		req := httptest.NewRequest(http.MethodPost, "/articles", strings.NewReader(string(articleJson)))
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		// req.Header.Set(echo.HeaderAuthorization, "Bearer "+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdXRob3JpemVkIjp0cnVlLCJuYW1lIjoiRGF2aW5ubiIsInJvbGUiOiJ1c2VyIiwidXNlcl9pZCI6IjUwMWM3MzdhLTcyY2EtNGY1ZS04YjM1LWY1Mzc0ZTRmZDg1YyJ9.Ioa0l1n0vJpqi0BrQOWT0skSEMMGxi49g_y3_QrBh0w")
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %s", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues("1")
+		middleware.JWT([]byte(config.JWT_KEY))(controller.CreateDoctorArticleControllerTesting())(context)
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		if assert.NoError(t, controller.CreateDoctorArticleController(c)) {
+			assert.Equal(t, testCase.expertCode, rec.Code)
+			body := rec.Body.String()
+
+			type Response struct {
+				Message  string                   `json:"message"`
+				Response dto.DoctorArticleRequest `json:"response"`
+			}
+			var responseData Response
+			err := json.Unmarshal([]byte(body), &responseData)
+			fmt.Println("token:", responseData)
+
+			if err != nil {
+				assert.Error(t, err, "error")
+			}
+
+			if rec.Code == 200 {
+				assert.Equal(t, testCase.article.Title, responseData.Response.Title)
+				assert.Equal(t, testCase.article.Tags, responseData.Response.Tags)
+				assert.Equal(t, testCase.article.Reference, responseData.Response.Reference)
+				assert.Equal(t, testCase.article.Image, responseData.Response.Image)
+				assert.Equal(t, testCase.article.ImageDesc, responseData.Response.ImageDesc)
+				assert.Equal(t, testCase.article.Content, responseData.Response.Content)
+			}
+		}
+	}
+}
+
 func TestCreateDoctorArticleController_invalid(t *testing.T) {
 	e := echo.New()
 
@@ -135,7 +209,7 @@ func TestUpdateDoctorArticleController_invalid(t *testing.T) {
 
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := token.Claims.(jwt.MapClaims)
-	claims["sub"] = "invalid_doctor_id" 
+	claims["sub"] = "invalid_doctor_id"
 	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
 
 	tokenString, err := token.SignedString([]byte(jwtKey))
@@ -143,7 +217,7 @@ func TestUpdateDoctorArticleController_invalid(t *testing.T) {
 		t.Fatalf("Error creating JWT token: %v", err)
 	}
 
-	articleID := "some_article_id" 
+	articleID := "some_article_id"
 	updateArticleDTO := dto.DoctorArticleRequest{
 		Title:   "Updated Test Article",
 		Content: "Updated content goes here.",
@@ -208,5 +282,5 @@ func TestUpdateArticlePublishedStatusController_invalid(t *testing.T) {
 	err = controller.UpdateArticlePublishedStatusController(c)
 
 	assert.Nil(t, err, "Expected an error but got nil")
-	assert.Equal(t, http.StatusBadRequest, rec.Code) 
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
