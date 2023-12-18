@@ -20,7 +20,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func InsertDataUser() (string) {
+func InsertDataUser() (string, model.User) {
 	user := model.User{
 		ID: uuid.New(),
 		Name:         "Davin2",
@@ -33,7 +33,7 @@ func InsertDataUser() (string) {
 	database.DB.Create(&user)
 
 	token, _ := middleware.CreateToken(user.ID, constant.ROLE_USER, user.Name, false)
-	return token
+	return token, user
 }
 
 func TestSignUpController(t *testing.T) {

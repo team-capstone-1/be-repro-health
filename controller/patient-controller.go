@@ -301,3 +301,7 @@ func GetPatientsControllerTesting() echo.HandlerFunc {
 func GetPatientControllerTesting() echo.HandlerFunc {
 	return GetPatientController
 }
+
+func DeletePatientControllerTesting() echo.HandlerFunc {
+	return DeletePatientController
+}
