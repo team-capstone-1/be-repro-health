@@ -8,7 +8,6 @@ Capstone Project Kampus Merdeka Batch 5 Alterra Academy Kelompok 1 dengan topik 
 <br/>
 
 ## API DOCUMENTATION
----
 
 - We use Postman for API Documentation
 - Link to API Documentation: <a href="https://documenter.getpostman.com/view/26802405/2s9YeEbrs2" style="text-decoration:underline">Here</a>
@@ -17,7 +16,6 @@ Capstone Project Kampus Merdeka Batch 5 Alterra Academy Kelompok 1 dengan topik 
 <br/>
 
 ## Entity Relationship Diagram
----
 - We use draw.io to design our ERD, below is our ERD Design:
   
 ![Project Logo](docs/ERD.png)
@@ -25,7 +23,6 @@ Capstone Project Kampus Merdeka Batch 5 Alterra Academy Kelompok 1 dengan topik 
 <br/>
 
 ## Other Links
----
 | Description             | Links                                                           |
 | ------------------------| ----------------------------------------------------------------|
 | Our Github Organization | https://github.com/team-capstone-1                  |
@@ -37,7 +34,6 @@ Capstone Project Kampus Merdeka Batch 5 Alterra Academy Kelompok 1 dengan topik 
 <br/>
 
 ## Back-End Team
----
 | Name                 | Role                   | Home Town | University                           |
 | ---------------------| -----------------------|-----------|--------------------------------------|
 | Septiandi Nugraha    | Lead Back-End Golang   | Cirebon   | Institut Teknologi Telkom Purwokerto |
