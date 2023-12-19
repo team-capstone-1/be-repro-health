@@ -3,7 +3,7 @@
 ![Project Logo](docs/Project-Logo.jpg)
 
 </center>
-Capstone Project Kampus Merdeka Batch 5 Alterra Academy Kelompok 1 dengan topik "Reproduction Health"
+Capstone Project Kampus Merdeka Batch 5 Alterra Academy Group 1 With Topic "Reproduction Health"
 
 <br/>
 
@@ -29,7 +29,7 @@ Capstone Project Kampus Merdeka Batch 5 Alterra Academy Kelompok 1 dengan topik 
 | Github                  | https://github.com/team-capstone-1/be-repro-health  |
 | Trello                  | https://trello.com/b/rIoiovwV/golang-section        |
 | Deployment to GCP       | https://reproduction-health-c2u5s4z6yq-uc.a.run.app |
-| Pointing Domain         | api.reprohealth.my.id                               |
+| Pointing Domain         | https://api.reprohealth.my.id                       |
 
 <br/>
 
