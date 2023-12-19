@@ -140,3 +140,7 @@ func generateTransaction(consultation dto.UserConsultationResponse) (model.Trans
 	}
 	return transaction, nil
 }
+
+func CreateConsultationControllerTesting() echo.HandlerFunc {
+	return CreateConsultationController
+}
