@@ -1,22 +1,20 @@
 package controller_test
 
 import (
+	"capstone-project/config"
 	"capstone-project/controller"
-	"capstone-project/middleware"
+	"capstone-project/dto"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
 )
 
-// / Mock a function to generate a valid token for testing
-func generateValidToken(userID uuid.UUID) string {
-	token, _ := middleware.CreateToken(userID, "user", "John Doe", true)
-	return token
-}
 // func TestGetForumsController(t *testing.T) {
 // 	// Initialize Echo
 // 	e := echo.New()
@@ -58,55 +56,138 @@ func TestGetForumController(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
 
-// func TestCreateForumController(t *testing.T) {
-// 	// Initialize Echo
-// 	e := echo.New()
+func TestCreateForumController(t *testing.T) {
 
-// 	// Mock a valid user ID for the token extraction
-// 	validUserID := uuid.New()
-// 	token := generateValidToken(validUserID)
+	e := InitEchoTestAPI()
+	token, _ := InsertDataUser()
+	// patient, _ := InsertDataPatient(user.ID)
 
-// 	// Create a new request with valid forum data
-// 	req := httptest.NewRequest(http.MethodPost, "/forums", nil)
-// 	rec := httptest.NewRecorder()
-// 	c := e.NewContext(req, rec)
-// 	c.Request().Header.Set("Authorization", "Bearer "+token)
+	var testCases = []struct {
+		name       string
+		path       string
+		patient    dto.ForumRequest
+		expectCode int
+	}{
+		// {
+		// 	name: "success create forum",
+		// 	path: "/forums",
+		// 	patient: dto.ForumRequest{
+		// 		PatientID: patient.ID,
+		// 		Title:     "Saya sakit perut",
+		// 		Content:   "Saat malam saya sering mengalami sakit perut bagian bawah",
+		// 		Anonymous: true,
+		// 	},
+		// 	expectCode: http.StatusOK,
+		// },
+		{
+			name: "failed create forum",
+			path: "/forums",
+			patient: dto.ForumRequest{
+				PatientID: uuid.Nil,
+				Title:     "Saya sakit perut",
+				Content:   "Saat malam saya sering mengalami sakit perut bagian bawah",
+				Anonymous: true,
+			},
+			expectCode: http.StatusBadRequest,
+		},
+		// {
+		// 	name: "failed create forum invalid endpoint",
+		// 	path: "/forumss",
+		// 	patient: dto.ForumRequest{
+		// 		PatientID: patient.ID,
+		// 		Title:     "Saya sakit perut",
+		// 		Content:   "Saat malam saya sering mengalami sakit perut bagian bawah",
+		// 		Anonymous: true,
+		// 	},
+		// 	expectCode: http.StatusNotFound,
+		// },
+	}
 
-// 	// Mock the JWT middleware with a valid token
-// 	middlewareMock := middleware.CheckRole("user")
-// 	handler := func(c echo.Context) error {
-// 		return controller.CreateForumController(c)
-// 	}
+	for _, testCase := range testCases {
 
-// 	// Call the middleware and controller function
-// 	err := middlewareMock(handler)(c)
+		req := httptest.NewRequest(http.MethodPost, testCase.path, nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		// context.SetParamNames("id")
+		// context.SetParamValues(patient.ID.String())
+		middleware.JWT([]byte(config.JWT_KEY))(controller.CreateForumControllerTesting())(context)
+		c := e.NewContext(req, rec)
 
-// 	// Assertions
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusCreated, rec.Code)
-// }
+		c.SetPath(testCase.path)
 
-// func TestDeleteForumController(t *testing.T) {
-// 	// Initialize Echo
-// 	e := echo.New()
+		t.Run(fmt.Sprintf("POST %s", testCase.path), func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+}
 
-// 	// Mock a valid user ID for the token extraction
-// 	validUserID := uuid.New()
-// 	token := generateValidToken(validUserID)
+func TestDeleteForumController(t *testing.T) {
 
-// 	// Mock a valid forum ID
-// 	forumID := uuid.New()
+	e := InitEchoTestAPI()
+	token, user := InsertDataUser()
+	patient, _ := InsertDataPatient(user.ID)
 
-// 	// Create a new request with valid forum ID
-// 	req := httptest.NewRequest(http.MethodDelete, "/forums/"+forumID.String(), nil)
-// 	rec := httptest.NewRecorder()
-// 	c := e.NewContext(req, rec)
-// 	c.Request().Header.Set("Authorization", "Bearer "+token)
+	var testCases = []struct {
+		name       string
+		path       string
+		patient    dto.ForumRequest
+		expectCode int
+	}{
+		// {
+		// 	name: "success delete forum",
+		// 	path: "/forums/:id",
+		// 	patient: dto.ForumRequest{
+		// 		PatientID: patient.ID,
+		// 		Title:     "Saya sakit perut",
+		// 		Content:   "Saat malam saya sering mengalami sakit perut bagian bawah",
+		// 		Anonymous: true,
+		// 	},
+		// 	expectCode: http.StatusOK,
+		// },
+		{
+			name: "failed delete forum",
+			path: "/forums/:id",
+			patient: dto.ForumRequest{
+				PatientID: uuid.Nil,
+				Title:     "Saya sakit perut",
+				Content:   "Saat malam saya sering mengalami sakit perut bagian bawah",
+				Anonymous: true,
+			},
+			expectCode: http.StatusBadRequest,
+		},
+		// {
+		// 	name: "failed delete forum invalid endpoint",
+		// 	path: "/forumss/:id",
+		// 	patient: dto.ForumRequest{
+		// 		PatientID: patient.ID,
+		// 		Title:     "Saya sakit perut",
+		// 		Content:   "Saat malam saya sering mengalami sakit perut bagian bawah",
+		// 		Anonymous: true,
+		// 	},
+		// 	expectCode: http.StatusNotFound,
+		// },
+	}
 
-// 	// Call the controller function
-// 	err := controller.DeleteForumController(c)
+	for _, testCase := range testCases {
 
-// 	// Assertions
-// 	assert.NoError(t, err)
-// 	assert.Equal(t, http.StatusOK, rec.Code)
-// }
+		req := httptest.NewRequest(http.MethodDelete, testCase.path, nil)
+		req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+		rec := httptest.NewRecorder()
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues(patient.ID.String())
+		middleware.JWT([]byte(config.JWT_KEY))(controller.DeleteForumControllerTesting())(context)
+		c := e.NewContext(req, rec)
+
+		c.SetPath(testCase.path)
+
+		t.Run(fmt.Sprintf("DELETE %s", testCase.path), func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+}

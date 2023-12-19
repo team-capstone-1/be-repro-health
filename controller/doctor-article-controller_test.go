@@ -75,7 +75,7 @@ func TestGetAllArticleDoctorsController(t *testing.T) {
 
 	e := InitEchoTestAPI()
 	InsertDataArticle()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 
 	for _, testCase := range testCases {
 		req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
@@ -143,7 +143,7 @@ func TestGetDoctorArticleByIDController(t *testing.T) {
 
 	e := InitEchoTestAPI()
 	InsertDataArticle()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 
 	for _, testCase := range testCases {
 		req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
@@ -220,7 +220,7 @@ func TestCreateDoctorArticleController(t *testing.T) {
 	}
 
 	e := InitEchoTestAPI()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 
 	for _, testCase := range testCases {
 		var buf bytes.Buffer
@@ -324,7 +324,7 @@ func TestUpdateDoctorArticleController(t *testing.T) {
 
 	e := InitEchoTestAPI()
 	InsertDataArticle()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 
 	for _, testCase := range testCases {
 		var buf bytes.Buffer
@@ -431,7 +431,7 @@ func TestUpdateArticlePublishedStatusController(t *testing.T) {
 
 	e := InitEchoTestAPI()
 	InsertDataArticle()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 
 	for _, testCase := range testCases {
 		var buf bytes.Buffer

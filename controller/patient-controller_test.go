@@ -26,11 +26,12 @@ import (
 
 func InsertDataPatient(userid uuid.UUID) (model.Patient, error) {
 	// user := m.ExtractTokenUserId(c)
+	patientID, _ := uuid.Parse("d4f1bd00-fbd5-4b04-93f8-aa889d15ad5a")
 	patient := model.Patient{
-		ID: uuid.New(),
+		ID:              patientID,
 		Name:            "Davin2",
-		UserID: 		 userid,
-		ProfileImage:	 "",
+		UserID:          userid,
+		ProfileImage:    "",
 		TelephoneNumber: "123456789",
 		DateOfBirth:     time.Date(1990, time.January, 1, 0, 0, 0, 0, time.UTC),
 		Relation:        "sibling",
@@ -50,27 +51,27 @@ func TestCreatePatientController(t *testing.T) {
 	var testCases = []struct {
 		name       string
 		path       string
-		patient	   dto.PatientRequest
+		patient    dto.PatientRequest
 		expectCode int
 	}{
 		{
-			name:       "create new patient",
-			path:       "/patients",
-			patient:		dto.PatientRequest{
-							Name:            "Davin2",
-							TelephoneNumber: "123456789",
-							DateOfBirth:     time.Now(),
-							Relation:        "sibling",
-							Weight:          70.5,
-							Height:          175.0,
-							Gender:          "male",
-						},
+			name: "create new patient",
+			path: "/patients",
+			patient: dto.PatientRequest{
+				Name:            "Davin2",
+				TelephoneNumber: "123456789",
+				DateOfBirth:     time.Now(),
+				Relation:        "sibling",
+				Weight:          70.5,
+				Height:          175.0,
+				Gender:          "male",
+			},
 			expectCode: http.StatusCreated,
 		},
 	}
 
 	e := InitEchoTestAPI()
-	token,_ := InsertDataUser()
+	token, _ := InsertDataUser()
 
 	for _, testCase := range testCases {
 		var buf bytes.Buffer
@@ -93,7 +94,7 @@ func TestCreatePatientController(t *testing.T) {
 		}
 
 		writer.Close()
-		
+
 		req := httptest.NewRequest(http.MethodPost, "/patients", &buf)
 		// req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
@@ -133,7 +134,7 @@ func TestGetAllPatientsController(t *testing.T) {
 	InsertDataPatient(user.ID)
 
 	for _, testCase := range testCases {
-		
+
 		req := httptest.NewRequest(http.MethodGet, "/patients/", nil)
 
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
@@ -157,28 +158,28 @@ func TestUpdatePatientController(t *testing.T) {
 	var testCases = []struct {
 		name       string
 		path       string
-		patient	   dto.PatientRequest
+		patient    dto.PatientRequest
 		expectCode int
 	}{
 		{
-			name:       "update patient",
-			path:       "/patients/:id",
-			patient:		dto.PatientRequest{
-							Name:            "Davin2",
-							TelephoneNumber: "123456789",
-							DateOfBirth:     time.Now(),
-							Relation:        "sibling",
-							Weight:          70.5,
-							Height:          175.0,
-							Gender:          "male",
-						},
+			name: "update patient",
+			path: "/patients/:id",
+			patient: dto.PatientRequest{
+				Name:            "Davin2",
+				TelephoneNumber: "123456789",
+				DateOfBirth:     time.Now(),
+				Relation:        "sibling",
+				Weight:          70.5,
+				Height:          175.0,
+				Gender:          "male",
+			},
 			expectCode: http.StatusOK,
 		},
 	}
 
 	e := InitEchoTestAPI()
 	token, user := InsertDataUser()
-	patient,_ := InsertDataPatient(user.ID)
+	patient, _ := InsertDataPatient(user.ID)
 
 	for _, testCase := range testCases {
 		var buf bytes.Buffer
@@ -201,7 +202,7 @@ func TestUpdatePatientController(t *testing.T) {
 		}
 
 		writer.Close()
-		
+
 		req := httptest.NewRequest(http.MethodPut, "/patients/:id", &buf)
 		// req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		req.Header.Set("Content-Type", writer.FormDataContentType())
@@ -238,10 +239,10 @@ func TestGetPatientByIDController(t *testing.T) {
 
 	e := InitEchoTestAPI()
 	token, user := InsertDataUser()
-	patient,_ := InsertDataPatient(user.ID)
+	patient, _ := InsertDataPatient(user.ID)
 
 	for _, testCase := range testCases {
-		
+
 		req := httptest.NewRequest(http.MethodGet, "/patients/:id", nil)
 
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
@@ -279,7 +280,7 @@ func TestGetPatientByIDControllerInvalid(t *testing.T) {
 	InsertDataPatient(user.ID)
 
 	for _, testCase := range testCases {
-		
+
 		req := httptest.NewRequest(http.MethodGet, "/patients/:id", nil)
 
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
@@ -314,10 +315,10 @@ func TestDeletePatientByIDController(t *testing.T) {
 
 	e := InitEchoTestAPI()
 	token, user := InsertDataUser()
-	patient,_ := InsertDataPatient(user.ID)
+	patient, _ := InsertDataPatient(user.ID)
 
 	for _, testCase := range testCases {
-		
+
 		req := httptest.NewRequest(http.MethodDelete, "/patients/:id", nil)
 
 		req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))

@@ -60,7 +60,7 @@ func TestGetDoctorAllForumsController(t *testing.T) {
 	}
 
 	e := InitEchoTestAPI()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 
 	for _, testCase := range testCases {
 
@@ -152,7 +152,7 @@ func TestCreateDoctorReplyForum(t *testing.T) {
 	}
 
 	e := InitEchoTestAPI()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 	_, user := InsertDataUser()
 	InsertDataPatient(user.ID)
 	InsertDataForums()
@@ -197,7 +197,7 @@ func TestGetForumDetailsController(t *testing.T) {
 	}
 
 	e := InitEchoTestAPI()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 	_, user := InsertDataUser()
 	InsertDataPatient(user.ID)
 	InsertDataForums()
@@ -247,7 +247,7 @@ func TestDeleteForumReplyController(t *testing.T) {
 	}
 
 	e := InitEchoTestAPI()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 	_, user := InsertDataUser()
 	InsertDataPatient(user.ID)
 	InsertDataForums()
@@ -319,7 +319,7 @@ func TestUpdateDoctorReplyForum(t *testing.T) {
 	}
 
 	e := InitEchoTestAPI()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 	_, user := InsertDataUser()
 	InsertDataPatient(user.ID)
 	InsertDataForums()

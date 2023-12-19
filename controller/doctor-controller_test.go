@@ -87,7 +87,7 @@ func InsertDataSpecialist() {
 	return
 }
 
-func InsertDataDoctor() string {
+func InsertDataDoctor() (string, model.Doctor) {
 	// user := m.ExtractTokenUserId(c)
 	specialistID, _ := uuid.Parse("0a8f12c6-1244-43e6-a704-126b173a8732")
 	clinicID, _ := uuid.Parse("fd9d3738-3bcf-4693-9079-57ad3b375af5")
@@ -114,7 +114,7 @@ func InsertDataDoctor() string {
 	database.DB.Create(&doctor)
 
 	token, _ := m.CreateToken(doctor.ID, constant.ROLE_DOCTOR, doctor.Name, false)
-	return token
+	return token, doctor
 }
 
 func TestCreateDoctorController(t *testing.T) {
@@ -612,7 +612,7 @@ func TestChangeDoctorPasswordController(t *testing.T) {
 	}
 
 	e := InitEchoTestAPI()
-	token := InsertDataDoctor()
+	token, _ := InsertDataDoctor()
 
 	for _, testCase := range testCases {
 		userJSON, _ := json.Marshal(testCase.doctor)
