@@ -513,3 +513,64 @@ func TestUpdateArticlePublishedStatusController_invalid(t *testing.T) {
 	assert.Nil(t, err, "Expected an error but got nil")
 	assert.Equal(t, http.StatusBadRequest, rec.Code)
 }
+
+func TestDeleteDoctorArticleController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		{
+			name:       "delete article by id",
+			path:       "/articles/1", // Replace with a valid article ID
+			expectCode: http.StatusBadRequest,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	InsertDataArticle()
+	token, _ := InsertDataDoctor()
+
+	for _, testCase := range testCases {
+		req := httptest.NewRequest(http.MethodDelete, testCase.path, nil)
+		req.Header.Set("Authorization", "Bearer "+token)
+
+		rec := httptest.NewRecorder()
+
+		context := e.NewContext(req, rec)
+		context.SetPath("/articles/:id")
+		context.SetParamNames("id")
+		context.SetParamValues("1")
+
+		middleware.JWT([]byte(config.JWT_KEY))(controller.DeleteDoctorArticleControllerTesting())(context)
+
+		t.Run(testCase.name, func(t *testing.T) {
+			fmt.Printf("Actual status code: %d\n", rec.Code) // Debugging statement
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+}
+
+func TestDeleteDoctorArticleController_invalid(t *testing.T) {
+	e := InitEchoTestAPI()
+	token, _ := InsertDataDoctor()
+
+	// Provide an invalid article ID
+	invalidArticleID := "invalid_article_id"
+
+	req := httptest.NewRequest(http.MethodDelete, "/articles/"+invalidArticleID, nil)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", token))
+
+	rec := httptest.NewRecorder()
+
+	context := e.NewContext(req, rec)
+	context.SetPath("/articles/:id")
+	context.SetParamNames("id")
+	context.SetParamValues(invalidArticleID)
+
+	middleware.JWT([]byte(config.JWT_KEY))(controller.DeleteDoctorArticleControllerTesting())(context)
+
+	t.Run("DELETE /articles/:id (invalid)", func(t *testing.T) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	})
+}

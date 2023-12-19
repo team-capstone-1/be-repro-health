@@ -333,3 +333,7 @@ func UpdateDoctorArticleControllerTesting() echo.HandlerFunc {
 func UpdateArticlePublishedStatusControllerTesting() echo.HandlerFunc {
 	return UpdateArticlePublishedStatusController
 }
+
+func DeleteDoctorArticleControllerTesting() echo.HandlerFunc {
+	return DeleteDoctorArticleController
+}

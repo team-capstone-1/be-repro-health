@@ -232,7 +232,6 @@ func DeleteDoctorWorkHistoryController(c echo.Context) error {
 }
 
 // Education
-
 func GetDoctorEducationController(c echo.Context) error {
 	user := m.ExtractTokenUserId(c)
 	if user == uuid.Nil {
@@ -696,18 +695,45 @@ func validateDoctorEducationRequest(education dto.DoctorEducationRequest) error 
 	return nil
 }
 
-// func validateDoctorCertificationRequest(certification dto.DoctorCertificationRequest) error {
-// 	if certification.DoctorID == uuid.Nil {
-// 		return errors.New("Doctor ID must be a valid UUID")
-// 	}
+func GetDoctorWorkHistoriesControllerTesting() echo.HandlerFunc {
+	return GetDoctorWorkHistoriesController
+}
 
-// 	if _, err := uuid.Parse(certification.DoctorID.String()); err != nil {
-// 		return errors.New("Doctor ID must be a valid UUID")
-// 	}
+func CreateDoctorWorkHistoryControllerTesting() echo.HandlerFunc {
+	return CreateDoctorWorkHistoryController
+}
 
-// 	if certification.DoctorID == uuid.Nil || certification.StartingDate.IsZero() || certification.EndingDate.IsZero() || certification.Description == "" || certification.CertificateType == "" || certification.Details == "" {
-// 		return errors.New("All fields must be filled in")
-// 	}
+func DeleteDoctorWorkHistoryControllerTesting() echo.HandlerFunc {
+	return DeleteDoctorWorkHistoryController
+}
 
-// 	return nil
-// }
+func GetDoctorEducationsControllerTesting() echo.HandlerFunc {
+	return GetDoctorEducationController
+}
+
+func CreateDoctorEducationsControllerTesting() echo.HandlerFunc {
+	return CreateDoctorEducationController
+}
+
+func UpdateDoctorEducationControllerTesting() echo.HandlerFunc {
+	return UpdateDoctorEducationController
+}
+func DeleteDoctorEducationControllerTesting() echo.HandlerFunc {
+	return DeleteDoctorEducationController
+}
+
+func GetDoctorCertificationsControllerTesting() echo.HandlerFunc {
+	return GetDoctorCertificationController
+}
+
+func CreateDoctorCertificationControllerTesting() echo.HandlerFunc {
+	return CreateDoctorCertificationController
+}
+
+func UpdateDoctorCertificationControllerTesting() echo.HandlerFunc {
+	return UpdateDoctorCertificationController
+}
+
+func DeleteDoctorCertificationControllerTesting() echo.HandlerFunc {
+	return DeleteDoctorCertificationController
+}
