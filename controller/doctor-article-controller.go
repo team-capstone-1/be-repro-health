@@ -314,6 +314,22 @@ func DeleteDoctorArticleController(c echo.Context) error {
 	})
 }
 
+func GetAllArticleDoctorsControllerTesting() echo.HandlerFunc {
+	return GetAllArticleDoctorsController
+}
+
+func GetDoctorArticleByIDControllerTesting() echo.HandlerFunc {
+	return GetDoctorArticleByIDController
+}
+
 func CreateDoctorArticleControllerTesting() echo.HandlerFunc {
 	return CreateDoctorArticleController
+}
+
+func UpdateDoctorArticleControllerTesting() echo.HandlerFunc {
+	return UpdateDoctorArticleController
+}
+
+func UpdateArticlePublishedStatusControllerTesting() echo.HandlerFunc {
+	return UpdateArticlePublishedStatusController
 }
