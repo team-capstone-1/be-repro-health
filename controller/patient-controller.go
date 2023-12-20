@@ -94,7 +94,7 @@ func CreatePatientController(c echo.Context) error {
 			"response": errBind.Error(),
 		})
 	}
-
+	
 	user := m.ExtractTokenUserId(c)
 	if user == uuid.Nil {
 		return c.JSON(http.StatusUnauthorized, map[string]any{
@@ -284,4 +284,24 @@ func DeletePatientController(c echo.Context) error {
 		"message":  "success delete patient",
 		"response": "success delete patient with id " + uuid.String(),
 	})
+}
+
+func CreatePatientControllerTesting() echo.HandlerFunc {
+	return CreatePatientController
+}
+
+func UpdatePatientControllerTesting() echo.HandlerFunc {
+	return UpdatePatientController
+}
+
+func GetPatientsControllerTesting() echo.HandlerFunc {
+	return GetPatientsController
+}
+
+func GetPatientControllerTesting() echo.HandlerFunc {
+	return GetPatientController
+}
+
+func DeletePatientControllerTesting() echo.HandlerFunc {
+	return DeletePatientController
 }

@@ -122,6 +122,16 @@ func DoctorActiveScheduleController(c echo.Context) error {
 	})
 }
 
+func GetAllDoctorScheduleControllerTesting() echo.HandlerFunc {
+	return GetAllDoctorScheduleController
+}
+func DoctorInactiveScheduleControllerTesting() echo.HandlerFunc {
+	return DoctorInactiveScheduleController
+}
+func DoctorActiveScheduleControllerTesting() echo.HandlerFunc {
+	return DoctorActiveScheduleController
+}
+
 func HandleDoctorAction(doctorHoliday model.Consultation, err error, doctorID uuid.UUID, date, session string) dto.DoctorScheduleResponse {
 	if err != nil {
 		return dto.DoctorScheduleResponse{

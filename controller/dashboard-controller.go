@@ -533,26 +533,26 @@ func GetDataCountForDoctorControllerOneDay(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]any{
 		"message": "success get dashboard data for one day",
 		// Consultation
-		"totalConsultations":        totalConsultations,
+		"totalConsultations":       totalConsultations,
 		"totalConsultationLastDay": totalConsultationLastDay,
 		"totalConsultationThisDay": totalConsultationThisDay,
-		"consultationPercentage":    consultationPercentage,
+		"consultationPercentage":   consultationPercentage,
 		// Patients
-		"totalPatients":        totalPatients,
+		"totalPatients":       totalPatients,
 		"totalPatientLastDay": totalPatientLastDay,
 		"totalPatientThisDay": totalPatientThisDay,
-		"patientPercentage":    patientPercentage,
+		"patientPercentage":   patientPercentage,
 		// Transaction
 		"totalTransaction":      totalTransaction,
 		"totalTransactions":     totalTransactions,
-		"totalPriceLastDay":    totalPriceLastDayTransaction,
-		"totalPriceThisDay":    totalPriceThisDayTransaction,
+		"totalPriceLastDay":     totalPriceLastDayTransaction,
+		"totalPriceThisDay":     totalPriceThisDayTransaction,
 		"transactionPercentage": transactionPercentage,
 		// Article
-		"totalArticles":        totalArticle,
+		"totalArticles":       totalArticle,
 		"totalArticleLastDay": totalArticleLastDay,
 		"totalArticleThisDay": totalArticleThisDay,
-		"articlePercentage":    articlePercentage,
+		"articlePercentage":   articlePercentage,
 	})
 }
 
@@ -647,3 +647,14 @@ func GetGraphController(c echo.Context) error {
 	})
 }
 
+func GetDataCountForDoctorControllerOneMonthTesting() echo.HandlerFunc {
+	return GetDataCountForDoctorControllerOneMonth
+}
+
+func GetDataCountForDoctorControllerOneWeekTesting() echo.HandlerFunc {
+	return GetDataCountForDoctorControllerOneWeek
+}
+
+func GetDataCountForDoctorControllerOneDayTesting() echo.HandlerFunc {
+	return GetDataCountForDoctorControllerOneDay
+}

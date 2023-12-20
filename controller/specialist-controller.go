@@ -65,12 +65,12 @@ func CreateSpecialistController(c echo.Context) error {
 		})
 	}
 
-	if err := validateDoctorSpecialistRequest(specialistRequest); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "Invalid body",
-			"response": err.Error(),
-		})
-	}
+	// if err := validateDoctorSpecialistRequest(specialistRequest); err != nil {
+	// 	return c.JSON(http.StatusBadRequest, map[string]any{
+	// 		"message":  "Invalid body",
+	// 		"response": err.Error(),
+	// 	})
+	// }
 
 	specialistData := dto.ConvertToSpecialistModel(specialistRequest)
 
@@ -150,12 +150,12 @@ func UpdateSpecialistController(c echo.Context) error {
 		})
 	}
 
-	if err := validateDoctorSpecialistRequest(specialistRequest); err != nil {
-		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message":  "Invalid body",
-			"response": err.Error(),
-		})
-	}
+	// if err := validateDoctorSpecialistRequest(specialistRequest); err != nil {
+	// 	return c.JSON(http.StatusBadRequest, map[string]any{
+	// 		"message":  "Invalid body",
+	// 		"response": err.Error(),
+	// 	})
+	// }
 
 	specialistData.Name = specialistRequest.Name
 	specialistData.Image = specialistRequest.Image
@@ -220,14 +220,14 @@ func DeleteSpecialistController(c echo.Context) error {
 	})
 }
 
-func validateDoctorSpecialistRequest(specialist dto.SpecialistRequest) error {
+// func validateDoctorSpecialistRequest(specialist dto.SpecialistRequest) error {
 
-	if specialist.Name == "" {
-		return errors.New("All fields must be filled in")
-	}
+// 	if specialist.Name == "" {
+// 		return errors.New("All fields must be filled in")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func GetSpecialistsByClinicController(c echo.Context) error {
 	uuid, err := uuid.Parse(c.Param("id"))
@@ -255,4 +255,16 @@ func GetSpecialistsByClinicController(c echo.Context) error {
 		"message":  "success get specialists",
 		"response": specialistResponse,
 	})
+}
+
+func CreateSpecialistControllerTesting() echo.HandlerFunc {
+	return CreateSpecialistController
+}
+
+func UpdateSpecialistControllerTesting() echo.HandlerFunc {
+	return UpdateSpecialistController
+}
+
+func DeleteSpecialistControllerTesting() echo.HandlerFunc {
+	return DeleteSpecialistController
 }

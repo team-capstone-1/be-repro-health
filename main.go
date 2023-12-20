@@ -1,12 +1,14 @@
 package main
 
 import (
+	"capstone-project/database"
 	m "capstone-project/middleware"
 	"capstone-project/route"
-	"capstone-project/database"
+	"capstone-project/config"
 )
 
 func main() {
+	config.Init()
 	database.Init()
 	e := route.New()
 	//implement middleware logger

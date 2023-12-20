@@ -299,3 +299,20 @@ func DeleteDoctorForumReplyController(c echo.Context) error {
 		"response": "success delete forum reply with id " + uuid.String(),
 	})
 }
+
+func GetDoctorAllForumsControllerTesting() echo.HandlerFunc {
+	return GetDoctorAllForumsController
+}
+func CreateDoctorReplyForumTesting() echo.HandlerFunc {
+	return CreateDoctorReplyForum
+}
+func GetDoctorForumDetailsTesting() echo.HandlerFunc {
+	return GetDoctorForumDetails
+}
+
+func DeleteDoctorForumReplyControllerTesting() echo.HandlerFunc {
+	return DeleteDoctorForumReplyController
+}
+func UpdateDoctorReplyForumTesting() echo.HandlerFunc {
+	return UpdateDoctorReplyForum
+}
