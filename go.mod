@@ -6,8 +6,8 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2
 	github.com/cloudinary/cloudinary-go/v2 v2.6.0
 	github.com/golang-jwt/jwt v3.2.2+incompatible
-	github.com/golang-jwt/jwt/v5 v5.2.0
 	github.com/google/uuid v1.4.0
+	github.com/jinzhu/gorm v1.9.16
 	github.com/joho/godotenv v1.5.1
 	github.com/labstack/echo/v4 v4.11.1
 	github.com/sashabaranov/go-openai v1.17.9
