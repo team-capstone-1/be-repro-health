@@ -330,3 +330,14 @@ func GetDoctorsBySpecialistAndClinicController(c echo.Context) error {
 		"response": doctorResponse,
 	})
 }
+
+func SignUpDoctorControllerTesting() echo.HandlerFunc {
+	return SignUpDoctorController
+}
+func GetDoctorControllerTesting() echo.HandlerFunc {
+	return GetDoctorController
+}
+
+func ChangeDoctorPasswordControllerTesting() echo.HandlerFunc {
+	return ChangeDoctorPasswordController
+}

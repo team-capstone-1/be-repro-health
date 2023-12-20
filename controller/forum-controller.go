@@ -3,12 +3,12 @@ package controller
 import (
 	"net/http"
 
-	"capstone-project/repository"
 	"capstone-project/dto"
 	m "capstone-project/middleware"
+	"capstone-project/repository"
 
-	"github.com/labstack/echo/v4"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 )
 
 func GetForumsController(c echo.Context) error {
@@ -18,8 +18,8 @@ func GetForumsController(c echo.Context) error {
 	responseData, err := repository.GetAllForums(title, patient_id)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed get forums",
-			"response":   err.Error(),
+			"message":  "failed get forums",
+			"response": err.Error(),
 		})
 	}
 
@@ -28,13 +28,13 @@ func GetForumsController(c echo.Context) error {
 		forumResponse = append(forumResponse, dto.ConvertToForumResponse(forum))
 	}
 
-	for _, forumRes := range forumResponse{
+	for _, forumRes := range forumResponse {
 		forumRes.Profile = repository.GetProfileByPatientID(forumRes.PatientID)
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success get forums",
-		"response":   forumResponse,
+		"message":  "success get forums",
+		"response": forumResponse,
 	})
 }
 
@@ -77,7 +77,7 @@ func CreateForumController(c echo.Context) error {
 	errBind := c.Bind(&forum)
 	if errBind != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error bind data",
+			"message":  "error bind data",
 			"response": errBind.Error(),
 		})
 	}
@@ -86,10 +86,10 @@ func CreateForumController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed create forum",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
-	if checkPatient.UserID != user{
+	if checkPatient.UserID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
 			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
@@ -97,12 +97,12 @@ func CreateForumController(c echo.Context) error {
 	}
 
 	forumData := dto.ConvertToForumModel(forum)
-	
+
 	responseData, err := repository.InsertForum(forumData)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "failed create forum",
-			"response":  err.Error(),
+			"message":  "failed create forum",
+			"response": err.Error(),
 		})
 	}
 
@@ -110,8 +110,8 @@ func CreateForumController(c echo.Context) error {
 	forumResponse.Profile = repository.GetProfileByPatientID(forumResponse.PatientID)
 
 	return c.JSON(http.StatusCreated, map[string]any{
-		"message": "success create new forum",
-		"response":    forumResponse,
+		"message":  "success create new forum",
+		"response": forumResponse,
 	})
 }
 
@@ -127,8 +127,8 @@ func DeleteForumController(c echo.Context) error {
 	uuid, err := uuid.Parse(c.Param("id"))
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
-			"message": "error parse id",
-			"response":   err.Error(),
+			"message":  "error parse id",
+			"response": err.Error(),
 		})
 	}
 
@@ -136,7 +136,7 @@ func DeleteForumController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed delete forum",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
@@ -144,10 +144,10 @@ func DeleteForumController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "failed delete forum",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
-	if checkPatient.UserID != user{
+	if checkPatient.UserID != user {
 		return c.JSON(http.StatusBadRequest, map[string]any{
 			"message": "unauthorized",
 			"reponse": "Permission Denied: You are not allowed to access other user patient data.",
@@ -158,12 +158,19 @@ func DeleteForumController(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]any{
 			"message": "failed delete forum",
-			"reponse":   err.Error(),
+			"reponse": err.Error(),
 		})
 	}
 
 	return c.JSON(http.StatusOK, map[string]any{
-		"message": "success delete forum",
+		"message":  "success delete forum",
 		"response": "success delete forum with id " + uuid.String(),
 	})
+}
+
+func CreateForumControllerTesting() echo.HandlerFunc {
+	return CreateForumController
+}
+func DeleteForumControllerTesting() echo.HandlerFunc {
+	return DeleteForumController
 }

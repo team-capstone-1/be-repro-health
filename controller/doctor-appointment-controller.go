@@ -206,3 +206,19 @@ func DoctorFinishedConsultationController(c echo.Context) error {
 		"response": consultationResponse,
 	})
 }
+
+func DoctorGetAllConsultationsTesting() echo.HandlerFunc {
+	return DoctorGetAllConsultations
+}
+func DoctorGetDetailsPatientControllerTesting() echo.HandlerFunc {
+	return DoctorGetDetailsPatientController
+}
+func DoctorGetDetailsTransactionControllerTesting() echo.HandlerFunc {
+	return DoctorGetDetailsTransactionController
+}
+func DoctorConfirmConsultationControllerTesting() echo.HandlerFunc {
+	return DoctorConfirmConsultationController
+}
+func DoctorFinishedConsultationControllerTesting() echo.HandlerFunc {
+	return DoctorFinishedConsultationController
+}

@@ -195,7 +195,6 @@ func GetArticleController(c echo.Context) error {
 	})
 }
 
-
 func BookmarkController(c echo.Context) error {
 	user := m.ExtractTokenUserId(c)
 	if user == uuid.Nil {
@@ -238,4 +237,20 @@ func BookmarkController(c echo.Context) error {
 		"message":  "success update bookmark",
 		"response": articleResponse,
 	})
+}
+
+func GetBookmarkedArticlesControllerTesting() echo.HandlerFunc {
+	return GetBookmarkedArticlesController
+}
+func GetArticlesControllerTesting() echo.HandlerFunc {
+	return GetArticlesController
+}
+func CreateCommentControllerTesting() echo.HandlerFunc {
+	return CreateCommentController
+}
+func GetArticleControllerTesting() echo.HandlerFunc {
+	return GetArticleController
+}
+func BookmarkControllerTesting() echo.HandlerFunc {
+	return BookmarkController
 }

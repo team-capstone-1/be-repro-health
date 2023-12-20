@@ -15,7 +15,7 @@ type Patient struct {
 	Name                 string                 `gorm:"size:255"`
 	TelephoneNumber      string                 `gorm:"size:255"`
 	ProfileImage         string                 `gorm:"size:255"`
-	DateOfBirth          time.Time              `gorm:"type:date"`
+	DateOfBirth          time.Time              `gorm:"type:date;default:null"`
 	Relation             string                 `gorm:"size:255"`
 	Weight               float64                `gorm:"type:decimal(5,2)"`
 	Height               float64                `gorm:"type:decimal(5,2)"`
