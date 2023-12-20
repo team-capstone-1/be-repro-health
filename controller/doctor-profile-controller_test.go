@@ -17,6 +17,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
@@ -32,7 +33,73 @@ func init() {
 	}
 }
 
-func TestGetDoctorProfileController(t *testing.T) {}
+func TestGetDoctorProfileController(t *testing.T) {
+	var testCases = []struct {
+		name       string
+		path       string
+		expectCode int
+	}{
+		{
+			name:       "get all doctor profile",
+			path:       "/profile",
+			expectCode: http.StatusOK,
+		},
+	}
+
+	e := InitEchoTestAPI()
+	InsertDataDoctorWorkHistory()
+	token, _ := InsertDataDoctor()
+
+	for _, testCase := range testCases {
+		req := httptest.NewRequest(http.MethodGet, testCase.path, nil)
+		req.Header.Set("Authorization", "Bearer "+token)
+
+		rec := httptest.NewRecorder()
+
+		context := e.NewContext(req, rec)
+		context.SetPath(testCase.path)
+		context.SetParamNames("id")
+		context.SetParamValues("1")
+
+		middleware.JWT([]byte(config.JWT_KEY))(controller.GetDoctorProfileControllerTesting())(context)
+
+		c := e.NewContext(req, rec)
+		c.SetPath(testCase.path)
+
+		t.Run(testCase.name, func(t *testing.T) {
+			assert.Equal(t, testCase.expectCode, rec.Code)
+		})
+	}
+}
+
+func TestGetDoctorProfileController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.GetDoctorProfileController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
 
 func InsertDataDoctorWorkHistory() (string, error) {
 	id := uuid.New()
@@ -67,7 +134,7 @@ func TestGetDoctorWorkHistoriesController(t *testing.T) {
 		expectCode int
 	}{
 		{
-			name:       "success get doctor work history",
+			name:       "failed get doctor work history",
 			path:       "/doctors/work-history",
 			expectCode: http.StatusNotFound,
 		},
@@ -99,6 +166,35 @@ func TestGetDoctorWorkHistoriesController(t *testing.T) {
 	}
 }
 
+func TestGetDoctorWorkHistoriesController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.GetDoctorWorkHistoriesController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
 func TestCreateDoctorWorkHistoryController(t *testing.T) {
 	var testCases = []struct {
 		name       string
@@ -107,7 +203,7 @@ func TestCreateDoctorWorkHistoryController(t *testing.T) {
 		expectCode int
 	}{
 		{
-			name: "success create doctor work history",
+			name: "failed create doctor work history",
 			path: "/doctors/work-history",
 			dwh: dto.DoctorWorkHistoryRequest{
 				DoctorID:     uuid.New(),
@@ -166,6 +262,35 @@ func TestCreateDoctorWorkHistoryController(t *testing.T) {
 			assert.Equal(t, testCase.expectCode, rec.Code)
 		})
 	}
+}
+
+func TestCreateDoctorWorkHistoryController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/doctors/work-history", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.CreateDoctorWorkHistoryController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
 func TestUpdateDoctorWorkHistoryController(t *testing.T) {
@@ -238,6 +363,35 @@ func TestUpdateDoctorWorkHistoryController(t *testing.T) {
 	}
 }
 
+func TestUpdateDoctorWorkHistoryController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPut, "/doctors/work-history/:id", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.UpdateDoctorArticleController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
+
 func TestDeleteDoctorWorkHistoryController(t *testing.T) {
 	var testCases = []struct {
 		name       string
@@ -274,6 +428,35 @@ func TestDeleteDoctorWorkHistoryController(t *testing.T) {
 	}
 }
 
+func TestDeleteDoctorWorkHistoryController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodDelete, "/doctors/work-history/:id", nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.DeleteDoctorWorkHistoryController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
 func InsertDataDoctorEducation() (string, error) {
 	id := uuid.New()
 	doctorID := uuid.New()
@@ -306,7 +489,7 @@ func TestGetDoctorEducationsController(t *testing.T) {
 		expectCode int
 	}{
 		{
-			name:       "success get doctor educations",
+			name:       "failed get doctor educations",
 			path:       "/doctors/educations",
 			expectCode: http.StatusNotFound,
 		},
@@ -338,6 +521,35 @@ func TestGetDoctorEducationsController(t *testing.T) {
 	}
 }
 
+func TestGetDoctorEducationsController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/doctors/educations", nil)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", tokenString))
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.GetDoctorEducationController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
 func TestCreateDoctorEducationController(t *testing.T) {
 	var testCases = []struct {
 		name       string
@@ -346,7 +558,7 @@ func TestCreateDoctorEducationController(t *testing.T) {
 		expectCode int
 	}{
 		{
-			name: "success create doctor educations",
+			name: "failed create doctor educations",
 			path: "/doctors/educations",
 			dwh: dto.DoctorEducationRequest{
 				DoctorID:         uuid.New(),
@@ -404,6 +616,35 @@ func TestCreateDoctorEducationController(t *testing.T) {
 			assert.Equal(t, testCase.expectCode, rec.Code)
 		})
 	}
+}
+
+func TestCreateDoctorEducationController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/doctors/educations", nil)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", tokenString))
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.CreateDoctorEducationController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
 func TestUpdateDoctorEducationController(t *testing.T) {
@@ -475,6 +716,35 @@ func TestUpdateDoctorEducationController(t *testing.T) {
 	}
 }
 
+func TestUpdateDoctorEducationController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPut, "/doctors/education/:id", nil)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", tokenString))
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.UpdateDoctorEducationController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
+
 func TestDeleteDoctorEducationController(t *testing.T) {
 	var testCases = []struct {
 		name       string
@@ -511,6 +781,35 @@ func TestDeleteDoctorEducationController(t *testing.T) {
 	}
 }
 
+func TestDeleteDoctorEducationController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodDelete, "/doctors/education/:id", nil)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", tokenString))
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.DeleteDoctorEducationController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
 // Certification
 func InsertDataDoctorCertification() (string, error) {
 	id := uuid.New()
@@ -545,7 +844,7 @@ func TestGetDoctorCertificationsController(t *testing.T) {
 		expectCode int
 	}{
 		{
-			name:       "success get doctor certifications",
+			name:       "failed get doctor certifications",
 			path:       "/doctors/certifications",
 			expectCode: http.StatusNotFound,
 		},
@@ -577,6 +876,35 @@ func TestGetDoctorCertificationsController(t *testing.T) {
 	}
 }
 
+func TestGetDoctorCertificationsController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/doctors/certifications", nil)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", tokenString))
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.GetDoctorCertificationController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
 func TestCreateDoctorCertificationController(t *testing.T) {
 	var testCases = []struct {
 		name       string
@@ -585,7 +913,7 @@ func TestCreateDoctorCertificationController(t *testing.T) {
 		expectCode int
 	}{
 		{
-			name: "success create doctor certification",
+			name: "failed create doctor certification",
 			path: "/doctors/certification",
 			dwh: dto.DoctorCertificationRequest{
 				DoctorID:        uuid.New(),
@@ -644,6 +972,35 @@ func TestCreateDoctorCertificationController(t *testing.T) {
 			assert.Equal(t, testCase.expectCode, rec.Code)
 		})
 	}
+}
+
+func TestCreateDoctorCertificationController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPost, "/doctors/certification", nil)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", tokenString))
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.CreateDoctorCertificationController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
 func TestUpdateDoctorCertificationController(t *testing.T) {
@@ -716,6 +1073,35 @@ func TestUpdateDoctorCertificationController(t *testing.T) {
 	}
 }
 
+func TestUpdateDoctorCertificationController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodPut, "/doctors/certification/:id", nil)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", tokenString))
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.UpdateDoctorCertificationController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusBadRequest, rec.Code)
+}
+
 func TestDeleteDoctorCertificationController(t *testing.T) {
 	var testCases = []struct {
 		name       string
@@ -750,4 +1136,33 @@ func TestDeleteDoctorCertificationController(t *testing.T) {
 			assert.Equal(t, testCase.expectCode, rec.Code)
 		})
 	}
+}
+
+func TestDeleteDoctorCertificationController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "invalid_doctor_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodDelete, "/doctors/certification/:id", nil)
+	req.Header.Set(echo.HeaderAuthorization, fmt.Sprintf("Bearer %v", tokenString))
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+
+	c.Set("user", token)
+
+	err = controller.DeleteDoctorCertificationController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }

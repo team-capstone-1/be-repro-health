@@ -695,6 +695,10 @@ func validateDoctorEducationRequest(education dto.DoctorEducationRequest) error 
 	return nil
 }
 
+func GetDoctorProfileControllerTesting() echo.HandlerFunc {
+	return GetDoctorProfileController
+}
+
 func GetDoctorWorkHistoriesControllerTesting() echo.HandlerFunc {
 	return GetDoctorWorkHistoriesController
 }

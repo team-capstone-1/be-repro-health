@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
+	"time"
 
+	"github.com/golang-jwt/jwt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/stretchr/testify/assert"
@@ -52,6 +55,36 @@ func TestGetBookmarkedArticlesController(t *testing.T) {
 	}
 }
 
+func TestGetBookmarkedArticlesController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "user_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/articles/bookmarks"+tokenString, nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/articles/bookmarks" + tokenString)
+
+	c.Set("user", token)
+
+	err = controller.GetBookmarkedArticlesController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
 func TestGetArticlesController(t *testing.T) {
 	var testCases = []struct {
 		name       string
@@ -84,10 +117,40 @@ func TestGetArticlesController(t *testing.T) {
 
 		c.SetPath(testCase.path)
 
-		t.Run("GET /articles/bookmarks", func(t *testing.T) {
+		t.Run("GET /articles", func(t *testing.T) {
 			assert.Equal(t, testCase.expectCode, rec.Code)
 		})
 	}
+}
+
+func TestGetArticlesController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "user_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/articles"+tokenString, nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/articles" + tokenString)
+
+	c.Set("user", token)
+
+	err = controller.GetArticlesController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
 func TestCreateCommentController(t *testing.T) {
@@ -112,7 +175,7 @@ func TestCreateCommentController(t *testing.T) {
 		// },
 		{
 			name: "failed create new comments",
-			path: "/articles/:id/commentss",
+			path: "/articles/:id/comments",
 			patient: dto.CommentRequest{
 				PatientID: patient.ID,
 				Comment:   "Artikel yang sangat bermanfaat!",
@@ -144,6 +207,36 @@ func TestCreateCommentController(t *testing.T) {
 	}
 }
 
+func TestCreateCommentController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "user_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/articles/1/comments"+tokenString, nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/articles/1/comments" + tokenString)
+
+	c.Set("user", token)
+
+	err = controller.CreateCommentController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+}
+
 func TestGetArticleController(t *testing.T) {
 	var testCases = []struct {
 		name       string
@@ -157,7 +250,7 @@ func TestGetArticleController(t *testing.T) {
 		// },
 		{
 			name:       "failed get details article",
-			path:       "/articless/:id",
+			path:       "/articles/:id",
 			expectCode: http.StatusBadRequest,
 		},
 	}
@@ -185,6 +278,36 @@ func TestGetArticleController(t *testing.T) {
 			assert.Equal(t, testCase.expectCode, rec.Code)
 		})
 	}
+}
+
+func TestGetArticleController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "user_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/articles/1"+tokenString, nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/articles/1" + tokenString)
+
+	c.Set("user", token)
+
+	err = controller.GetArticleController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }
 
 func TestBookmarkController(t *testing.T) {
@@ -228,4 +351,34 @@ func TestBookmarkController(t *testing.T) {
 			assert.Equal(t, testCase.expectCode, rec.Code)
 		})
 	}
+}
+
+func TestBookmarkController_invalid(t *testing.T) {
+	e := echo.New()
+
+	jwtKey := os.Getenv("JWT_KEY")
+
+	token := jwt.New(jwt.SigningMethodHS256)
+	claims := token.Claims.(jwt.MapClaims)
+	claims["sub"] = "user_id"
+	claims["exp"] = time.Now().Add(time.Hour * 1).Unix()
+
+	tokenString, err := token.SignedString([]byte(jwtKey))
+	if err != nil {
+		t.Fatalf("Error creating JWT token: %v", err)
+	}
+
+	req := httptest.NewRequest(http.MethodGet, "/articles/1/bookmarks"+tokenString, nil)
+	req.Header.Set("Authorization", "Bearer "+tokenString)
+
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	c.SetPath("/articles/:id/bookmarks" + tokenString)
+
+	c.Set("user", token)
+
+	err = controller.BookmarkController(c)
+
+	assert.Nil(t, err, "Expected an error but got nil")
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
 }

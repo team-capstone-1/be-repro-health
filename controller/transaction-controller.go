@@ -448,3 +448,35 @@ func PaymentTimeOut(c echo.Context) error {
 		"response": transactionResponse,
 	})
 }
+
+func GetTransactionControllerTesting() echo.HandlerFunc {
+	return GetTransactionController
+}
+
+func GetTransactionsControllerTesting() echo.HandlerFunc {
+	return GetTransactionsController
+}
+
+func GetPatientTransactionsControllerTesting() echo.HandlerFunc {
+	return GetPatientTransactionsController
+}
+
+func CreatePaymentControllerTesting() echo.HandlerFunc {
+	return CreatePaymentController
+}
+
+func RescheduleControllerTesting() echo.HandlerFunc {
+	return RescheduleController
+}
+
+func CancelTransactionControllerTesting() echo.HandlerFunc {
+	return CancelTransactionController
+}
+
+func ValidateRefundTesting() echo.HandlerFunc {
+	return ValidateRefund
+}
+
+func PaymentTimeOutTesting() echo.HandlerFunc {
+	return PaymentTimeOut
+}
